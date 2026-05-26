@@ -41,6 +41,32 @@ function safeFileName(file: File) {
   return `${Date.now()}-${baseName}${extension ? `.${extension.toLowerCase()}` : ""}`;
 }
 
+async function uniqueDocumentSlug(supabase: NonNullable<ReturnType<typeof getSupabaseAdminClient>>, baseSlug: string, documentId?: string) {
+  let candidate = baseSlug;
+  let suffix = 2;
+
+  while (true) {
+    let query = supabase.from("documents").select("id").eq("slug", candidate).limit(1);
+
+    if (documentId) {
+      query = query.neq("id", documentId);
+    }
+
+    const { data, error } = await query;
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    if (!data?.length) {
+      return candidate;
+    }
+
+    candidate = `${baseSlug}-${suffix}`;
+    suffix += 1;
+  }
+}
+
 async function uploadPublicFile(file: File, folder: string) {
   const supabase = getSupabaseAdminClient();
 
@@ -64,7 +90,7 @@ async function uploadPublicFile(file: File, folder: string) {
 
 async function documentPayload(formData: FormData, existingPreviewUrl?: string, existingCoverUrl?: string) {
   const title = textValue(formData, "title");
-  const slug = textValue(formData, "slug") || slugify(title);
+  const slug = slugify(textValue(formData, "slug") || title);
   const previewFile = fileValue(formData, "preview_file");
   const coverFile = fileValue(formData, "cover_image");
   const previewFileUrl =
@@ -109,6 +135,7 @@ export async function createDocumentAction(formData: FormData) {
   }
 
   const payload = await documentPayload(formData);
+  payload.slug = await uniqueDocumentSlug(supabase, payload.slug);
   const { error } = await supabase.from("documents").insert(payload);
 
   if (error) {
@@ -133,6 +160,7 @@ export async function updateDocumentAction(documentId: string, formData: FormDat
     optionalTextValue(formData, "existing_preview_file_url") || undefined,
     optionalTextValue(formData, "existing_cover_image_url") || undefined
   );
+  payload.slug = await uniqueDocumentSlug(supabase, payload.slug, documentId);
   const { error } = await supabase.from("documents").update(payload).eq("id", documentId);
 
   if (error) {
