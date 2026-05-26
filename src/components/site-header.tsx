@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { BookOpen, Building2, FileText, Home, ShieldCheck } from "lucide-react";
+import Image from "next/image";
+import { Building2, FileText, Home, ShieldCheck } from "lucide-react";
 
 const nav = [
   { href: "/", label: "Trang chủ", icon: Home },
@@ -13,8 +14,15 @@ export function SiteHeader() {
     <header className="sticky top-0 z-40 border-b border-ink/10 bg-paper/88 backdrop-blur-xl">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
         <Link href="/" className="flex items-center gap-3 font-semibold text-ink">
-          <span className="grid h-10 w-10 place-items-center rounded bg-palm text-white">
-            <BookOpen className="h-5 w-5" aria-hidden="true" />
+          <span className="relative h-11 w-11 overflow-hidden rounded border border-ink/10 bg-white">
+            <Image
+              src="/images/logo-thu-vien-tay-ninh.jpg"
+              alt="Logo Thư viện tỉnh Tây Ninh"
+              fill
+              sizes="44px"
+              className="object-contain p-0.5"
+              priority
+            />
           </span>
           <span className="leading-tight">
             Địa chí số
