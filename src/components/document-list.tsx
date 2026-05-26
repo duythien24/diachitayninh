@@ -15,9 +15,15 @@ const filters: Array<{ label: string; value: Filter; icon: typeof FileText }> = 
   { label: "Báo Tây Ninh", value: "bao_tay_ninh", icon: Newspaper }
 ];
 
-export function DocumentList({ documents }: { documents: Document[] }) {
+export function DocumentList({
+  documents,
+  initialFilter = "all"
+}: {
+  documents: Document[];
+  initialFilter?: Filter;
+}) {
   const [query, setQuery] = useState("");
-  const [filter, setFilter] = useState<Filter>("all");
+  const [filter, setFilter] = useState<Filter>(initialFilter);
 
   const filteredDocuments = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
