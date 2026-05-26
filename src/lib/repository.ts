@@ -155,7 +155,7 @@ export async function getCommuneById(id?: string) {
 export async function getDocuments() {
   noStore();
 
-  const supabase = getSupabasePublicClient();
+  const supabase = getSupabaseAdminClient() || getSupabasePublicClient();
   if (!supabase) {
     return mockDocuments.map(enrichMockDocument);
   }
@@ -223,7 +223,7 @@ export async function getDocumentsByCommune(communeId: string) {
 export async function getDocumentBySlug(slug: string) {
   noStore();
 
-  const supabase = getSupabasePublicClient();
+  const supabase = getSupabaseAdminClient() || getSupabasePublicClient();
   if (!supabase) {
     const document = mockDocuments.find((item) => item.slug === slug);
     return document ? enrichMockDocument(document) : undefined;

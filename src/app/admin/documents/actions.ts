@@ -24,6 +24,10 @@ function documentTypeValue(formData: FormData): DocumentType {
   return value === "bao_tay_ninh" ? "bao_tay_ninh" : "dia_chi";
 }
 
+function isPreviewOnlyValue(formData: FormData) {
+  return textValue(formData, "access_mode") !== "full";
+}
+
 function yearValue(formData: FormData) {
   const year = Number(textValue(formData, "year"));
   return Number.isFinite(year) ? year : null;
@@ -120,7 +124,7 @@ async function documentPayload(formData: FormData, existingPreviewUrl?: string, 
     source: optionalTextValue(formData, "source") || "Thư viện tỉnh Tây Ninh",
     preview_file_url: previewFileUrl,
     cover_image_url: coverImageUrl,
-    is_preview_only: true,
+    is_preview_only: isPreviewOnlyValue(formData),
     contact_note:
       optionalTextValue(formData, "contact_note") || "Vui lòng liên hệ thư viện để đọc bản đầy đủ.",
     updated_at: new Date().toISOString()

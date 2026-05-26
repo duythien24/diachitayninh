@@ -137,14 +137,16 @@ export function DocumentForm({ communes, document }: { communes: Commune[]; docu
         </label>
       </div>
 
-      <label className="inline-flex items-center gap-3 text-sm font-semibold text-ink">
-        <input
-          name="is_preview_only"
-          type="checkbox"
-          defaultChecked={document?.isPreviewOnly ?? true}
-          className="h-4 w-4 rounded accent-palm"
-        />
-        Chỉ public bản preview, không upload bản full
+      <label className="grid gap-2 text-sm font-semibold text-ink md:max-w-sm">
+        Chế độ đọc
+        <select
+          name="access_mode"
+          defaultValue={document ? (document.isPreviewOnly === false ? "full" : "preview") : "full"}
+          className="rounded border border-ink/12 px-3 py-2.5 font-normal outline-none transition focus:border-palm"
+        >
+          <option value="full">Bản đầy đủ - cho đọc hết</option>
+          <option value="preview">Bản preview - chỉ đọc thử</option>
+        </select>
       </label>
 
       <div className="rounded bg-paper p-4 text-sm leading-6 text-ink/68">

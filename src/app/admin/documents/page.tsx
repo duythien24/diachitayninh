@@ -84,7 +84,7 @@ export default async function AdminDocumentsPage({
                   <td className="px-4 py-4 text-ink/68">{document.year}</td>
                   <td className="px-4 py-4">
                     <span className="rounded bg-palm/10 px-2.5 py-1 text-xs font-semibold text-palm">
-                      Preview only
+                      {document.isPreviewOnly ? "Preview" : "Bản đầy đủ"}
                     </span>
                   </td>
                   <td className="px-4 py-4">

@@ -22,6 +22,7 @@ export default async function DocumentDetailPage({ params }: { params: Promise<{
   }
 
   const commune = document.commune;
+  const isPreview = document.isPreviewOnly;
 
   return (
     <PageShell>
@@ -55,7 +56,7 @@ export default async function DocumentDetailPage({ params }: { params: Promise<{
             </div>
             <div>
               <dt className="font-semibold text-ink">Trạng thái</dt>
-              <dd className="mt-1 text-ink/64">Bản đọc thử có watermark</dd>
+              <dd className="mt-1 text-ink/64">{isPreview ? "Bản preview/đọc thử" : "Bản đầy đủ"}</dd>
             </div>
           </dl>
           <div className="mt-6 flex flex-wrap gap-3">
@@ -64,16 +65,35 @@ export default async function DocumentDetailPage({ params }: { params: Promise<{
               className="inline-flex items-center gap-2 rounded bg-palm px-4 py-3 text-sm font-semibold text-white transition hover:bg-palm/90"
             >
               <Eye className="h-4 w-4" aria-hidden="true" />
-              Đọc PDF online
+              {isPreview ? "Đọc preview online" : "Đọc đầy đủ online"}
             </Link>
-            <span className="inline-flex items-center gap-2 rounded border border-lacquer/20 px-4 py-3 text-sm font-semibold text-lacquer">
-              <LockKeyhole className="h-4 w-4" aria-hidden="true" />
-              Không public bản full
-            </span>
+            {isPreview ? (
+              <span className="inline-flex items-center gap-2 rounded border border-lacquer/20 px-4 py-3 text-sm font-semibold text-lacquer">
+                <LockKeyhole className="h-4 w-4" aria-hidden="true" />
+                Bản đầy đủ cần liên hệ thư viện
+              </span>
+            ) : null}
           </div>
         </div>
 
-        <ContactPanel />
+        {isPreview ? (
+          <ContactPanel />
+        ) : (
+          <aside className="rounded border border-palm/20 bg-palm p-5 text-white shadow-soft">
+            <p className="text-sm font-semibold uppercase text-white/70">Bản đầy đủ</p>
+            <h2 className="mt-2 text-2xl font-semibold">Được mở đọc toàn văn</h2>
+            <p className="mt-3 text-sm leading-6 text-white/78">
+              Tài liệu này được quản trị đánh dấu là bản đầy đủ, người đọc có thể mở PDF online để đọc hết nội dung.
+            </p>
+            <Link
+              href={`/doc/${document.slug}`}
+              className="mt-5 inline-flex items-center gap-2 rounded bg-white px-3 py-2 text-sm font-semibold text-palm transition hover:bg-paper"
+            >
+              <Eye className="h-4 w-4" aria-hidden="true" />
+              Đọc đầy đủ
+            </Link>
+          </aside>
+        )}
       </section>
     </PageShell>
   );

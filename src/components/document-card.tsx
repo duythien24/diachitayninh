@@ -8,6 +8,8 @@ import { documentTypeLabel, typePrefix } from "@/lib/utils";
 
 export function DocumentCard({ document }: { document: Document }) {
   const commune = document.commune || getCommuneById(document.communeId);
+  const readLabel = document.isPreviewOnly ? "Đọc thử" : "Đọc đầy đủ";
+  const statusLabel = document.isPreviewOnly ? "Preview" : "Bản đầy đủ";
 
   return (
     <article className="overflow-hidden rounded border border-ink/10 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-soft">
@@ -21,6 +23,9 @@ export function DocumentCard({ document }: { document: Document }) {
         />
         <div className="absolute left-3 top-3 rounded bg-white/90 px-2.5 py-1 text-xs font-semibold text-ink">
           {documentTypeLabel(document.documentType)}
+        </div>
+        <div className="absolute right-3 top-3 rounded bg-palm px-2.5 py-1 text-xs font-semibold text-white">
+          {statusLabel}
         </div>
       </div>
       <div className="space-y-4 p-5">
@@ -41,7 +46,7 @@ export function DocumentCard({ document }: { document: Document }) {
             className="inline-flex items-center gap-2 rounded bg-palm px-3 py-2 text-sm font-semibold text-white transition hover:bg-palm/90"
           >
             <Eye className="h-4 w-4" aria-hidden="true" />
-            Đọc thử
+            {readLabel}
           </Link>
           <Link
             href={`/tai-lieu/${document.slug}`}

@@ -25,7 +25,7 @@ export default async function DocumentsPage({
       <SectionHeader
         eyebrow="Kho tư liệu"
         title="Tài liệu địa chí và Báo Tây Ninh"
-        description="Mỗi tài liệu public chỉ nên là bản preview 10 trang có watermark. Bản full giữ nội bộ và phục vụ qua kênh liên hệ thư viện."
+        description="Tài liệu có thể được mở đọc toàn văn hoặc chỉ công bố bản preview tùy theo chế độ được chọn trong khu quản trị."
       />
 
       <DocumentList documents={documents} initialFilter={initialFilter} />

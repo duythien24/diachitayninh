@@ -65,7 +65,7 @@ create policy "Public can read communes"
 drop policy if exists "Public can read preview documents" on documents;
 create policy "Public can read preview documents"
   on documents for select
-  using (is_preview_only = true);
+  using (true);
 
 insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
 values (

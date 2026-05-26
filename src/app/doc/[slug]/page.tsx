@@ -19,6 +19,8 @@ export default async function PdfReaderPage({ params }: { params: Promise<{ slug
     notFound();
   }
 
+  const isPreview = document.isPreviewOnly;
+
   return (
     <PageShell>
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
@@ -44,7 +46,7 @@ export default async function PdfReaderPage({ params }: { params: Promise<{ slug
         <section className="overflow-hidden rounded border border-ink/10 bg-white shadow-soft">
           <div className="flex items-center gap-2 border-b border-ink/10 bg-paper px-4 py-3 text-sm font-semibold text-lacquer">
             <LockKeyhole className="h-4 w-4" aria-hidden="true" />
-            Bản đọc tham khảo - Thư viện tỉnh Tây Ninh
+            {isPreview ? "Bản đọc thử - Thư viện tỉnh Tây Ninh" : "Bản đầy đủ - Thư viện tỉnh Tây Ninh"}
           </div>
           <iframe
             src={document.previewFileUrl}
@@ -52,7 +54,17 @@ export default async function PdfReaderPage({ params }: { params: Promise<{ slug
             className="h-[76vh] w-full bg-white"
           />
         </section>
-        <ContactPanel />
+        {isPreview ? (
+          <ContactPanel />
+        ) : (
+          <aside className="rounded border border-palm/20 bg-palm p-5 text-white shadow-soft">
+            <p className="text-sm font-semibold uppercase text-white/70">Bản đầy đủ</p>
+            <h2 className="mt-2 text-2xl font-semibold">Đang đọc toàn văn</h2>
+            <p className="mt-3 text-sm leading-6 text-white/78">
+              Tài liệu này được quản trị đánh dấu là bản đầy đủ, nên PDF online hiển thị toàn bộ nội dung đã upload.
+            </p>
+          </aside>
+        )}
       </div>
     </PageShell>
   );
