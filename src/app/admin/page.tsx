@@ -2,10 +2,10 @@ import Link from "next/link";
 import { Database, FilePlus2, FileText, Upload } from "lucide-react";
 
 import { PageShell, SectionHeader } from "@/components/page-shell";
-import { getDocuments, usingMockData } from "@/lib/repository";
+import { getAdminDocuments, usingMockData } from "@/lib/repository";
 
 export default async function AdminPage() {
-  const documents = await getDocuments();
+  const documents = await getAdminDocuments();
   const isMock = usingMockData();
 
   return (

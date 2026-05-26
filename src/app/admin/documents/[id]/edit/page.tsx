@@ -2,17 +2,16 @@ import { notFound } from "next/navigation";
 
 import { DocumentForm } from "@/components/document-form";
 import { PageShell, SectionHeader } from "@/components/page-shell";
-import { getCommunes, getDocuments } from "@/lib/repository";
+import { getAdminDocumentById, getAdminDocuments, getCommunes } from "@/lib/repository";
 
 export async function generateStaticParams() {
-  const documents = await getDocuments();
+  const documents = await getAdminDocuments();
   return documents.map((document) => ({ id: document.id }));
 }
 
 export default async function EditDocumentPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const [communes, documents] = await Promise.all([getCommunes(), getDocuments()]);
-  const document = documents.find((item) => item.id === id);
+  const [communes, document] = await Promise.all([getCommunes(), getAdminDocumentById(id)]);
 
   if (!document) {
     notFound();

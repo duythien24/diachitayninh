@@ -94,7 +94,7 @@ async function documentPayload(formData: FormData, existingPreviewUrl?: string, 
     source: optionalTextValue(formData, "source") || "Thư viện tỉnh Tây Ninh",
     preview_file_url: previewFileUrl,
     cover_image_url: coverImageUrl,
-    is_preview_only: formData.get("is_preview_only") === "on",
+    is_preview_only: true,
     contact_note:
       optionalTextValue(formData, "contact_note") || "Vui lòng liên hệ thư viện để đọc bản đầy đủ.",
     updated_at: new Date().toISOString()

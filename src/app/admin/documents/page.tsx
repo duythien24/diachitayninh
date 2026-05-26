@@ -3,7 +3,7 @@ import { Edit, FilePlus2, Trash2 } from "lucide-react";
 
 import { deleteDocumentAction } from "@/app/admin/documents/actions";
 import { PageShell, SectionHeader } from "@/components/page-shell";
-import { getDocuments, usingMockData } from "@/lib/repository";
+import { getAdminDocuments, usingMockData } from "@/lib/repository";
 import { documentTypeLabel, typePrefix } from "@/lib/utils";
 
 function statusMessage(status?: string) {
@@ -19,7 +19,7 @@ export default async function AdminDocumentsPage({
 }: {
   searchParams: Promise<{ status?: string }>;
 }) {
-  const [documents, params] = await Promise.all([getDocuments(), searchParams]);
+  const [documents, params] = await Promise.all([getAdminDocuments(), searchParams]);
   const message = statusMessage(params.status);
   const isMock = usingMockData();
 

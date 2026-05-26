@@ -7,7 +7,7 @@ import {
   documents as mockDocuments,
   getCommuneById as getMockCommuneById
 } from "@/lib/data";
-import { getSupabasePublicClient, isSupabaseConfigured } from "@/lib/supabase-server";
+import { getSupabaseAdminClient, getSupabasePublicClient, isSupabaseConfigured } from "@/lib/supabase-server";
 import type { Commune, CommuneType, Document, DocumentType } from "@/lib/types";
 
 type CommuneRow = {
@@ -39,6 +39,9 @@ type DocumentRow = {
 
 const fallbackCover =
   "https://commons.wikimedia.org/wiki/Special:Redirect/file/Ch%C3%B9a_B%C3%A0_v%C3%A0_c%E1%BA%A3nh_ch%C3%A2n_tr%E1%BB%9Di%2C_KDL_N%C3%BAi_B%C3%A0_%C4%90en.jpg?width=900";
+
+const documentSelect =
+  "id,title,slug,document_type,commune_id,year,description,source,preview_file_url,cover_image_url,is_preview_only,contact_note,created_at,communes(id,name,type,district_old,description,slug,created_at)";
 
 function enrichMockDocument(document: Document): Document {
   return {
@@ -159,9 +162,7 @@ export async function getDocuments() {
 
   const { data, error } = await supabase
     .from("documents")
-    .select(
-      "id,title,slug,document_type,commune_id,year,description,source,preview_file_url,cover_image_url,is_preview_only,contact_note,created_at,communes(id,name,type,district_old,description,slug,created_at)"
-    )
+    .select(documentSelect)
     .order("created_at", { ascending: false });
 
   if (error) {
@@ -169,6 +170,49 @@ export async function getDocuments() {
   }
 
   return data.map((row) => mapDocument(row as DocumentRow));
+}
+
+export async function getAdminDocuments() {
+  noStore();
+
+  const supabase = getSupabaseAdminClient();
+  if (!supabase) {
+    return getDocuments();
+  }
+
+  const { data, error } = await supabase
+    .from("documents")
+    .select(documentSelect)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    return getDocuments();
+  }
+
+  return data.map((row) => mapDocument(row as DocumentRow));
+}
+
+export async function getAdminDocumentById(id: string) {
+  noStore();
+
+  const supabase = getSupabaseAdminClient();
+  if (!supabase) {
+    const documents = await getDocuments();
+    return documents.find((document) => document.id === id);
+  }
+
+  const { data, error } = await supabase
+    .from("documents")
+    .select(documentSelect)
+    .eq("id", id)
+    .maybeSingle();
+
+  if (error || !data) {
+    const documents = await getDocuments();
+    return documents.find((document) => document.id === id);
+  }
+
+  return mapDocument(data as DocumentRow);
 }
 
 export async function getDocumentsByCommune(communeId: string) {
@@ -187,9 +231,7 @@ export async function getDocumentBySlug(slug: string) {
 
   const { data, error } = await supabase
     .from("documents")
-    .select(
-      "id,title,slug,document_type,commune_id,year,description,source,preview_file_url,cover_image_url,is_preview_only,contact_note,created_at,communes(id,name,type,district_old,description,slug,created_at)"
-    )
+    .select(documentSelect)
     .eq("slug", slug)
     .maybeSingle();
 
