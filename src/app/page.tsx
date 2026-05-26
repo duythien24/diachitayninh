@@ -58,7 +58,7 @@ export default async function HomePage() {
       </section>
 
       <PageShell>
-        <section className="-mt-24 grid gap-5 lg:grid-cols-2">
+        <section className="grid gap-5 lg:grid-cols-2">
           <article className="rounded border border-ink/10 bg-white p-6 shadow-soft">
             <div className="flex items-start justify-between gap-4">
               <div>
