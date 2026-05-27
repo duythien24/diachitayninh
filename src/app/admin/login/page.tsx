@@ -5,9 +5,9 @@ import { BookOpenCheck, LockKeyhole, LogIn } from "lucide-react";
 import {
   adminSessionCookie,
   createAdminSessionValue,
-  isValidAdminLogin,
   safeAdminNextPath
 } from "@/lib/admin-auth";
+import { verifyAdminLogin } from "@/lib/admin-users";
 
 async function loginAction(formData: FormData) {
   "use server";
@@ -16,12 +16,14 @@ async function loginAction(formData: FormData) {
   const password = String(formData.get("password") || "");
   const nextPath = safeAdminNextPath(String(formData.get("next") || "/admin"));
 
-  if (!isValidAdminLogin(username, password)) {
+  const validUsername = await verifyAdminLogin(username, password);
+
+  if (!validUsername) {
     redirect(`/admin/login?error=1&next=${encodeURIComponent(nextPath)}`);
   }
 
   const cookieStore = await cookies();
-  cookieStore.set(adminSessionCookie, await createAdminSessionValue(), {
+  cookieStore.set(adminSessionCookie, await createAdminSessionValue(validUsername), {
     httpOnly: true,
     maxAge: 60 * 60 * 8,
     path: "/admin",

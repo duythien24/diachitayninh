@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Database, FilePlus2, FileText, Upload } from "lucide-react";
+import { FilePlus2, FileText, Newspaper, ShieldCheck, Users } from "lucide-react";
 
 import { PageShell, SectionHeader } from "@/components/page-shell";
 import { getAdminDocuments, usingMockData } from "@/lib/repository";
@@ -7,13 +7,16 @@ import { getAdminDocuments, usingMockData } from "@/lib/repository";
 export default async function AdminPage() {
   const documents = await getAdminDocuments();
   const isMock = usingMockData();
+  const communeDocumentCount = documents.filter((document) => document.documentType === "dia_chi").length;
+  const newspaperDocumentCount = documents.filter((document) => document.documentType === "bao_tay_ninh").length;
+  const provincialDocumentCount = documents.filter((document) => document.documentType === "tai_lieu_cap_tinh").length;
 
   return (
     <PageShell>
       <SectionHeader
         eyebrow="Quản trị"
         title="Bảng điều khiển tài liệu"
-        description="Bản MVP đang dùng dữ liệu mẫu. Khi nối Supabase, các form trong khu vực này sẽ ghi vào bảng documents và upload PDF preview lên Supabase Storage."
+        description="Theo dõi số lượng tài liệu theo từng nhóm và truy cập nhanh các công cụ quản trị nội dung."
       />
 
       {isMock ? (
@@ -24,9 +27,9 @@ export default async function AdminPage() {
 
       <div className="mt-8 grid gap-4 md:grid-cols-3">
         {[
-          { label: "Tài liệu hiện có", value: documents.length, icon: FileText },
-          { label: "Storage", value: "Preview PDF", icon: Upload },
-          { label: "Database", value: "Supabase", icon: Database }
+          { label: "Tài liệu cấp xã", value: communeDocumentCount, icon: FileText },
+          { label: "Tài liệu báo", value: newspaperDocumentCount, icon: Newspaper },
+          { label: "Tài liệu cấp tỉnh", value: provincialDocumentCount, icon: ShieldCheck }
         ].map((item) => {
           const Icon = item.icon;
           return (
@@ -53,6 +56,13 @@ export default async function AdminPage() {
         >
           <FilePlus2 className="h-4 w-4" aria-hidden="true" />
           Thêm tài liệu
+        </Link>
+        <Link
+          href="/admin/accounts"
+          className="inline-flex items-center gap-2 rounded border border-ink/12 bg-white px-4 py-3 text-sm font-semibold text-ink transition hover:bg-paper"
+        >
+          <Users className="h-4 w-4" aria-hidden="true" />
+          Tài khoản và mật khẩu
         </Link>
       </div>
     </PageShell>

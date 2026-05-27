@@ -32,8 +32,7 @@ async function sign(value: string) {
   return bytesToHex(signature);
 }
 
-export async function createAdminSessionValue() {
-  const username = adminUsername();
+export async function createAdminSessionValue(username = adminUsername()) {
   const signature = await sign(username);
   return `${username}.${signature}`;
 }
@@ -43,11 +42,17 @@ export async function isValidAdminSession(value?: string) {
     return false;
   }
 
-  const expected = await createAdminSessionValue();
+  const separator = value.lastIndexOf(".");
+  if (separator <= 0) {
+    return false;
+  }
+
+  const username = value.slice(0, separator);
+  const expected = await createAdminSessionValue(username);
   return value === expected;
 }
 
-export function isValidAdminLogin(username: string, password: string) {
+export function isValidEnvAdminLogin(username: string, password: string) {
   const configuredPassword = process.env.ADMIN_PASSWORD;
   return Boolean(configuredPassword && username === adminUsername() && password === configuredPassword);
 }

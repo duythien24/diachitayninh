@@ -138,7 +138,7 @@ export default async function HomePage() {
                 <p className="text-sm font-semibold uppercase text-lacquer">Kho cấp tỉnh</p>
                 <h2 className="mt-3 text-3xl font-semibold text-ink">Tài liệu cấp tỉnh</h2>
               </div>
-              <span className="grid h-12 w-12 shrink-0 place-items-center rounded bg-brass text-ink">
+              <span className="grid h-12 w-12 shrink-0 place-items-center rounded bg-brass text-white">
                 <Files className="h-6 w-6" aria-hidden="true" />
               </span>
             </div>
@@ -148,7 +148,7 @@ export default async function HomePage() {
             <div className="mt-6 flex flex-wrap gap-3">
               <Link
                 href="/tai-lieu?loai=tai_lieu_cap_tinh"
-                className="inline-flex items-center gap-2 rounded bg-brass px-4 py-3 text-sm font-semibold text-ink transition hover:bg-brass/90"
+                className="inline-flex items-center gap-2 rounded bg-brass px-4 py-3 text-sm font-semibold text-white transition hover:bg-brass/90"
               >
                 <Files className="h-4 w-4" aria-hidden="true" />
                 Mở tài liệu cấp tỉnh

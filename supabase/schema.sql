@@ -42,10 +42,19 @@ create table if not exists documents (
   updated_at timestamptz not null default now()
 );
 
+create table if not exists admin_users (
+  id uuid primary key default gen_random_uuid(),
+  username text not null unique,
+  password_hash text not null,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
 create index if not exists documents_document_type_idx on documents(document_type);
 create index if not exists documents_commune_id_idx on documents(commune_id);
 create index if not exists communes_slug_idx on communes(slug);
 create index if not exists documents_slug_idx on documents(slug);
+create index if not exists admin_users_username_idx on admin_users(username);
 
 create or replace function set_updated_at()
 returns trigger as $$
@@ -61,8 +70,15 @@ create trigger documents_set_updated_at
   for each row
   execute function set_updated_at();
 
+drop trigger if exists admin_users_set_updated_at on admin_users;
+create trigger admin_users_set_updated_at
+  before update on admin_users
+  for each row
+  execute function set_updated_at();
+
 alter table communes enable row level security;
 alter table documents enable row level security;
+alter table admin_users enable row level security;
 
 drop policy if exists "Public can read communes" on communes;
 create policy "Public can read communes"
