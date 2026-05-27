@@ -13,7 +13,7 @@ import { PageShell } from "@/components/page-shell";
 import { getCommunes, getDocuments } from "@/lib/repository";
 
 const heroImage =
-  "https://commons.wikimedia.org/wiki/Special:Redirect/file/Ch%C3%B9a_B%C3%A0_v%C3%A0_c%E1%BA%A3nh_ch%C3%A2n_tr%E1%BB%9Di%2C_KDL_N%C3%BAi_B%C3%A0_%C4%90en.jpg?width=1600";
+  "https://commons.wikimedia.org/wiki/Special:Redirect/file/T%C6%B0%E1%BB%A3ng_Ph%E1%BA%ADt_B%C3%A0_T%C3%A2y_B%E1%BB%95_%C4%90%C3%A0_S%C6%A1n_%E1%BB%9F_N%C3%BAi_B%C3%A0_%C4%90en_2024.jpg?width=1800";
 
 export default async function HomePage() {
   const [communes, documents] = await Promise.all([getCommunes(), getDocuments()]);
@@ -74,17 +74,17 @@ export default async function HomePage() {
             </p>
             <div className="mt-6 flex flex-wrap gap-3">
               <Link
-                href="/xa-phuong"
+                href="/tai-lieu?loai=dia_chi"
                 className="inline-flex items-center gap-2 rounded bg-palm px-4 py-3 text-sm font-semibold text-white transition hover:bg-palm/90"
               >
-                <Building2 className="h-4 w-4" aria-hidden="true" />
-                Chọn xã/phường
+                <BookOpen className="h-4 w-4" aria-hidden="true" />
+                Mở Địa chí Tây Ninh
               </Link>
               <Link
-                href="/tai-lieu?loai=dia_chi"
+                href="/xa-phuong"
                 className="inline-flex items-center gap-2 rounded border border-ink/12 px-4 py-3 text-sm font-semibold text-ink transition hover:bg-paper"
               >
-                Tài liệu địa chí
+                Chọn xã/phường
                 <ArrowRight className="h-4 w-4" aria-hidden="true" />
               </Link>
             </div>
@@ -112,10 +112,10 @@ export default async function HomePage() {
                 Mở Báo Tây Ninh
               </Link>
               <Link
-                href="/tai-lieu"
+                href="/tai-lieu?loai=bao_tay_ninh"
                 className="inline-flex items-center gap-2 rounded border border-ink/12 px-4 py-3 text-sm font-semibold text-ink transition hover:bg-paper"
               >
-                Tất cả tài liệu
+                Danh mục Báo Tây Ninh
                 <ArrowRight className="h-4 w-4" aria-hidden="true" />
               </Link>
             </div>
