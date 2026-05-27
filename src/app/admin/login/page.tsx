@@ -16,14 +16,14 @@ async function loginAction(formData: FormData) {
   const password = String(formData.get("password") || "");
   const nextPath = safeAdminNextPath(String(formData.get("next") || "/admin"));
 
-  const validUsername = await verifyAdminLogin(username, password);
+  const login = await verifyAdminLogin(username, password);
 
-  if (!validUsername) {
+  if (!login) {
     redirect(`/admin/login?error=1&next=${encodeURIComponent(nextPath)}`);
   }
 
   const cookieStore = await cookies();
-  cookieStore.set(adminSessionCookie, await createAdminSessionValue(validUsername), {
+  cookieStore.set(adminSessionCookie, await createAdminSessionValue(login.username), {
     httpOnly: true,
     maxAge: 60 * 60 * 8,
     path: "/admin",

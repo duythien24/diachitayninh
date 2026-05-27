@@ -3,7 +3,12 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
-import { hashAdminPassword } from "@/lib/admin-users";
+import {
+  getCurrentAdmin,
+  hashAdminPassword,
+  isMissingAdminUsersTable,
+  verifyCurrentAdminPassword
+} from "@/lib/admin-users";
 import { getSupabaseAdminClient } from "@/lib/supabase-server";
 
 function textValue(formData: FormData, key: string) {
@@ -27,7 +32,16 @@ function adminClient() {
   return supabase;
 }
 
+async function requireSuperAdmin() {
+  const currentAdmin = await getCurrentAdmin();
+  if (!currentAdmin || currentAdmin.role !== "super_admin") {
+    redirect("/admin/accounts?status=forbidden");
+  }
+  return currentAdmin;
+}
+
 export async function createAdminUserAction(formData: FormData) {
+  await requireSuperAdmin();
   const supabase = adminClient();
   const username = textValue(formData, "username");
   const password = passwordValue(formData);
@@ -38,10 +52,14 @@ export async function createAdminUserAction(formData: FormData) {
 
   const { error } = await supabase.from("admin_users").insert({
     username,
-    password_hash: await hashAdminPassword(password)
+    password_hash: await hashAdminPassword(password),
+    role: "document_manager"
   });
 
   if (error) {
+    if (isMissingAdminUsersTable(error.message)) {
+      redirect("/admin/accounts?status=missing-table");
+    }
     throw new Error(error.message);
   }
 
@@ -49,16 +67,38 @@ export async function createAdminUserAction(formData: FormData) {
   redirect("/admin/accounts?status=created");
 }
 
-export async function changeAdminPasswordAction(userId: string, formData: FormData) {
+export async function changeCurrentAdminPasswordAction(formData: FormData) {
   const supabase = adminClient();
-  const password = passwordValue(formData, "new_password");
+  const currentAdmin = await getCurrentAdmin();
+  const oldPassword = textValue(formData, "old_password");
+  const newPassword = passwordValue(formData, "new_password");
+  const confirmPassword = textValue(formData, "confirm_password");
+
+  if (!currentAdmin) {
+    redirect("/admin/login");
+  }
+
+  if (newPassword !== confirmPassword) {
+    redirect("/admin/accounts?status=password-mismatch");
+  }
+
+  if (!(await verifyCurrentAdminPassword(currentAdmin, oldPassword))) {
+    redirect("/admin/accounts?status=wrong-password");
+  }
+
+  if (!currentAdmin.userId) {
+    redirect("/admin/accounts?status=env-password");
+  }
 
   const { error } = await supabase
     .from("admin_users")
-    .update({ password_hash: await hashAdminPassword(password) })
-    .eq("id", userId);
+    .update({ password_hash: await hashAdminPassword(newPassword) })
+    .eq("id", currentAdmin.userId);
 
   if (error) {
+    if (isMissingAdminUsersTable(error.message)) {
+      redirect("/admin/accounts?status=missing-table");
+    }
     throw new Error(error.message);
   }
 
@@ -67,10 +107,18 @@ export async function changeAdminPasswordAction(userId: string, formData: FormDa
 }
 
 export async function deleteAdminUserAction(userId: string) {
+  const currentAdmin = await requireSuperAdmin();
+  if (currentAdmin.userId === userId) {
+    redirect("/admin/accounts?status=cannot-delete-self");
+  }
+
   const supabase = adminClient();
   const { error } = await supabase.from("admin_users").delete().eq("id", userId);
 
   if (error) {
+    if (isMissingAdminUsersTable(error.message)) {
+      redirect("/admin/accounts?status=missing-table");
+    }
     throw new Error(error.message);
   }
 

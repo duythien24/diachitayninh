@@ -2,10 +2,11 @@ import Link from "next/link";
 import { FilePlus2, FileText, Newspaper, ShieldCheck, Users } from "lucide-react";
 
 import { PageShell, SectionHeader } from "@/components/page-shell";
+import { getCurrentAdmin } from "@/lib/admin-users";
 import { getAdminDocuments, usingMockData } from "@/lib/repository";
 
 export default async function AdminPage() {
-  const documents = await getAdminDocuments();
+  const [documents, currentAdmin] = await Promise.all([getAdminDocuments(), getCurrentAdmin()]);
   const isMock = usingMockData();
   const communeDocumentCount = documents.filter((document) => document.documentType === "dia_chi").length;
   const newspaperDocumentCount = documents.filter((document) => document.documentType === "bao_tay_ninh").length;
@@ -57,13 +58,23 @@ export default async function AdminPage() {
           <FilePlus2 className="h-4 w-4" aria-hidden="true" />
           Thêm tài liệu
         </Link>
-        <Link
-          href="/admin/accounts"
-          className="inline-flex items-center gap-2 rounded border border-ink/12 bg-white px-4 py-3 text-sm font-semibold text-ink transition hover:bg-paper"
-        >
-          <Users className="h-4 w-4" aria-hidden="true" />
-          Tài khoản và mật khẩu
-        </Link>
+        {currentAdmin?.role === "super_admin" ? (
+          <Link
+            href="/admin/accounts"
+            className="inline-flex items-center gap-2 rounded border border-ink/12 bg-white px-4 py-3 text-sm font-semibold text-ink transition hover:bg-paper"
+          >
+            <Users className="h-4 w-4" aria-hidden="true" />
+            Tài khoản và mật khẩu
+          </Link>
+        ) : (
+          <Link
+            href="/admin/accounts"
+            className="inline-flex items-center gap-2 rounded border border-ink/12 bg-white px-4 py-3 text-sm font-semibold text-ink transition hover:bg-paper"
+          >
+            <Users className="h-4 w-4" aria-hidden="true" />
+            Đổi mật khẩu
+          </Link>
+        )}
       </div>
     </PageShell>
   );

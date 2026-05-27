@@ -1,7 +1,11 @@
 export const adminSessionCookie = "diachitayninh_admin";
 
-function adminUsername() {
+export function adminUsername() {
   return process.env.ADMIN_USERNAME || "admin";
+}
+
+export function adminPassword() {
+  return process.env.ADMIN_PASSWORD || "";
 }
 
 function adminSecret() {
@@ -52,9 +56,23 @@ export async function isValidAdminSession(value?: string) {
   return value === expected;
 }
 
+export function parseAdminSessionValue(value?: string) {
+  if (!value) {
+    return null;
+  }
+
+  const separator = value.lastIndexOf(".");
+  if (separator <= 0) {
+    return null;
+  }
+
+  return {
+    username: value.slice(0, separator)
+  };
+}
+
 export function isValidEnvAdminLogin(username: string, password: string) {
-  const configuredPassword = process.env.ADMIN_PASSWORD;
-  return Boolean(configuredPassword && username === adminUsername() && password === configuredPassword);
+  return Boolean(adminPassword() && username === adminUsername() && password === adminPassword());
 }
 
 export function safeAdminNextPath(value?: string | null) {
