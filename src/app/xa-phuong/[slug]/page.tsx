@@ -5,7 +5,7 @@ import { ArrowLeft, FileText } from "lucide-react";
 import { DocumentCard } from "@/components/document-card";
 import { PageShell } from "@/components/page-shell";
 import { getCommunes, getCommuneBySlug, getDocumentsByCommune } from "@/lib/repository";
-import { typePrefix } from "@/lib/utils";
+import { communeDescription, typePrefix } from "@/lib/utils";
 
 export async function generateStaticParams() {
   const communes = await getCommunes();
@@ -36,7 +36,7 @@ export default async function CommuneDetailPage({ params }: { params: Promise<{ 
           </p>
           <h1 className="mt-3 text-4xl font-semibold text-ink">{commune.name}</h1>
           <p className="mt-4 text-sm text-ink/55">{commune.districtOld}</p>
-          <p className="mt-5 leading-7 text-ink/70">{commune.description}</p>
+          <p className="mt-5 leading-7 text-ink/70">{communeDescription(commune.name, commune.type)}</p>
           <div className="mt-6 rounded bg-paper p-4 text-sm leading-6 text-ink/70">
             Dữ liệu trang này đang dùng mock data. Khi nối Supabase, mỗi xã/phường sẽ có mô tả, tài liệu địa chí, báo liên quan và ảnh bìa riêng.
           </div>

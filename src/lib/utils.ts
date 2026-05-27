@@ -1,4 +1,4 @@
-import type { DocumentType } from "@/lib/types";
+import type { CommuneType, DocumentType } from "@/lib/types";
 
 export function cn(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(" ");
@@ -19,6 +19,11 @@ export function documentTypeLabel(type: DocumentType) {
   return type === "dia_chi" ? "Địa chí" : "Báo Tây Ninh";
 }
 
-export function typePrefix(type: "xa" | "phuong") {
+export function typePrefix(type: CommuneType) {
   return type === "xa" ? "Xã" : "Phường";
+}
+
+export function communeDescription(name: string, type: CommuneType) {
+  const unitType = type === "phuong" ? "phường" : "xã";
+  return `Kho tư liệu địa chí, báo chí địa phương và tài liệu liên quan đến ${unitType} ${name} trên địa bàn tỉnh Tây Ninh.`;
 }

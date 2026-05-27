@@ -5,7 +5,7 @@ import { useMemo, useState } from "react";
 import { ArrowRight, Search } from "lucide-react";
 
 import type { Commune, CommuneType } from "@/lib/types";
-import { cn, typePrefix } from "@/lib/utils";
+import { cn, communeDescription, typePrefix } from "@/lib/utils";
 
 type Filter = "all" | CommuneType;
 
@@ -82,7 +82,9 @@ export function CommuneList({ communes }: { communes: Commune[] }) {
                 </div>
                 <ArrowRight className="h-4 w-4 shrink-0 text-ink/35 transition group-hover:text-palm" aria-hidden="true" />
               </div>
-              <p className="mt-3 line-clamp-2 text-sm leading-6 text-ink/62">{commune.description}</p>
+              <p className="mt-3 line-clamp-2 text-sm leading-6 text-ink/62">
+                {communeDescription(commune.name, commune.type)}
+              </p>
             </Link>
           ))}
         </div>

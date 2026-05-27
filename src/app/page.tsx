@@ -35,7 +35,7 @@ export default async function HomePage() {
             </p>
             <h1 className="text-4xl font-semibold leading-tight sm:text-6xl">Địa chí số Tây Ninh</h1>
             <p className="mt-5 max-w-2xl text-lg leading-8 text-white/82">
-              Cổng đọc thử tài liệu địa chí, báo chí địa phương và hồ sơ số hóa theo từng xã, phường.
+              Kho tài liệu địa chí, báo chí địa phương và tài liệu địa phương trên địa bàn tỉnh Tây Ninh.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Link
