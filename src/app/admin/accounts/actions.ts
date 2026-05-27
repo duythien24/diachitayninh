@@ -16,12 +16,9 @@ function textValue(formData: FormData, key: string) {
   return typeof value === "string" ? value.trim() : "";
 }
 
-function passwordValue(formData: FormData, key = "password") {
-  const value = textValue(formData, key);
-  if (value.length < 6) {
-    throw new Error("Mật khẩu cần tối thiểu 6 ký tự.");
-  }
-  return value;
+function isDuplicateUsernameError(message: string) {
+  const normalized = message.toLowerCase();
+  return normalized.includes("duplicate") || normalized.includes("admin_users_username_key");
 }
 
 function adminClient() {
@@ -44,10 +41,14 @@ export async function createAdminUserAction(formData: FormData) {
   await requireSuperAdmin();
   const supabase = adminClient();
   const username = textValue(formData, "username");
-  const password = passwordValue(formData);
+  const password = textValue(formData, "password");
 
   if (!username) {
-    throw new Error("Tên đăng nhập là bắt buộc.");
+    redirect("/admin/accounts?status=missing-username");
+  }
+
+  if (password.length < 6) {
+    redirect("/admin/accounts?status=password-too-short");
   }
 
   const { error } = await supabase.from("admin_users").insert({
@@ -60,7 +61,10 @@ export async function createAdminUserAction(formData: FormData) {
     if (isMissingAdminUsersTable(error.message)) {
       redirect("/admin/accounts?status=missing-table");
     }
-    throw new Error(error.message);
+    if (isDuplicateUsernameError(error.message)) {
+      redirect("/admin/accounts?status=username-exists");
+    }
+    redirect("/admin/accounts?status=create-failed");
   }
 
   revalidatePath("/admin/accounts");
@@ -71,11 +75,15 @@ export async function changeCurrentAdminPasswordAction(formData: FormData) {
   const supabase = adminClient();
   const currentAdmin = await getCurrentAdmin();
   const oldPassword = textValue(formData, "old_password");
-  const newPassword = passwordValue(formData, "new_password");
+  const newPassword = textValue(formData, "new_password");
   const confirmPassword = textValue(formData, "confirm_password");
 
   if (!currentAdmin) {
     redirect("/admin/login");
+  }
+
+  if (newPassword.length < 6) {
+    redirect("/admin/accounts?status=password-too-short");
   }
 
   if (newPassword !== confirmPassword) {
@@ -99,7 +107,7 @@ export async function changeCurrentAdminPasswordAction(formData: FormData) {
     if (isMissingAdminUsersTable(error.message)) {
       redirect("/admin/accounts?status=missing-table");
     }
-    throw new Error(error.message);
+    redirect("/admin/accounts?status=password-failed");
   }
 
   revalidatePath("/admin/accounts");
@@ -119,7 +127,7 @@ export async function deleteAdminUserAction(userId: string) {
     if (isMissingAdminUsersTable(error.message)) {
       redirect("/admin/accounts?status=missing-table");
     }
-    throw new Error(error.message);
+    redirect("/admin/accounts?status=delete-failed");
   }
 
   revalidatePath("/admin/accounts");
