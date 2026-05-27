@@ -21,7 +21,9 @@ function optionalTextValue(formData: FormData, key: string) {
 
 function documentTypeValue(formData: FormData): DocumentType {
   const value = textValue(formData, "document_type");
-  return value === "bao_tay_ninh" ? "bao_tay_ninh" : "dia_chi";
+  if (value === "bao_tay_ninh") return "bao_tay_ninh";
+  if (value === "tai_lieu_cap_tinh") return "tai_lieu_cap_tinh";
+  return "dia_chi";
 }
 
 function isPreviewOnlyValue(formData: FormData) {
@@ -114,11 +116,13 @@ async function documentPayload(formData: FormData, existingPreviewUrl?: string, 
     throw new Error("Cần upload file PDF preview hoặc nhập URL PDF preview.");
   }
 
+  const documentType = documentTypeValue(formData);
+
   return {
     title,
     slug,
-    document_type: documentTypeValue(formData),
-    commune_id: optionalTextValue(formData, "commune_id"),
+    document_type: documentType,
+    commune_id: documentType === "tai_lieu_cap_tinh" ? null : optionalTextValue(formData, "commune_id"),
     year: yearValue(formData),
     description: optionalTextValue(formData, "description"),
     source: optionalTextValue(formData, "source") || "Thư viện tỉnh Tây Ninh",

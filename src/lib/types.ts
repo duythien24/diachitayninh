@@ -1,6 +1,6 @@
 export type CommuneType = "xa" | "phuong";
 
-export type DocumentType = "dia_chi" | "bao_tay_ninh";
+export type DocumentType = "dia_chi" | "bao_tay_ninh" | "tai_lieu_cap_tinh";
 
 export type Commune = {
   id: string;

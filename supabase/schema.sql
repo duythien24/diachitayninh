@@ -3,7 +3,14 @@ create extension if not exists "pgcrypto";
 do $$
 begin
   if not exists (select 1 from pg_type where typname = 'document_type') then
-    create type document_type as enum ('dia_chi', 'bao_tay_ninh');
+    create type document_type as enum ('dia_chi', 'bao_tay_ninh', 'tai_lieu_cap_tinh');
+  elsif not exists (
+    select 1
+    from pg_enum
+    where enumtypid = 'document_type'::regtype
+      and enumlabel = 'tai_lieu_cap_tinh'
+  ) then
+    alter type document_type add value 'tai_lieu_cap_tinh';
   end if;
 end
 $$;

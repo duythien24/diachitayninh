@@ -16,7 +16,9 @@ export function slugify(value: string) {
 }
 
 export function documentTypeLabel(type: DocumentType) {
-  return type === "dia_chi" ? "Địa chí" : "Báo Tây Ninh";
+  if (type === "dia_chi") return "Địa chí";
+  if (type === "bao_tay_ninh") return "Báo Tây Ninh";
+  return "Tài liệu cấp tỉnh";
 }
 
 export function typePrefix(type: CommuneType) {

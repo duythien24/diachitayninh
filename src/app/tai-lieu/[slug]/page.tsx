@@ -45,7 +45,9 @@ export default async function DocumentDetailPage({ params }: { params: Promise<{
               <span className="rounded bg-paper px-2.5 py-1 text-ink/70">
                 {typePrefix(commune.type)} {commune.name}
               </span>
-            ) : null}
+            ) : (
+              <span className="rounded bg-paper px-2.5 py-1 text-ink/70">Cấp tỉnh</span>
+            )}
           </div>
           <h1 className="mt-4 text-3xl font-semibold leading-tight text-ink">{document.title}</h1>
           <p className="mt-4 leading-7 text-ink/70">{document.description}</p>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { FileText, Newspaper, Search } from "lucide-react";
+import { FileText, Files, Newspaper, Search } from "lucide-react";
 
 import { DocumentCard } from "@/components/document-card";
 import type { Document, DocumentType } from "@/lib/types";
@@ -12,7 +12,8 @@ type Filter = "all" | DocumentType;
 const filters: Array<{ label: string; value: Filter; icon: typeof FileText }> = [
   { label: "Tất cả", value: "all", icon: FileText },
   { label: "Địa chí", value: "dia_chi", icon: FileText },
-  { label: "Báo Tây Ninh", value: "bao_tay_ninh", icon: Newspaper }
+  { label: "Báo Tây Ninh", value: "bao_tay_ninh", icon: Newspaper },
+  { label: "Cấp tỉnh", value: "tai_lieu_cap_tinh", icon: Files }
 ];
 
 export function DocumentList({
@@ -35,11 +36,13 @@ export function DocumentList({
     return documents.filter((document) => {
       const matchesType = filter === "all" || document.documentType === filter;
       const communeName = document.commune?.name.toLowerCase() || "";
+      const scopeName = document.documentType === "tai_lieu_cap_tinh" ? "cấp tỉnh tai lieu cap tinh" : "";
       const matchesQuery =
         normalizedQuery.length === 0 ||
         document.title.toLowerCase().includes(normalizedQuery) ||
         document.slug.includes(normalizedQuery) ||
-        communeName.includes(normalizedQuery);
+        communeName.includes(normalizedQuery) ||
+        scopeName.includes(normalizedQuery);
 
       return matchesType && matchesQuery;
     });
@@ -55,7 +58,7 @@ export function DocumentList({
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             className="min-w-0 flex-1 bg-transparent text-sm text-ink outline-none placeholder:text-ink/45"
-            placeholder="Tìm theo tên tài liệu hoặc xã/phường"
+            placeholder="Tìm theo tên tài liệu, xã/phường hoặc cấp tỉnh"
           />
         </label>
         <div className="inline-flex w-fit rounded border border-ink/10 bg-white p-1">

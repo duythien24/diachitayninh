@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, Eye, Library } from "lucide-react";
+import { ArrowRight, Eye, Files, Library } from "lucide-react";
 
 import { getCommuneById } from "@/lib/data";
 import type { Document } from "@/lib/types";
@@ -39,7 +39,12 @@ export function DocumentCard({ document }: { document: Document }) {
             <Library className="h-3.5 w-3.5" aria-hidden="true" />
             {typePrefix(commune.type)} {commune.name}
           </p>
-        ) : null}
+        ) : (
+          <p className="inline-flex items-center gap-2 rounded bg-paper px-2.5 py-1 text-xs font-medium text-ink/70">
+            <Files className="h-3.5 w-3.5" aria-hidden="true" />
+            Cấp tỉnh
+          </p>
+        )}
         <div className="flex flex-wrap gap-2 pt-1">
           <Link
             href={`/doc/${document.slug}`}

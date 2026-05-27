@@ -4,7 +4,7 @@ import { getDocuments } from "@/lib/repository";
 import type { DocumentType } from "@/lib/types";
 
 function documentTypeFromQuery(value?: string): DocumentType | "all" {
-  if (value === "dia_chi" || value === "bao_tay_ninh") {
+  if (value === "dia_chi" || value === "bao_tay_ninh" || value === "tai_lieu_cap_tinh") {
     return value;
   }
 
@@ -28,10 +28,18 @@ function pageCopy(filter: DocumentType | "all") {
     };
   }
 
+  if (filter === "tai_lieu_cap_tinh") {
+    return {
+      eyebrow: "Danh mục cấp tỉnh",
+      title: "Tài liệu cấp tỉnh",
+      description: "Kho tài liệu chung cấp tỉnh, không gắn riêng với một xã/phường cụ thể."
+    };
+  }
+
   return {
     eyebrow: "Kho tư liệu",
-    title: "Tài liệu địa chí và Báo Tây Ninh",
-    description: "Tài liệu có thể được mở đọc toàn văn hoặc chỉ công bố bản preview tùy theo chế độ được chọn trong khu quản trị."
+    title: "Tài liệu địa chí, báo chí và cấp tỉnh",
+    description: "Tài liệu có thể gắn với xã/phường hoặc thuộc kho cấp tỉnh, tùy nội dung được chọn trong khu quản trị."
   };
 }
 

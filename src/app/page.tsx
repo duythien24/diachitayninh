@@ -5,6 +5,7 @@ import {
   BookOpen,
   Building2,
   FileText,
+  Files,
   Library,
   Newspaper,
   Search
@@ -23,6 +24,7 @@ export default async function HomePage() {
   const communeCount = communes.filter((commune) => commune.type === "xa").length;
   const diaChiCount = documents.filter((document) => document.documentType === "dia_chi").length;
   const baoTayNinhCount = documents.filter((document) => document.documentType === "bao_tay_ninh").length;
+  const provincialCount = documents.filter((document) => document.documentType === "tai_lieu_cap_tinh").length;
 
   return (
     <>
@@ -54,13 +56,20 @@ export default async function HomePage() {
                 <Newspaper className="h-4 w-4" aria-hidden="true" />
                 Báo Tây Ninh
               </Link>
+              <Link
+                href="/tai-lieu?loai=tai_lieu_cap_tinh"
+                className="inline-flex items-center gap-2 rounded border border-white/25 bg-white/10 px-4 py-3 text-sm font-semibold text-white backdrop-blur transition hover:bg-white/18"
+              >
+                <Files className="h-4 w-4" aria-hidden="true" />
+                Tài liệu cấp tỉnh
+              </Link>
             </div>
           </div>
         </div>
       </section>
 
       <PageShell>
-        <section className="grid gap-5 lg:grid-cols-2">
+        <section className="grid gap-5 lg:grid-cols-3">
           <article className="rounded border border-ink/10 bg-white p-6 shadow-soft">
             <div className="flex items-start justify-between gap-4">
               <div>
@@ -122,14 +131,46 @@ export default async function HomePage() {
               </Link>
             </div>
           </article>
+
+          <article className="rounded border border-ink/10 bg-white p-6 shadow-soft">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-sm font-semibold uppercase text-lacquer">Kho cấp tỉnh</p>
+                <h2 className="mt-3 text-3xl font-semibold text-ink">Tài liệu cấp tỉnh</h2>
+              </div>
+              <span className="grid h-12 w-12 shrink-0 place-items-center rounded bg-brass text-ink">
+                <Files className="h-6 w-6" aria-hidden="true" />
+              </span>
+            </div>
+            <p className="mt-4 leading-7 text-ink/68">
+              Lưu trữ tài liệu chung cấp tỉnh, hồ sơ chuyên đề và tư liệu không gắn riêng với xã/phường nào.
+            </p>
+            <div className="mt-6 flex flex-wrap gap-3">
+              <Link
+                href="/tai-lieu?loai=tai_lieu_cap_tinh"
+                className="inline-flex items-center gap-2 rounded bg-brass px-4 py-3 text-sm font-semibold text-ink transition hover:bg-brass/90"
+              >
+                <Files className="h-4 w-4" aria-hidden="true" />
+                Mở tài liệu cấp tỉnh
+              </Link>
+              <Link
+                href="/tai-lieu"
+                className="inline-flex items-center gap-2 rounded border border-ink/12 px-4 py-3 text-sm font-semibold text-ink transition hover:bg-paper"
+              >
+                Tất cả tài liệu
+                <ArrowRight className="h-4 w-4" aria-hidden="true" />
+              </Link>
+            </div>
+          </article>
         </section>
 
-        <section className="mt-8 grid gap-4 md:grid-cols-4">
+        <section className="mt-8 grid gap-4 md:grid-cols-5">
           {[
             { label: "Xã", value: communeCount, icon: Building2 },
             { label: "Phường", value: wardCount, icon: Building2 },
             { label: "Địa chí", value: diaChiCount, icon: BookOpen },
-            { label: "Báo Tây Ninh", value: baoTayNinhCount, icon: Newspaper }
+            { label: "Báo Tây Ninh", value: baoTayNinhCount, icon: Newspaper },
+            { label: "Cấp tỉnh", value: provincialCount, icon: Files }
           ].map((item) => {
             const Icon = item.icon;
             return (
@@ -169,6 +210,12 @@ export default async function HomePage() {
                   icon: Newspaper,
                   title: "Kho Báo Tây Ninh",
                   description: "Tra cứu các số báo và chuyên đề báo chí địa phương đã được số hóa."
+                },
+                {
+                  href: "/tai-lieu?loai=tai_lieu_cap_tinh",
+                  icon: Files,
+                  title: "Tài liệu cấp tỉnh",
+                  description: "Xem các tài liệu chung toàn tỉnh, không gắn riêng với xã/phường nào."
                 }
               ].map((item) => {
                 const Icon = item.icon;

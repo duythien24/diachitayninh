@@ -44,6 +44,7 @@ export function DocumentForm({ communes, document }: { communes: Commune[]; docu
           >
             <option value="dia_chi">Địa chí</option>
             <option value="bao_tay_ninh">Báo Tây Ninh</option>
+            <option value="tai_lieu_cap_tinh">Tài liệu cấp tỉnh</option>
           </select>
         </label>
         <label className="grid gap-2 text-sm font-semibold text-ink">
@@ -53,7 +54,7 @@ export function DocumentForm({ communes, document }: { communes: Commune[]; docu
             defaultValue={document?.communeId || ""}
             className="rounded border border-ink/12 px-3 py-2.5 font-normal outline-none transition focus:border-palm"
           >
-            <option value="">Toàn tỉnh</option>
+            <option value="">Không gắn xã/phường - tài liệu cấp tỉnh</option>
             {communes.map((commune) => (
               <option key={commune.id} value={commune.id}>
                 {typePrefix(commune.type)} {commune.name}

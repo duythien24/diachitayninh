@@ -58,7 +58,7 @@ export default async function AdminDocumentsPage({
             <tr>
               <th className="px-4 py-3 font-semibold">Tên tài liệu</th>
               <th className="px-4 py-3 font-semibold">Loại</th>
-              <th className="px-4 py-3 font-semibold">Xã/phường</th>
+              <th className="px-4 py-3 font-semibold">Phạm vi</th>
               <th className="px-4 py-3 font-semibold">Năm</th>
               <th className="px-4 py-3 font-semibold">Trạng thái</th>
               <th className="px-4 py-3 font-semibold">Thao tác</th>
@@ -79,7 +79,7 @@ export default async function AdminDocumentsPage({
                   <td className="px-4 py-4 font-medium text-ink">{document.title}</td>
                   <td className="px-4 py-4 text-ink/68">{documentTypeLabel(document.documentType)}</td>
                   <td className="px-4 py-4 text-ink/68">
-                    {commune ? `${typePrefix(commune.type)} ${commune.name}` : "Toàn tỉnh"}
+                    {commune ? `${typePrefix(commune.type)} ${commune.name}` : "Cấp tỉnh"}
                   </td>
                   <td className="px-4 py-4 text-ink/68">{document.year}</td>
                   <td className="px-4 py-4">
