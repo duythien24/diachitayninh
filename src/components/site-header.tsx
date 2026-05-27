@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Building2, FileText, Home } from "lucide-react";
 
 import { AccountMenu } from "@/components/account-menu";
+import { adminRoleLabel, getCurrentAdmin } from "@/lib/admin-users";
 
 const nav = [
   { href: "/", label: "Trang chủ", icon: Home },
@@ -10,7 +11,15 @@ const nav = [
   { href: "/tai-lieu", label: "Tài liệu", icon: FileText }
 ];
 
-export function SiteHeader() {
+export async function SiteHeader() {
+  const currentAdmin = await getCurrentAdmin();
+  const account = currentAdmin
+    ? {
+        username: currentAdmin.username,
+        roleLabel: adminRoleLabel(currentAdmin.role)
+      }
+    : null;
+
   return (
     <header className="sticky top-0 z-40 border-b border-ink/10 bg-paper/88 backdrop-blur-xl">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
@@ -44,7 +53,7 @@ export function SiteHeader() {
               </Link>
             );
           })}
-          <AccountMenu />
+          <AccountMenu account={account} />
         </nav>
       </div>
     </header>

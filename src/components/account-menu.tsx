@@ -2,45 +2,13 @@
 
 import Link from "next/link";
 import { FileText, LogIn, LogOut, UserCircle } from "lucide-react";
-import { useEffect, useState } from "react";
 
-type AccountSession = {
+export type AccountSession = {
   username: string;
   roleLabel: string;
 };
 
-export function AccountMenu() {
-  const [account, setAccount] = useState<AccountSession | null>(null);
-
-  useEffect(() => {
-    let mounted = true;
-
-    async function loadSession() {
-      try {
-        const response = await fetch("/admin/session", {
-          credentials: "include",
-          cache: "no-store"
-        });
-
-        if (!response.ok) {
-          if (mounted) setAccount(null);
-          return;
-        }
-
-        const payload = (await response.json()) as { admin?: AccountSession | null };
-        if (mounted) setAccount(payload.admin || null);
-      } catch {
-        if (mounted) setAccount(null);
-      }
-    }
-
-    loadSession();
-
-    return () => {
-      mounted = false;
-    };
-  }, []);
-
+export function AccountMenu({ account }: { account: AccountSession | null }) {
   if (!account) {
     return (
       <Link
