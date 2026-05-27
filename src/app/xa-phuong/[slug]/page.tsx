@@ -4,6 +4,7 @@ import { ArrowLeft, FileText } from "lucide-react";
 
 import { DocumentCard } from "@/components/document-card";
 import { PageShell } from "@/components/page-shell";
+import { communeMergeInfoBySlug } from "@/lib/merge-info";
 import { getCommunes, getCommuneBySlug, getDocumentsByCommune } from "@/lib/repository";
 import { communeDescription, typePrefix } from "@/lib/utils";
 
@@ -21,6 +22,7 @@ export default async function CommuneDetailPage({ params }: { params: Promise<{ 
   }
 
   const relatedDocuments = await getDocumentsByCommune(commune.id);
+  const mergeInfo = communeMergeInfoBySlug[commune.slug];
 
   return (
     <PageShell>
@@ -38,7 +40,32 @@ export default async function CommuneDetailPage({ params }: { params: Promise<{ 
           <p className="mt-4 text-sm text-ink/55">{commune.districtOld}</p>
           <p className="mt-5 leading-7 text-ink/70">{communeDescription(commune.name, commune.type)}</p>
           <div className="mt-6 rounded bg-paper p-4 text-sm leading-6 text-ink/70">
-            Dữ liệu trang này đang dùng mock data. Khi nối Supabase, mỗi xã/phường sẽ có mô tả, tài liệu địa chí, báo liên quan và ảnh bìa riêng.
+            <p className="font-semibold text-ink">Thông tin sắp xếp đơn vị hành chính</p>
+            {mergeInfo ? (
+              <>
+                <p className="mt-2">{mergeInfo.note}</p>
+                <div className="mt-3">
+                  <p className="text-xs font-semibold uppercase text-lacquer">Đơn vị cũ hợp thành</p>
+                  <ul className="mt-2 space-y-1">
+                    {mergeInfo.oldUnits.map((unit) => (
+                      <li key={unit}>- {unit}</li>
+                    ))}
+                  </ul>
+                </div>
+                <a
+                  href={mergeInfo.sourceUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="mt-3 inline-flex font-semibold text-palm hover:text-lacquer"
+                >
+                  Nguồn: {mergeInfo.sourceLabel}
+                </a>
+              </>
+            ) : (
+              <p className="mt-2">
+                Thông tin các xã/phường cũ hợp thành đơn vị này đang được thư viện tiếp tục rà soát và cập nhật.
+              </p>
+            )}
           </div>
         </div>
 
