@@ -66,12 +66,14 @@ function mapCommune(row: CommuneRow): Commune {
 function mapDocument(row: DocumentRow): Document {
   const communeRow = Array.isArray(row.communes) ? row.communes[0] : row.communes;
   const commune = communeRow ? mapCommune(communeRow) : undefined;
+  const documentType =
+    row.document_type === "dia_chi" && !row.commune_id ? "tai_lieu_cap_tinh" : row.document_type;
 
   return {
     id: row.id,
     title: row.title,
     slug: row.slug,
-    documentType: row.document_type,
+    documentType,
     communeId: row.commune_id || undefined,
     year: row.year || new Date(row.created_at).getFullYear(),
     description: row.description || "",

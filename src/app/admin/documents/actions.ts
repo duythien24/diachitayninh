@@ -117,12 +117,15 @@ async function documentPayload(formData: FormData, existingPreviewUrl?: string, 
   }
 
   const documentType = documentTypeValue(formData);
+  const isProvincialDocument = documentType === "tai_lieu_cap_tinh";
 
   return {
     title,
     slug,
-    document_type: documentType,
-    commune_id: documentType === "tai_lieu_cap_tinh" ? null : optionalTextValue(formData, "commune_id"),
+    // Supabase production may still have the original two-value enum. Store province-level
+    // documents as dia_chi without a commune, then map them back when reading.
+    document_type: isProvincialDocument ? "dia_chi" : documentType,
+    commune_id: isProvincialDocument ? null : optionalTextValue(formData, "commune_id"),
     year: yearValue(formData),
     description: optionalTextValue(formData, "description"),
     source: optionalTextValue(formData, "source") || "Thư viện tỉnh Tây Ninh",
