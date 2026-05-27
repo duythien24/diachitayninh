@@ -94,14 +94,19 @@ export async function changeCurrentAdminPasswordAction(formData: FormData) {
     redirect("/admin/accounts?status=wrong-password");
   }
 
-  if (!currentAdmin.userId) {
-    redirect("/admin/accounts?status=env-password");
-  }
+  const passwordHash = await hashAdminPassword(newPassword);
+  const update = currentAdmin.userId
+    ? supabase.from("admin_users").update({ password_hash: passwordHash }).eq("id", currentAdmin.userId)
+    : supabase.from("admin_users").upsert(
+        {
+          username: currentAdmin.username,
+          password_hash: passwordHash,
+          role: "super_admin"
+        },
+        { onConflict: "username" }
+      );
 
-  const { error } = await supabase
-    .from("admin_users")
-    .update({ password_hash: await hashAdminPassword(newPassword) })
-    .eq("id", currentAdmin.userId);
+  const { error } = await update;
 
   if (error) {
     if (isMissingAdminUsersTable(error.message)) {
