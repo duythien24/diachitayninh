@@ -44,14 +44,16 @@ export default async function CommuneDetailPage({ params }: { params: Promise<{ 
             {mergeInfo ? (
               <>
                 <p className="mt-2">{mergeInfo.note}</p>
-                <div className="mt-3">
-                  <p className="text-xs font-semibold uppercase text-lacquer">Đơn vị cũ hợp thành</p>
-                  <ul className="mt-2 space-y-1">
-                    {mergeInfo.oldUnits.map((unit) => (
-                      <li key={unit}>- {unit}</li>
-                    ))}
-                  </ul>
-                </div>
+                {mergeInfo.oldUnits?.length ? (
+                  <div className="mt-3">
+                    <p className="text-xs font-semibold uppercase text-lacquer">Đơn vị cũ hợp thành</p>
+                    <ul className="mt-2 space-y-1">
+                      {mergeInfo.oldUnits.map((unit) => (
+                        <li key={unit}>- {unit}</li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
                 <a
                   href={mergeInfo.sourceUrl}
                   target="_blank"
