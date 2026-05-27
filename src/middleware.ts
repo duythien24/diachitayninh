@@ -1,39 +1,26 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
-function unauthorized() {
-  return new NextResponse("Authentication required", {
-    status: 401,
-    headers: {
-      "WWW-Authenticate": 'Basic realm="Dia chi so Tay Ninh admin"'
-    }
-  });
-}
+import { adminSessionCookie, isValidAdminSession } from "@/lib/admin-auth";
 
-export function middleware(request: NextRequest) {
-  const adminPassword = process.env.ADMIN_PASSWORD;
+export async function middleware(request: NextRequest) {
+  const { pathname, search } = request.nextUrl;
 
-  if (!adminPassword) {
+  if (pathname.startsWith("/admin/login")) {
     return NextResponse.next();
   }
 
-  const adminUsername = process.env.ADMIN_USERNAME || "admin";
-  const authorization = request.headers.get("authorization");
+  const session = request.cookies.get(adminSessionCookie)?.value;
 
-  if (!authorization?.startsWith("Basic ")) {
-    return unauthorized();
+  if (await isValidAdminSession(session)) {
+    return NextResponse.next();
   }
 
-  const credentials = atob(authorization.slice("Basic ".length));
-  const separatorIndex = credentials.indexOf(":");
-  const username = credentials.slice(0, separatorIndex);
-  const password = credentials.slice(separatorIndex + 1);
+  const loginUrl = request.nextUrl.clone();
+  loginUrl.pathname = "/admin/login";
+  loginUrl.searchParams.set("next", `${pathname}${search}`);
 
-  if (username !== adminUsername || password !== adminPassword) {
-    return unauthorized();
-  }
-
-  return NextResponse.next();
+  return NextResponse.redirect(loginUrl);
 }
 
 export const config = {
