@@ -4,8 +4,10 @@ import {
   ArrowRight,
   BookOpen,
   Building2,
+  FileText,
   Library,
-  Newspaper
+  Newspaper,
+  Search
 } from "lucide-react";
 
 import { DocumentCard } from "@/components/document-card";
@@ -140,29 +142,81 @@ export default async function HomePage() {
           })}
         </section>
 
-        <section className="mt-14 grid gap-8 lg:grid-cols-[0.9fr_1.1fr]">
+        <section className="mt-14 grid gap-8 lg:grid-cols-[0.92fr_1.08fr]">
           <div>
-            <p className="text-sm font-semibold uppercase text-lacquer">Luồng tra cứu</p>
-            <h2 className="mt-3 text-3xl font-semibold text-ink">Chọn đúng kho tư liệu trước khi đọc</h2>
+            <p className="text-sm font-semibold uppercase text-lacquer">Tra cứu nhanh</p>
+            <h2 className="mt-3 text-3xl font-semibold text-ink">Tìm tư liệu theo nhu cầu đọc</h2>
             <p className="mt-4 leading-7 text-ink/68">
-              Người đọc có thể đi theo hai hướng rõ ràng: chọn xã/phường để xem địa chí liên quan, hoặc mở riêng kho Báo Tây Ninh để đọc các số báo đã số hóa.
+              Chọn xã/phường để xem tư liệu địa phương, mở riêng kho địa chí hoặc đọc các số Báo Tây Ninh đã số hóa.
             </p>
-            <Link
-              href="/tai-lieu"
-              className="mt-6 inline-flex items-center gap-2 rounded border border-ink/12 px-4 py-3 text-sm font-semibold text-ink transition hover:bg-white"
-            >
-              Xem toàn bộ kho tài liệu
-              <ArrowRight className="h-4 w-4" aria-hidden="true" />
-            </Link>
+
+            <div className="mt-6 space-y-3">
+              {[
+                {
+                  href: "/xa-phuong",
+                  icon: Search,
+                  title: "Tra cứu theo xã/phường",
+                  description: "Xem tài liệu gắn với từng đơn vị hành chính mới."
+                },
+                {
+                  href: "/tai-lieu?loai=dia_chi",
+                  icon: BookOpen,
+                  title: "Kho tài liệu địa chí",
+                  description: "Đọc các tài liệu địa chí, di tích, địa danh và tư liệu lịch sử địa phương."
+                },
+                {
+                  href: "/tai-lieu?loai=bao_tay_ninh",
+                  icon: Newspaper,
+                  title: "Kho Báo Tây Ninh",
+                  description: "Tra cứu các số báo và chuyên đề báo chí địa phương đã được số hóa."
+                }
+              ].map((item) => {
+                const Icon = item.icon;
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className="group flex items-start gap-4 rounded border border-ink/10 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-palm/35 hover:shadow-soft"
+                  >
+                    <span className="grid h-10 w-10 shrink-0 place-items-center rounded bg-paper text-palm">
+                      <Icon className="h-5 w-5" aria-hidden="true" />
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="flex items-center justify-between gap-3 font-semibold text-ink">
+                        {item.title}
+                        <ArrowRight className="h-4 w-4 shrink-0 text-ink/40 transition group-hover:translate-x-1 group-hover:text-palm" aria-hidden="true" />
+                      </span>
+                      <span className="mt-1 block text-sm leading-6 text-ink/62">{item.description}</span>
+                    </span>
+                  </Link>
+                );
+              })}
+            </div>
           </div>
           {documents.length > 0 ? (
-            <div className="grid gap-4 sm:grid-cols-2">
-              {documents.slice(0, 2).map((document) => (
-                <DocumentCard key={document.id} document={document} />
-              ))}
+            <div>
+              <div className="mb-4 flex items-end justify-between gap-4">
+                <div>
+                  <p className="text-sm font-semibold uppercase text-lacquer">Tài liệu mới</p>
+                  <h2 className="mt-2 text-2xl font-semibold text-ink">Vừa được cập nhật</h2>
+                </div>
+                <Link
+                  href="/tai-lieu"
+                  className="hidden items-center gap-2 rounded border border-ink/12 px-3 py-2 text-sm font-semibold text-ink transition hover:bg-white sm:inline-flex"
+                >
+                  Tất cả
+                  <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                </Link>
+              </div>
+              <div className="grid gap-4 sm:grid-cols-2">
+                {documents.slice(0, 2).map((document) => (
+                  <DocumentCard key={document.id} document={document} />
+                ))}
+              </div>
             </div>
           ) : (
             <div className="rounded border border-dashed border-ink/18 bg-white p-6 text-sm leading-6 text-ink/62">
+              <FileText className="mb-3 h-5 w-5 text-lacquer" aria-hidden="true" />
               Chưa có tài liệu trên Supabase. Vào khu quản trị để thêm bản PDF preview đầu tiên.
             </div>
           )}
