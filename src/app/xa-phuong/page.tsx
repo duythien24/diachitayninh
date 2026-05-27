@@ -1,9 +1,26 @@
 import { CommuneList } from "@/components/commune-list";
 import { PageShell, SectionHeader } from "@/components/page-shell";
-import { getCommunes } from "@/lib/repository";
+import { getCommunes, getDocuments } from "@/lib/repository";
 
 export default async function CommunesPage() {
-  const communes = await getCommunes();
+  const [communes, documents] = await Promise.all([getCommunes(), getDocuments()]);
+  const documentCounts = documents.reduce<Record<string, number>>((counts, document) => {
+    if (document.communeId) {
+      counts[document.communeId] = (counts[document.communeId] || 0) + 1;
+    }
+
+    return counts;
+  }, {});
+  const sortedCommunes = communes
+    .map((commune) => ({
+      ...commune,
+      documentCount: documentCounts[commune.id] || 0
+    }))
+    .sort((left, right) => {
+      const countDelta = (right.documentCount || 0) - (left.documentCount || 0);
+      if (countDelta !== 0) return countDelta;
+      return left.name.localeCompare(right.name, "vi");
+    });
 
   return (
     <PageShell>
@@ -15,7 +32,7 @@ export default async function CommunesPage() {
         />
       </div>
 
-      <CommuneList communes={communes} />
+      <CommuneList communes={sortedCommunes} />
     </PageShell>
   );
 }

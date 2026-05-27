@@ -8,6 +8,7 @@ import type { Commune, CommuneType } from "@/lib/types";
 import { cn, communeDescription, typePrefix } from "@/lib/utils";
 
 type Filter = "all" | CommuneType;
+export type CommuneListItem = Commune & { documentCount?: number };
 
 const filters: Array<{ label: string; value: Filter }> = [
   { label: "Tất cả", value: "all" },
@@ -15,7 +16,7 @@ const filters: Array<{ label: string; value: Filter }> = [
   { label: "Phường", value: "phuong" }
 ];
 
-export function CommuneList({ communes }: { communes: Commune[] }) {
+export function CommuneList({ communes }: { communes: CommuneListItem[] }) {
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<Filter>("all");
 
@@ -75,9 +76,16 @@ export function CommuneList({ communes }: { communes: Commune[] }) {
             >
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <p className="text-xs font-semibold uppercase text-lacquer">
-                    {typePrefix(commune.type)}
-                  </p>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <p className="text-xs font-semibold uppercase text-lacquer">
+                      {typePrefix(commune.type)}
+                    </p>
+                    {commune.documentCount ? (
+                      <span className="rounded bg-palm/10 px-2 py-0.5 text-xs font-semibold text-palm">
+                        {commune.documentCount} tài liệu
+                      </span>
+                    ) : null}
+                  </div>
                   <h2 className="mt-2 text-lg font-semibold text-ink">{commune.name}</h2>
                 </div>
                 <ArrowRight className="h-4 w-4 shrink-0 text-ink/35 transition group-hover:text-palm" aria-hidden="true" />
