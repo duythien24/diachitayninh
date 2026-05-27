@@ -6,7 +6,7 @@ import { adminSessionCookie, isValidAdminSession } from "@/lib/admin-auth";
 export async function middleware(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
 
-  if (pathname.startsWith("/admin/login")) {
+  if (pathname.startsWith("/admin/login") || pathname === "/admin/session" || pathname === "/admin/logout") {
     return NextResponse.next();
   }
 

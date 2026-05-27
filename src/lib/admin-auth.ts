@@ -25,14 +25,14 @@ async function sign(value: string) {
     return "";
   }
 
-  const key = await crypto.subtle.importKey(
+  const key = await globalThis.crypto.subtle.importKey(
     "raw",
     new TextEncoder().encode(secret),
     { name: "HMAC", hash: "SHA-256" },
     false,
     ["sign"]
   );
-  const signature = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(value));
+  const signature = await globalThis.crypto.subtle.sign("HMAC", key, new TextEncoder().encode(value));
   return bytesToHex(signature);
 }
 

@@ -1,12 +1,13 @@
-import Link from "next/link";
 import Image from "next/image";
-import { Building2, FileText, Home, ShieldCheck } from "lucide-react";
+import Link from "next/link";
+import { Building2, FileText, Home } from "lucide-react";
+
+import { AccountMenu } from "@/components/account-menu";
 
 const nav = [
   { href: "/", label: "Trang chủ", icon: Home },
   { href: "/xa-phuong", label: "Xã/phường", icon: Building2 },
-  { href: "/tai-lieu", label: "Tài liệu", icon: FileText },
-  { href: "/admin", label: "Quản trị", icon: ShieldCheck }
+  { href: "/tai-lieu", label: "Tài liệu", icon: FileText }
 ];
 
 export function SiteHeader() {
@@ -43,6 +44,7 @@ export function SiteHeader() {
               </Link>
             );
           })}
+          <AccountMenu />
         </nav>
       </div>
     </header>

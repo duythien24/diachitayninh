@@ -26,7 +26,7 @@ async function loginAction(formData: FormData) {
   cookieStore.set(adminSessionCookie, await createAdminSessionValue(login.username), {
     httpOnly: true,
     maxAge: 60 * 60 * 8,
-    path: "/admin",
+    path: "/",
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production"
   });
