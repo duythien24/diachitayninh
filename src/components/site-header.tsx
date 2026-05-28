@@ -1,12 +1,11 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Building2, FileText, Home } from "lucide-react";
+import { Building2, FileText } from "lucide-react";
 
 import { AccountMenu } from "@/components/account-menu";
 import { adminRoleLabel, getCurrentAdmin } from "@/lib/admin-users";
 
 const nav = [
-  { href: "/", label: "Trang chủ", icon: Home },
   { href: "/xa-phuong", label: "Xã/phường", icon: Building2 },
   { href: "/tai-lieu", label: "Tài liệu", icon: FileText }
 ];
