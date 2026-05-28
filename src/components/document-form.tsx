@@ -5,7 +5,7 @@ import { FormEvent, useRef, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
 
 import { createDocumentAction, updateDocumentAction } from "@/app/admin/documents/actions";
-import type { Commune, Document } from "@/lib/types";
+import type { Commune, Document, DocumentType } from "@/lib/types";
 import { typePrefix } from "@/lib/utils";
 
 type SignedUpload = {
@@ -30,7 +30,9 @@ function browserSupabaseClient() {
 
 async function signedUpload(file: File, folder: "pdf" | "covers") {
   if (file.size > maxSupabaseFileSize) {
-    throw new Error("File vượt quá 50MB, Supabase Storage hiện chưa cho upload file lớn hơn mức này. Hãy nén PDF, chia nhỏ file hoặc dùng link PDF đã lưu ở nơi khác.");
+    throw new Error(
+      "File vượt quá 50MB. Hãy nén PDF, chia nhỏ file hoặc dùng link PDF đã lưu ở nơi khác."
+    );
   }
 
   const response = await fetch("/admin/uploads", {
@@ -71,6 +73,15 @@ export function DocumentForm({ communes, document }: { communes: Commune[]; docu
   const coverUrlRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const [selectedDocumentType, setSelectedDocumentType] = useState<DocumentType>(document?.documentType || "dia_chi");
+  const [selectedCommuneId, setSelectedCommuneId] = useState(document?.communeId || "");
+
+  const emptyCommuneLabel =
+    selectedDocumentType === "bao_tay_ninh"
+      ? "Báo Tây Ninh - không gắn xã/phường cụ thể"
+      : selectedDocumentType === "tai_lieu_cap_tinh"
+        ? "Không gắn xã/phường - tài liệu cấp tỉnh"
+        : "Chọn xã/phường liên quan hoặc để trống";
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     const form = formRef.current;
@@ -147,7 +158,14 @@ export function DocumentForm({ communes, document }: { communes: Commune[]; docu
           Loại tài liệu
           <select
             name="document_type"
-            defaultValue={document?.documentType || "dia_chi"}
+            value={selectedDocumentType}
+            onChange={(event) => {
+              const nextType = event.target.value as DocumentType;
+              setSelectedDocumentType(nextType);
+              if (nextType === "bao_tay_ninh" || nextType === "tai_lieu_cap_tinh") {
+                setSelectedCommuneId("");
+              }
+            }}
             className="rounded border border-ink/12 px-3 py-2.5 font-normal outline-none transition focus:border-palm"
           >
             <option value="dia_chi">Địa chí</option>
@@ -159,10 +177,11 @@ export function DocumentForm({ communes, document }: { communes: Commune[]; docu
           Xã/phường
           <select
             name="commune_id"
-            defaultValue={document?.communeId || ""}
+            value={selectedCommuneId}
+            onChange={(event) => setSelectedCommuneId(event.target.value)}
             className="rounded border border-ink/12 px-3 py-2.5 font-normal outline-none transition focus:border-palm"
           >
-            <option value="">Không gắn xã/phường - tài liệu cấp tỉnh</option>
+            <option value="">{emptyCommuneLabel}</option>
             {communes.map((commune) => (
               <option key={commune.id} value={commune.id}>
                 {typePrefix(commune.type)} {commune.name}
