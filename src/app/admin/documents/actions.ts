@@ -26,6 +26,16 @@ function documentTypeValue(formData: FormData): DocumentType {
   return "dia_chi";
 }
 
+function documentGroupParam(documentType: DocumentType) {
+  return documentType;
+}
+
+function documentGroupFromForm(formData: FormData) {
+  const value = textValue(formData, "document_group");
+  if (value === "bao_tay_ninh" || value === "tai_lieu_cap_tinh") return value;
+  return "dia_chi";
+}
+
 function isPreviewOnlyValue(formData: FormData) {
   return textValue(formData, "access_mode") !== "full";
 }
@@ -140,9 +150,10 @@ async function documentPayload(formData: FormData, existingPreviewUrl?: string, 
 
 export async function createDocumentAction(formData: FormData) {
   const supabase = getSupabaseAdminClient();
+  const selectedDocumentType = documentTypeValue(formData);
 
   if (!supabase) {
-    redirect("/admin/documents?status=missing-env");
+    redirect(`/admin/documents?nhom=${documentGroupParam(selectedDocumentType)}&status=missing-env`);
   }
 
   const payload = await documentPayload(formData);
@@ -156,14 +167,15 @@ export async function createDocumentAction(formData: FormData) {
   revalidatePath("/");
   revalidatePath("/tai-lieu");
   revalidatePath("/admin/documents");
-  redirect("/admin/documents?status=created");
+  redirect(`/admin/documents?nhom=${documentGroupParam(selectedDocumentType)}&status=created`);
 }
 
 export async function updateDocumentAction(documentId: string, formData: FormData) {
   const supabase = getSupabaseAdminClient();
+  const selectedDocumentType = documentTypeValue(formData);
 
   if (!supabase) {
-    redirect("/admin/documents?status=missing-env");
+    redirect(`/admin/documents?nhom=${documentGroupParam(selectedDocumentType)}&status=missing-env`);
   }
 
   const payload = await documentPayload(
@@ -181,14 +193,15 @@ export async function updateDocumentAction(documentId: string, formData: FormDat
   revalidatePath("/");
   revalidatePath("/tai-lieu");
   revalidatePath("/admin/documents");
-  redirect("/admin/documents?status=updated");
+  redirect(`/admin/documents?nhom=${documentGroupParam(selectedDocumentType)}&status=updated`);
 }
 
-export async function deleteDocumentAction(documentId: string) {
+export async function deleteDocumentAction(documentId: string, formData: FormData) {
   const supabase = getSupabaseAdminClient();
+  const documentGroup = documentGroupFromForm(formData);
 
   if (!supabase) {
-    redirect("/admin/documents?status=missing-env");
+    redirect(`/admin/documents?nhom=${documentGroup}&status=missing-env`);
   }
 
   const { error } = await supabase.from("documents").delete().eq("id", documentId);
@@ -200,5 +213,5 @@ export async function deleteDocumentAction(documentId: string) {
   revalidatePath("/");
   revalidatePath("/tai-lieu");
   revalidatePath("/admin/documents");
-  redirect("/admin/documents?status=deleted");
+  redirect(`/admin/documents?nhom=${documentGroup}&status=deleted`);
 }
