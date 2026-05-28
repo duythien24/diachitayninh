@@ -70,7 +70,7 @@ export default async function HomePage() {
 
       <PageShell>
         <section className="grid gap-5 lg:grid-cols-3">
-          <article className="rounded border border-ink/10 bg-white p-6 shadow-soft">
+          <article className="flex h-full flex-col rounded border border-ink/10 bg-white p-6 shadow-soft">
             <div className="flex items-start justify-between gap-4">
               <div>
                 <p className="text-sm font-semibold uppercase text-lacquer">Kho địa chí</p>
@@ -83,17 +83,17 @@ export default async function HomePage() {
             <p className="mt-4 leading-7 text-ink/68">
               Tra cứu tài liệu địa chí theo 96 xã, phường; mở bản PDF preview và liên hệ thư viện khi cần bản đầy đủ.
             </p>
-            <div className="mt-6 flex flex-wrap gap-3">
+            <div className="mt-auto grid gap-3 pt-6 sm:grid-cols-2">
               <Link
                 href="/tai-lieu?loai=dia_chi"
-                className="inline-flex items-center gap-2 rounded bg-palm px-4 py-3 text-sm font-semibold text-white transition hover:bg-palm/90"
+                className="inline-flex h-16 items-center justify-center gap-2 rounded bg-palm px-4 text-center text-sm font-semibold text-white transition hover:bg-palm/90"
               >
                 <BookOpen className="h-4 w-4" aria-hidden="true" />
                 Mở Địa chí Tây Ninh
               </Link>
               <Link
                 href="/xa-phuong"
-                className="inline-flex items-center gap-2 rounded border border-ink/12 px-4 py-3 text-sm font-semibold text-ink transition hover:bg-paper"
+                className="inline-flex h-16 items-center justify-center gap-2 rounded border border-ink/12 px-4 text-center text-sm font-semibold text-ink transition hover:bg-paper"
               >
                 Chọn xã/phường
                 <ArrowRight className="h-4 w-4" aria-hidden="true" />
@@ -101,7 +101,7 @@ export default async function HomePage() {
             </div>
           </article>
 
-          <article className="rounded border border-ink/10 bg-white p-6 shadow-soft">
+          <article className="flex h-full flex-col rounded border border-ink/10 bg-white p-6 shadow-soft">
             <div className="flex items-start justify-between gap-4">
               <div>
                 <p className="text-sm font-semibold uppercase text-lacquer">Kho báo chí</p>
@@ -114,17 +114,17 @@ export default async function HomePage() {
             <p className="mt-4 leading-7 text-ink/68">
               Xem các số báo, chuyên đề và tuyển chọn bài viết địa phương đã được số hóa dưới dạng bản đọc thử.
             </p>
-            <div className="mt-6 flex flex-wrap gap-3">
+            <div className="mt-auto grid gap-3 pt-6 sm:grid-cols-2">
               <Link
                 href="/tai-lieu?loai=bao_tay_ninh"
-                className="inline-flex items-center gap-2 rounded bg-river px-4 py-3 text-sm font-semibold text-white transition hover:bg-river/90"
+                className="inline-flex h-16 items-center justify-center gap-2 rounded bg-river px-4 text-center text-sm font-semibold text-white transition hover:bg-river/90"
               >
                 <Newspaper className="h-4 w-4" aria-hidden="true" />
                 Mở Báo Tây Ninh
               </Link>
               <Link
                 href="/tai-lieu?loai=bao_tay_ninh"
-                className="inline-flex items-center gap-2 rounded border border-ink/12 px-4 py-3 text-sm font-semibold text-ink transition hover:bg-paper"
+                className="inline-flex h-16 items-center justify-center gap-2 rounded border border-ink/12 px-4 text-center text-sm font-semibold text-ink transition hover:bg-paper"
               >
                 Danh mục Báo Tây Ninh
                 <ArrowRight className="h-4 w-4" aria-hidden="true" />
@@ -132,7 +132,7 @@ export default async function HomePage() {
             </div>
           </article>
 
-          <article className="rounded border border-ink/10 bg-white p-6 shadow-soft">
+          <article className="flex h-full flex-col rounded border border-ink/10 bg-white p-6 shadow-soft">
             <div className="flex items-start justify-between gap-4">
               <div>
                 <p className="text-sm font-semibold uppercase text-lacquer">Kho cấp tỉnh</p>
@@ -145,17 +145,17 @@ export default async function HomePage() {
             <p className="mt-4 leading-7 text-ink/68">
               Lưu trữ tài liệu chung cấp tỉnh, hồ sơ chuyên đề và tư liệu không gắn riêng với xã/phường nào.
             </p>
-            <div className="mt-6 flex flex-wrap gap-3">
+            <div className="mt-auto grid gap-3 pt-6 sm:grid-cols-2">
               <Link
                 href="/tai-lieu?loai=tai_lieu_cap_tinh"
-                className="inline-flex items-center gap-2 rounded bg-brass px-4 py-3 text-sm font-semibold text-white transition hover:bg-brass/90"
+                className="inline-flex h-16 items-center justify-center gap-2 rounded bg-brass px-4 text-center text-sm font-semibold text-white transition hover:bg-brass/90"
               >
                 <Files className="h-4 w-4" aria-hidden="true" />
                 Mở tài liệu cấp tỉnh
               </Link>
               <Link
                 href="/tai-lieu"
-                className="inline-flex items-center gap-2 rounded border border-ink/12 px-4 py-3 text-sm font-semibold text-ink transition hover:bg-paper"
+                className="inline-flex h-16 items-center justify-center gap-2 rounded border border-ink/12 px-4 text-center text-sm font-semibold text-ink transition hover:bg-paper"
               >
                 Tất cả tài liệu
                 <ArrowRight className="h-4 w-4" aria-hidden="true" />
