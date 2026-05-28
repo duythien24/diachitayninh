@@ -185,15 +185,15 @@ export default async function HomePage() {
           })}
         </section>
 
-        <section className="mt-14 grid gap-8 lg:grid-cols-[0.92fr_1.08fr]">
+        <section className="mt-14">
           <div>
             <p className="text-sm font-semibold uppercase text-lacquer">Gợi ý khám phá</p>
             <h2 className="mt-3 text-3xl font-semibold text-ink">Mở lối đọc theo chủ đề</h2>
-            <p className="mt-4 leading-7 text-ink/68">
+            <p className="mt-4 max-w-3xl leading-7 text-ink/68">
               Các lối đọc này tự mở kho tài liệu với từ khóa gợi ý, phù hợp khi người đọc muốn bắt đầu từ một mạch nội dung thay vì chọn danh mục.
             </p>
 
-            <div className="mt-6 space-y-3">
+            <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
               {[
                 {
                   href: "/tai-lieu?q=di%20tich",
@@ -225,46 +225,49 @@ export default async function HomePage() {
                   <Link
                     key={item.href}
                     href={item.href}
-                    className="group flex items-start gap-4 rounded border border-ink/10 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-palm/35 hover:shadow-soft"
+                    className="group flex h-full min-h-44 flex-col rounded border border-ink/10 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-palm/35 hover:shadow-soft"
                   >
-                    <span className="grid h-10 w-10 shrink-0 place-items-center rounded bg-paper text-palm">
-                      <Icon className="h-5 w-5" aria-hidden="true" />
-                    </span>
-                    <span className="min-w-0 flex-1">
-                      <span className="flex items-center justify-between gap-3 font-semibold text-ink">
-                        {item.title}
-                        <ArrowRight className="h-4 w-4 shrink-0 text-ink/40 transition group-hover:translate-x-1 group-hover:text-palm" aria-hidden="true" />
+                    <span className="flex items-start justify-between gap-4">
+                      <span className="grid h-10 w-10 shrink-0 place-items-center rounded bg-paper text-palm">
+                        <Icon className="h-5 w-5" aria-hidden="true" />
                       </span>
-                      <span className="mt-1 block text-sm leading-6 text-ink/62">{item.description}</span>
+                      <ArrowRight className="h-4 w-4 shrink-0 text-ink/40 transition group-hover:translate-x-1 group-hover:text-palm" aria-hidden="true" />
+                    </span>
+                    <span className="mt-5 flex flex-1 flex-col">
+                      <span className="min-h-[3rem] font-semibold leading-6 text-ink">
+                        {item.title}
+                      </span>
+                      <span className="mt-2 block flex-1 text-sm leading-6 text-ink/62">{item.description}</span>
                     </span>
                   </Link>
                 );
               })}
             </div>
           </div>
+
           {documents.length > 0 ? (
-            <div>
-              <div className="mb-4 flex items-end justify-between gap-4">
+            <div className="mt-14">
+              <div className="mb-5 flex items-end justify-between gap-4">
                 <div>
                   <p className="text-sm font-semibold uppercase text-lacquer">Tài liệu mới</p>
                   <h2 className="mt-2 text-2xl font-semibold text-ink">Vừa được cập nhật</h2>
                 </div>
                 <Link
                   href="/tai-lieu"
-                  className="hidden items-center gap-2 rounded border border-ink/12 px-3 py-2 text-sm font-semibold text-ink transition hover:bg-white sm:inline-flex"
+                  className="inline-flex items-center gap-2 rounded border border-ink/12 px-3 py-2 text-sm font-semibold text-ink transition hover:bg-white"
                 >
                   Tất cả
                   <ArrowRight className="h-4 w-4" aria-hidden="true" />
                 </Link>
               </div>
-              <div className="grid gap-4 sm:grid-cols-2">
-                {documents.slice(0, 2).map((document) => (
+              <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+                {documents.slice(0, 3).map((document) => (
                   <DocumentCard key={document.id} document={document} />
                 ))}
               </div>
             </div>
           ) : (
-            <div className="rounded border border-dashed border-ink/18 bg-white p-6 text-sm leading-6 text-ink/62">
+            <div className="mt-14 rounded border border-dashed border-ink/18 bg-white p-6 text-sm leading-6 text-ink/62">
               <FileText className="mb-3 h-5 w-5 text-lacquer" aria-hidden="true" />
               Chưa có tài liệu trên Supabase. Vào khu quản trị để thêm bản PDF preview đầu tiên.
             </div>
