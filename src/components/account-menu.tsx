@@ -1,10 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { FileText, LogIn, LogOut, UserCircle } from "lucide-react";
+import { FileText, KeyRound, LogIn, LogOut, UserCircle } from "lucide-react";
+
+import type { AdminRole } from "@/lib/admin-users";
 
 export type AccountSession = {
   username: string;
+  role: AdminRole;
   roleLabel: string;
 };
 
@@ -40,6 +43,15 @@ export function AccountMenu({ account }: { account: AccountSession | null }) {
           <FileText className="h-4 w-4" aria-hidden="true" />
           Quản lý tài liệu
         </Link>
+        {account.role === "super_admin" ? (
+          <Link
+            href="/admin/accounts"
+            className="flex items-center gap-2 px-4 py-3 text-sm font-semibold text-ink/72 transition hover:bg-paper hover:text-ink"
+          >
+            <KeyRound className="h-4 w-4" aria-hidden="true" />
+            Tài khoản và mật khẩu
+          </Link>
+        ) : null}
         <form action="/admin/logout" method="post">
           <button
             type="submit"

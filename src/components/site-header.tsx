@@ -15,6 +15,7 @@ export async function SiteHeader() {
   const account = currentAdmin
     ? {
         username: currentAdmin.username,
+        role: currentAdmin.role,
         roleLabel: adminRoleLabel(currentAdmin.role)
       }
     : null;
