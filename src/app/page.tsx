@@ -15,8 +15,7 @@ import { DocumentCard } from "@/components/document-card";
 import { PageShell } from "@/components/page-shell";
 import { getCommunes, getDocuments } from "@/lib/repository";
 
-const heroImage =
-  "https://commons.wikimedia.org/wiki/Special:Redirect/file/T%C6%B0%E1%BB%A3ng_Ph%E1%BA%ADt_B%C3%A0_T%C3%A2y_B%E1%BB%95_%C4%90%C3%A0_S%C6%A1n_%E1%BB%9F_N%C3%BAi_B%C3%A0_%C4%90en_2024.jpg?width=1800";
+const heroImage = "/images/nui-ba-den-may-phu.jpg";
 
 export default async function HomePage() {
   const [communes, documents] = await Promise.all([getCommunes(), getDocuments()]);
