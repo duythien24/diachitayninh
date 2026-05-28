@@ -16,33 +16,53 @@ const filters: Array<{ label: string; value: Filter; icon: typeof FileText }> = 
   { label: "Cấp tỉnh", value: "tai_lieu_cap_tinh", icon: Files }
 ];
 
+function normalizeSearchText(value: string) {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/đ/g, "d")
+    .replace(/Đ/g, "D")
+    .toLowerCase();
+}
+
 export function DocumentList({
   documents,
-  initialFilter = "all"
+  initialFilter = "all",
+  initialQuery = ""
 }: {
   documents: Document[];
   initialFilter?: Filter;
+  initialQuery?: string;
 }) {
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState(initialQuery);
   const [filter, setFilter] = useState<Filter>(initialFilter);
 
   useEffect(() => {
     setFilter(initialFilter);
   }, [initialFilter]);
 
+  useEffect(() => {
+    setQuery(initialQuery);
+  }, [initialQuery]);
+
   const filteredDocuments = useMemo(() => {
-    const normalizedQuery = query.trim().toLowerCase();
+    const normalizedQuery = normalizeSearchText(query.trim());
 
     return documents.filter((document) => {
       const matchesType = filter === "all" || document.documentType === filter;
-      const communeName = document.commune?.name.toLowerCase() || "";
       const scopeName = document.documentType === "tai_lieu_cap_tinh" ? "cấp tỉnh tai lieu cap tinh" : "";
-      const matchesQuery =
-        normalizedQuery.length === 0 ||
-        document.title.toLowerCase().includes(normalizedQuery) ||
-        document.slug.includes(normalizedQuery) ||
-        communeName.includes(normalizedQuery) ||
-        scopeName.includes(normalizedQuery);
+      const searchableText = normalizeSearchText(
+        [
+          document.title,
+          document.description,
+          String(document.year),
+          document.source,
+          document.slug,
+          document.commune?.name || "",
+          scopeName
+        ].join(" ")
+      );
+      const matchesQuery = normalizedQuery.length === 0 || searchableText.includes(normalizedQuery);
 
       return matchesType && matchesQuery;
     });

@@ -4,11 +4,14 @@ import {
   ArrowRight,
   BookOpen,
   Building2,
+  Clock3,
+  Compass,
   FileText,
   Files,
+  Landmark,
   Library,
   Newspaper,
-  Search
+  ScrollText
 } from "lucide-react";
 
 import { DocumentCard } from "@/components/document-card";
@@ -184,37 +187,37 @@ export default async function HomePage() {
 
         <section className="mt-14 grid gap-8 lg:grid-cols-[0.92fr_1.08fr]">
           <div>
-            <p className="text-sm font-semibold uppercase text-lacquer">Tra cứu nhanh</p>
-            <h2 className="mt-3 text-3xl font-semibold text-ink">Tìm tư liệu theo nhu cầu đọc</h2>
+            <p className="text-sm font-semibold uppercase text-lacquer">Gợi ý khám phá</p>
+            <h2 className="mt-3 text-3xl font-semibold text-ink">Mở lối đọc theo chủ đề</h2>
             <p className="mt-4 leading-7 text-ink/68">
-              Chọn xã/phường để xem tư liệu địa phương, mở riêng kho địa chí hoặc đọc các số Báo Tây Ninh đã số hóa.
+              Các lối đọc này tự mở kho tài liệu với từ khóa gợi ý, phù hợp khi người đọc muốn bắt đầu từ một mạch nội dung thay vì chọn danh mục.
             </p>
 
             <div className="mt-6 space-y-3">
               {[
                 {
-                  href: "/xa-phuong",
-                  icon: Search,
-                  title: "Tra cứu theo xã/phường",
-                  description: "Xem tài liệu gắn với từng đơn vị hành chính mới."
+                  href: "/tai-lieu?q=di%20tich",
+                  icon: Landmark,
+                  title: "Di tích, địa danh và nhân vật",
+                  description: "Tìm nhanh tư liệu về di tích, địa danh, danh nhân và các điểm ghi dấu lịch sử."
                 },
                 {
-                  href: "/tai-lieu?loai=dia_chi",
-                  icon: BookOpen,
-                  title: "Kho tài liệu địa chí",
-                  description: "Đọc các tài liệu địa chí, di tích, địa danh và tư liệu lịch sử địa phương."
+                  href: "/tai-lieu?q=lich%20su",
+                  icon: Clock3,
+                  title: "Lịch sử địa phương",
+                  description: "Gợi mở các tài liệu về quá trình hình thành, truyền thống và ký ức cộng đồng."
                 },
                 {
-                  href: "/tai-lieu?loai=bao_tay_ninh",
-                  icon: Newspaper,
-                  title: "Kho Báo Tây Ninh",
-                  description: "Tra cứu các số báo và chuyên đề báo chí địa phương đã được số hóa."
+                  href: "/tai-lieu?q=van%20hoa",
+                  icon: Compass,
+                  title: "Văn hóa và đời sống",
+                  description: "Khám phá tư liệu về cộng đồng cư dân, phong tục, hoạt động xã hội và đời sống văn hóa."
                 },
                 {
-                  href: "/tai-lieu?loai=tai_lieu_cap_tinh",
-                  icon: Files,
-                  title: "Tài liệu cấp tỉnh",
-                  description: "Xem các tài liệu chung toàn tỉnh, không gắn riêng với xã/phường nào."
+                  href: "/tai-lieu?q=bao%20chi",
+                  icon: ScrollText,
+                  title: "Dấu ấn qua báo chí",
+                  description: "Đi vào các số báo và bài viết để nhìn lại sự kiện, chuyên đề và nhịp sống địa phương."
                 }
               ].map((item) => {
                 const Icon = item.icon;

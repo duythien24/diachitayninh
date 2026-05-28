@@ -46,18 +46,19 @@ function pageCopy(filter: DocumentType | "all") {
 export default async function DocumentsPage({
   searchParams
 }: {
-  searchParams: Promise<{ loai?: string }>;
+  searchParams: Promise<{ loai?: string; q?: string }>;
 }) {
   const params = await searchParams;
   const documents = await getDocuments();
   const initialFilter = documentTypeFromQuery(params.loai);
+  const initialQuery = params.q?.trim() || "";
   const copy = pageCopy(initialFilter);
 
   return (
     <PageShell>
       <SectionHeader eyebrow={copy.eyebrow} title={copy.title} description={copy.description} />
 
-      <DocumentList documents={documents} initialFilter={initialFilter} />
+      <DocumentList documents={documents} initialFilter={initialFilter} initialQuery={initialQuery} />
     </PageShell>
   );
 }
