@@ -10,7 +10,7 @@ export default async function NewDocumentPage() {
       <SectionHeader
         eyebrow="Quản trị"
         title="Thêm tài liệu"
-        description="Form mẫu cho dữ liệu documents. Bước tiếp theo sẽ thêm server action để upload PDF preview và ghi database."
+        description="Nhập thông tin mô tả, chọn đúng loại tài liệu và tải lên PDF/ảnh bìa để hệ thống tự đưa vào danh sách quản trị phù hợp."
       />
       <div className="mt-8">
         <DocumentForm communes={communes} />

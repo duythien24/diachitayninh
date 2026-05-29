@@ -57,7 +57,6 @@ export default async function DocumentsPage({
   return (
     <PageShell>
       <SectionHeader eyebrow={copy.eyebrow} title={copy.title} description={copy.description} />
-
       <DocumentList documents={documents} initialFilter={initialFilter} initialQuery={initialQuery} />
     </PageShell>
   );

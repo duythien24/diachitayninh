@@ -37,9 +37,7 @@ export default async function DocumentDetailPage({ params }: { params: Promise<{
             <Image src={document.coverImageUrl} alt="" fill sizes="100vw" className="object-cover" />
           </div>
           <div className="mt-6 flex flex-wrap gap-2 text-xs font-semibold">
-            <span className="rounded bg-paper px-2.5 py-1 text-ink/70">
-              {documentTypeLabel(document.documentType)}
-            </span>
+            <span className="rounded bg-paper px-2.5 py-1 text-ink/70">{documentTypeLabel(document.documentType)}</span>
             <span className="rounded bg-paper px-2.5 py-1 text-ink/70">{document.year}</span>
             {commune ? (
               <span className="rounded bg-paper px-2.5 py-1 text-ink/70">
@@ -51,7 +49,7 @@ export default async function DocumentDetailPage({ params }: { params: Promise<{
           </div>
           <h1 className="mt-4 text-3xl font-semibold leading-tight text-ink">{document.title}</h1>
           <p className="mt-4 leading-7 text-ink/70">{document.description}</p>
-          <dl className="mt-6 grid gap-4 rounded bg-paper p-4 text-sm sm:grid-cols-2">
+          <dl className="mt-6 grid gap-4 rounded border border-ink/8 bg-paper p-4 text-sm sm:grid-cols-2">
             <div>
               <dt className="font-semibold text-ink">Nguồn</dt>
               <dd className="mt-1 text-ink/64">{document.source}</dd>
@@ -64,13 +62,13 @@ export default async function DocumentDetailPage({ params }: { params: Promise<{
           <div className="mt-6 flex flex-wrap gap-3">
             <Link
               href={`/doc/${document.slug}`}
-              className="inline-flex items-center gap-2 rounded bg-palm px-4 py-3 text-sm font-semibold text-white transition hover:bg-palm/90"
+              className="inline-flex min-h-11 items-center gap-2 rounded bg-palm px-4 py-3 text-sm font-semibold text-white transition hover:bg-palm/90"
             >
               <Eye className="h-4 w-4" aria-hidden="true" />
               {isPreview ? "Đọc preview online" : "Đọc đầy đủ online"}
             </Link>
             {isPreview ? (
-              <span className="inline-flex items-center gap-2 rounded border border-lacquer/20 px-4 py-3 text-sm font-semibold text-lacquer">
+              <span className="inline-flex min-h-11 items-center gap-2 rounded border border-lacquer/20 px-4 py-3 text-sm font-semibold text-lacquer">
                 <LockKeyhole className="h-4 w-4" aria-hidden="true" />
                 Bản đầy đủ cần liên hệ thư viện
               </span>
@@ -82,14 +80,14 @@ export default async function DocumentDetailPage({ params }: { params: Promise<{
           <ContactPanel />
         ) : (
           <aside className="rounded border border-palm/20 bg-palm p-5 text-white shadow-soft">
-            <p className="text-sm font-semibold uppercase text-white/70">Bản đầy đủ</p>
+            <p className="text-sm font-semibold uppercase tracking-wide text-white/70">Bản đầy đủ</p>
             <h2 className="mt-2 text-2xl font-semibold">Được mở đọc toàn văn</h2>
             <p className="mt-3 text-sm leading-6 text-white/78">
               Tài liệu này được quản trị đánh dấu là bản đầy đủ, người đọc có thể mở PDF online để đọc hết nội dung.
             </p>
             <Link
               href={`/doc/${document.slug}`}
-              className="mt-5 inline-flex items-center gap-2 rounded bg-white px-3 py-2 text-sm font-semibold text-palm transition hover:bg-paper"
+              className="mt-5 inline-flex min-h-10 items-center gap-2 rounded bg-white px-3 py-2 text-sm font-semibold text-palm transition hover:bg-paper"
             >
               <Eye className="h-4 w-4" aria-hidden="true" />
               Đọc đầy đủ

@@ -6,7 +6,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Địa chí số Tây Ninh",
-  description: "Kho đọc thử tài liệu địa chí, Báo Tây Ninh và tài liệu cấp tỉnh dạng số."
+  description: "Kho đọc trực tuyến tài liệu địa chí, Báo Tây Ninh và tài liệu cấp tỉnh dạng số."
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

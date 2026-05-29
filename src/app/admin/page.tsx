@@ -46,35 +46,25 @@ export default async function AdminPage() {
       <div className="mt-8 flex flex-wrap gap-3">
         <Link
           href="/admin/documents"
-          className="inline-flex items-center gap-2 rounded bg-palm px-4 py-3 text-sm font-semibold text-white transition hover:bg-palm/90"
+          className="inline-flex min-h-11 items-center gap-2 rounded bg-palm px-4 py-3 text-sm font-semibold text-white transition hover:bg-palm/90"
         >
           <FileText className="h-4 w-4" aria-hidden="true" />
           Quản lý tài liệu
         </Link>
         <Link
           href="/admin/documents/new"
-          className="inline-flex items-center gap-2 rounded border border-ink/12 bg-white px-4 py-3 text-sm font-semibold text-ink transition hover:bg-paper"
+          className="inline-flex min-h-11 items-center gap-2 rounded border border-ink/12 bg-white px-4 py-3 text-sm font-semibold text-ink transition hover:bg-paper"
         >
           <FilePlus2 className="h-4 w-4" aria-hidden="true" />
           Thêm tài liệu
         </Link>
-        {currentAdmin?.role === "super_admin" ? (
-          <Link
-            href="/admin/accounts"
-            className="inline-flex items-center gap-2 rounded border border-ink/12 bg-white px-4 py-3 text-sm font-semibold text-ink transition hover:bg-paper"
-          >
-            <Users className="h-4 w-4" aria-hidden="true" />
-            Tài khoản và mật khẩu
-          </Link>
-        ) : (
-          <Link
-            href="/admin/accounts"
-            className="inline-flex items-center gap-2 rounded border border-ink/12 bg-white px-4 py-3 text-sm font-semibold text-ink transition hover:bg-paper"
-          >
-            <Users className="h-4 w-4" aria-hidden="true" />
-            Đổi mật khẩu
-          </Link>
-        )}
+        <Link
+          href="/admin/accounts"
+          className="inline-flex min-h-11 items-center gap-2 rounded border border-ink/12 bg-white px-4 py-3 text-sm font-semibold text-ink transition hover:bg-paper"
+        >
+          <Users className="h-4 w-4" aria-hidden="true" />
+          {currentAdmin?.role === "super_admin" ? "Tài khoản và mật khẩu" : "Đổi mật khẩu"}
+        </Link>
       </div>
     </PageShell>
   );

@@ -33,20 +33,19 @@ export default async function CommuneDetailPage({ params }: { params: Promise<{ 
 
       <section className="mt-6 grid gap-8 lg:grid-cols-[0.95fr_1.05fr]">
         <div className="rounded border border-ink/10 bg-white p-6 shadow-sm">
-          <p className="text-sm font-semibold uppercase text-lacquer">
-            {typePrefix(commune.type)}
-          </p>
+          <p className="text-sm font-semibold uppercase tracking-wide text-lacquer">{typePrefix(commune.type)}</p>
           <h1 className="mt-3 text-4xl font-semibold text-ink">{commune.name}</h1>
           <p className="mt-4 text-sm text-ink/55">{commune.districtOld}</p>
           <p className="mt-5 leading-7 text-ink/70">{communeDescription(commune.name, commune.type)}</p>
-          <div className="mt-6 rounded bg-paper p-4 text-sm leading-6 text-ink/70">
+
+          <div className="mt-6 rounded border border-ink/8 bg-paper p-4 text-sm leading-6 text-ink/70">
             <p className="font-semibold text-ink">Thông tin sắp xếp đơn vị hành chính</p>
             {mergeInfo ? (
               <>
                 <p className="mt-2">{mergeInfo.note}</p>
                 {mergeInfo.oldUnits?.length ? (
                   <div className="mt-3">
-                    <p className="text-xs font-semibold uppercase text-lacquer">Đơn vị cũ hợp thành</p>
+                    <p className="text-xs font-semibold uppercase tracking-wide text-lacquer">Đơn vị cũ hợp thành</p>
                     <ul className="mt-2 space-y-1">
                       {mergeInfo.oldUnits.map((unit) => (
                         <li key={unit}>- {unit}</li>
@@ -72,9 +71,14 @@ export default async function CommuneDetailPage({ params }: { params: Promise<{ 
         </div>
 
         <div>
-          <div className="mb-4 flex items-center gap-2">
-            <FileText className="h-5 w-5 text-lacquer" aria-hidden="true" />
-            <h2 className="text-2xl font-semibold text-ink">Tài liệu liên quan</h2>
+          <div className="mb-4 flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <FileText className="h-5 w-5 text-lacquer" aria-hidden="true" />
+              <h2 className="text-2xl font-semibold text-ink">Tài liệu liên quan</h2>
+            </div>
+            <span className="rounded bg-white px-2.5 py-1 text-sm font-semibold text-ink/55">
+              {relatedDocuments.length} tài liệu
+            </span>
           </div>
           {relatedDocuments.length > 0 ? (
             <div className="grid gap-4 sm:grid-cols-2">
@@ -84,7 +88,7 @@ export default async function CommuneDetailPage({ params }: { params: Promise<{ 
             </div>
           ) : (
             <div className="rounded border border-dashed border-ink/18 bg-white p-6 text-sm leading-6 text-ink/62">
-              Chưa có tài liệu preview cho đơn vị này. Admin có thể upload sau trong trang quản trị.
+              Chưa có tài liệu cho đơn vị này. Khi thư viện bổ sung bản số hóa, tài liệu sẽ tự hiển thị tại đây.
             </div>
           )}
         </div>
