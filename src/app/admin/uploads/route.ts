@@ -5,12 +5,39 @@ import { getSupabaseAdminClient } from "@/lib/supabase-server";
 import { slugify } from "@/lib/utils";
 
 const bucketName = process.env.NEXT_PUBLIC_SUPABASE_STORAGE_BUCKET || "documents-preview";
+const maxPdfFileSize = 50 * 1024 * 1024;
+const maxImageFileSize = 5 * 1024 * 1024;
+const allowedImageTypes = ["image/jpeg", "image/png", "image/webp"];
 
 function safeFileName(name: string) {
   const segments = name.split(".");
   const extension = segments.length > 1 ? segments.pop() : "";
   const baseName = slugify(segments.join(".") || name) || "file";
   return `${Date.now()}-${baseName}${extension ? `.${extension.toLowerCase()}` : ""}`;
+}
+
+function validateUpload(contentType: string | undefined, fileSize: number | undefined, folder: "pdf" | "covers") {
+  if (folder === "pdf") {
+    if (contentType !== "application/pdf") {
+      return { error: "Chỉ được upload file PDF.", status: 400 };
+    }
+
+    if (typeof fileSize === "number" && fileSize > maxPdfFileSize) {
+      return { error: "File PDF không được vượt quá 50MB.", status: 413 };
+    }
+
+    return null;
+  }
+
+  if (!contentType || !allowedImageTypes.includes(contentType)) {
+    return { error: "Ảnh bìa chỉ hỗ trợ JPG, PNG hoặc WEBP.", status: 400 };
+  }
+
+  if (typeof fileSize === "number" && fileSize > maxImageFileSize) {
+    return { error: "Ảnh bìa không được vượt quá 5MB.", status: 413 };
+  }
+
+  return null;
 }
 
 export async function POST(request: NextRequest) {
@@ -37,11 +64,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Thiếu tên file." }, { status: 400 });
   }
 
-  if (typeof body.fileSize === "number" && body.fileSize > 50 * 1024 * 1024) {
-    return NextResponse.json(
-      { error: "File vượt quá 50MB, Supabase Storage hiện chưa cho upload file lớn hơn mức này." },
-      { status: 413 }
-    );
+  const validation = validateUpload(body.contentType, body.fileSize, folder);
+  if (validation) {
+    return NextResponse.json({ error: validation.error }, { status: validation.status });
   }
 
   const path = `${folder}/${safeFileName(body.fileName)}`;

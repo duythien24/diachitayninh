@@ -50,6 +50,10 @@ export function DocumentList({
           document.source,
           document.slug,
           document.commune?.name || "",
+          document.communes?.map((commune) => commune.name).join(" ") || "",
+          document.author || "",
+          document.publisher || "",
+          document.keywords?.join(" ") || "",
           scopeName
         ].join(" ")
       );

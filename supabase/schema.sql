@@ -32,6 +32,11 @@ create table if not exists documents (
   document_type document_type not null,
   commune_id uuid references communes(id) on delete set null,
   year integer,
+  page_count integer,
+  preview_page_count integer default 10,
+  keywords text[],
+  author text,
+  publisher text,
   description text,
   source text,
   preview_file_url text not null,
@@ -40,6 +45,21 @@ create table if not exists documents (
   contact_note text,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
+);
+
+alter table documents
+  add column if not exists page_count integer,
+  add column if not exists preview_page_count integer default 10,
+  add column if not exists keywords text[],
+  add column if not exists author text,
+  add column if not exists publisher text;
+
+create table if not exists document_communes (
+  id uuid primary key default gen_random_uuid(),
+  document_id uuid not null references documents(id) on delete cascade,
+  commune_id uuid not null references communes(id) on delete cascade,
+  created_at timestamptz default now(),
+  unique(document_id, commune_id)
 );
 
 create table if not exists admin_users (
@@ -70,8 +90,12 @@ $$;
 
 create index if not exists documents_document_type_idx on documents(document_type);
 create index if not exists documents_commune_id_idx on documents(commune_id);
+create index if not exists document_communes_document_id_idx on document_communes(document_id);
+create index if not exists document_communes_commune_id_idx on document_communes(commune_id);
 create index if not exists communes_slug_idx on communes(slug);
 create index if not exists documents_slug_idx on documents(slug);
+create index if not exists documents_title_idx on documents using gin (to_tsvector('simple', title));
+create index if not exists documents_description_idx on documents using gin (to_tsvector('simple', coalesce(description, '')));
 create index if not exists admin_users_username_idx on admin_users(username);
 
 create or replace function set_updated_at()
@@ -96,6 +120,7 @@ create trigger admin_users_set_updated_at
 
 alter table communes enable row level security;
 alter table documents enable row level security;
+alter table document_communes enable row level security;
 alter table admin_users enable row level security;
 
 drop policy if exists "Public can read communes" on communes;
@@ -106,6 +131,11 @@ create policy "Public can read communes"
 drop policy if exists "Public can read preview documents" on documents;
 create policy "Public can read preview documents"
   on documents for select
+  using (true);
+
+drop policy if exists "Public can read document commune links" on document_communes;
+create policy "Public can read document commune links"
+  on document_communes for select
   using (true);
 
 insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)

@@ -17,7 +17,13 @@ export type Document = {
   slug: string;
   documentType: DocumentType;
   communeId?: string;
+  communeIds?: string[];
   year: number;
+  pageCount?: number;
+  previewPageCount?: number;
+  keywords?: string[];
+  author?: string;
+  publisher?: string;
   description: string;
   source: string;
   previewFileUrl: string;
@@ -26,4 +32,5 @@ export type Document = {
   contactNote: string;
   createdAt: string;
   commune?: Commune;
+  communes?: Commune[];
 };

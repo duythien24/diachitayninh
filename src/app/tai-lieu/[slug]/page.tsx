@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -13,6 +14,22 @@ export async function generateStaticParams() {
   return documents.map((document) => ({ slug: document.slug }));
 }
 
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
+  const document = await getDocumentBySlug(slug);
+
+  if (!document) {
+    return {
+      title: "Không tìm thấy tài liệu"
+    };
+  }
+
+  return {
+    title: `${document.title} | Địa chí Tây Ninh`,
+    description: document.description || `Xem tài liệu ${document.title} tại Thư viện tỉnh Tây Ninh.`
+  };
+}
+
 export default async function DocumentDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const document = await getDocumentBySlug(slug);
@@ -22,6 +39,7 @@ export default async function DocumentDetailPage({ params }: { params: Promise<{
   }
 
   const commune = document.commune;
+  const communes = document.communes?.length ? document.communes : commune ? [commune] : [];
   const isPreview = document.isPreviewOnly;
 
   return (
@@ -39,16 +57,19 @@ export default async function DocumentDetailPage({ params }: { params: Promise<{
           <div className="mt-6 flex flex-wrap gap-2 text-xs font-semibold">
             <span className="rounded bg-paper px-2.5 py-1 text-ink/70">{documentTypeLabel(document.documentType)}</span>
             <span className="rounded bg-paper px-2.5 py-1 text-ink/70">{document.year}</span>
-            {commune ? (
-              <span className="rounded bg-paper px-2.5 py-1 text-ink/70">
-                {typePrefix(commune.type)} {commune.name}
-              </span>
+            {communes.length ? (
+              communes.map((item) => (
+                <span key={item.id} className="rounded bg-paper px-2.5 py-1 text-ink/70">
+                  {typePrefix(item.type)} {item.name}
+                </span>
+              ))
             ) : (
               <span className="rounded bg-paper px-2.5 py-1 text-ink/70">Cấp tỉnh</span>
             )}
           </div>
           <h1 className="mt-4 text-3xl font-semibold leading-tight text-ink">{document.title}</h1>
           <p className="mt-4 leading-7 text-ink/70">{document.description}</p>
+
           <dl className="mt-6 grid gap-4 rounded border border-ink/8 bg-paper p-4 text-sm sm:grid-cols-2">
             <div>
               <dt className="font-semibold text-ink">Nguồn</dt>
@@ -58,7 +79,46 @@ export default async function DocumentDetailPage({ params }: { params: Promise<{
               <dt className="font-semibold text-ink">Trạng thái</dt>
               <dd className="mt-1 text-ink/64">{isPreview ? "Bản preview/đọc thử" : "Bản đầy đủ"}</dd>
             </div>
+            {document.author ? (
+              <div>
+                <dt className="font-semibold text-ink">Tác giả</dt>
+                <dd className="mt-1 text-ink/64">{document.author}</dd>
+              </div>
+            ) : null}
+            {document.publisher ? (
+              <div>
+                <dt className="font-semibold text-ink">Nhà xuất bản</dt>
+                <dd className="mt-1 text-ink/64">{document.publisher}</dd>
+              </div>
+            ) : null}
+            {document.pageCount ? (
+              <div>
+                <dt className="font-semibold text-ink">Số trang</dt>
+                <dd className="mt-1 text-ink/64">{document.pageCount}</dd>
+              </div>
+            ) : null}
+            {document.previewPageCount ? (
+              <div>
+                <dt className="font-semibold text-ink">Số trang xem thử</dt>
+                <dd className="mt-1 text-ink/64">{document.previewPageCount}</dd>
+              </div>
+            ) : null}
           </dl>
+
+          {document.keywords?.length ? (
+            <div className="mt-5 flex flex-wrap gap-2">
+              {document.keywords.map((keyword) => (
+                <Link
+                  key={keyword}
+                  href={`/tai-lieu?q=${encodeURIComponent(keyword)}`}
+                  className="rounded bg-palm/10 px-2.5 py-1 text-xs font-semibold text-palm transition hover:bg-palm/15"
+                >
+                  {keyword}
+                </Link>
+              ))}
+            </div>
+          ) : null}
+
           <div className="mt-6 flex flex-wrap gap-3">
             <Link
               href={`/doc/${document.slug}`}

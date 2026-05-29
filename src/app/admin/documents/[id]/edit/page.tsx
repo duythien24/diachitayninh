@@ -22,7 +22,7 @@ export default async function EditDocumentPage({ params }: { params: Promise<{ i
       <SectionHeader
         eyebrow="Quản trị"
         title="Sửa tài liệu"
-        description="Dữ liệu hiện đang được điền từ mock data để kiểm thử giao diện trước khi nối Supabase."
+        description="Cập nhật thông tin mô tả, metadata, phạm vi xã/phường liên quan, file PDF và ảnh bìa của tài liệu."
       />
       <div className="mt-8">
         <DocumentForm communes={communes} document={document} />

@@ -20,6 +20,10 @@ type CommuneRow = {
   created_at: string;
 };
 
+type DocumentCommuneRow = {
+  communes?: CommuneRow | CommuneRow[] | null;
+};
+
 type DocumentRow = {
   id: string;
   title: string;
@@ -27,6 +31,11 @@ type DocumentRow = {
   document_type: DocumentType;
   commune_id: string | null;
   year: number | null;
+  page_count?: number | null;
+  preview_page_count?: number | null;
+  keywords?: string[] | null;
+  author?: string | null;
+  publisher?: string | null;
   description: string | null;
   source: string | null;
   preview_file_url: string;
@@ -35,18 +44,25 @@ type DocumentRow = {
   contact_note: string | null;
   created_at: string;
   communes?: CommuneRow | CommuneRow[] | null;
+  document_communes?: DocumentCommuneRow[] | null;
 };
 
 const fallbackCover =
   "https://commons.wikimedia.org/wiki/Special:Redirect/file/Ch%C3%B9a_B%C3%A0_v%C3%A0_c%E1%BA%A3nh_ch%C3%A2n_tr%E1%BB%9Di%2C_KDL_N%C3%BAi_B%C3%A0_%C4%90en.jpg?width=900";
 
 const documentSelect =
+  "id,title,slug,document_type,commune_id,year,page_count,preview_page_count,keywords,author,publisher,description,source,preview_file_url,cover_image_url,is_preview_only,contact_note,created_at,communes(id,name,type,district_old,description,slug,created_at),document_communes(communes(id,name,type,district_old,description,slug,created_at))";
+
+const legacyDocumentSelect =
   "id,title,slug,document_type,commune_id,year,description,source,preview_file_url,cover_image_url,is_preview_only,contact_note,created_at,communes(id,name,type,district_old,description,slug,created_at)";
 
 function enrichMockDocument(document: Document): Document {
+  const commune = getMockCommuneById(document.communeId);
   return {
     ...document,
-    commune: getMockCommuneById(document.communeId)
+    commune,
+    communes: commune ? [commune] : [],
+    communeIds: commune ? [commune.id] : []
   };
 }
 
@@ -63,19 +79,37 @@ function mapCommune(row: CommuneRow): Commune {
   };
 }
 
+function mapLinkedCommunes(row: DocumentRow) {
+  const legacyCommuneRow = Array.isArray(row.communes) ? row.communes[0] : row.communes;
+  const linkedCommunes = (row.document_communes || [])
+    .map((link) => (Array.isArray(link.communes) ? link.communes[0] : link.communes))
+    .filter((commune): commune is CommuneRow => Boolean(commune))
+    .map((commune) => mapCommune(commune));
+
+  if (linkedCommunes.length) {
+    return linkedCommunes;
+  }
+
+  return legacyCommuneRow ? [mapCommune(legacyCommuneRow)] : [];
+}
+
 function mapDocument(row: DocumentRow): Document {
-  const communeRow = Array.isArray(row.communes) ? row.communes[0] : row.communes;
-  const commune = communeRow ? mapCommune(communeRow) : undefined;
-  const documentType =
-    row.document_type === "dia_chi" && !row.commune_id ? "tai_lieu_cap_tinh" : row.document_type;
+  const communes = mapLinkedCommunes(row);
+  const commune = communes[0];
 
   return {
     id: row.id,
     title: row.title,
     slug: row.slug,
-    documentType,
-    communeId: row.commune_id || undefined,
+    documentType: row.document_type,
+    communeId: commune?.id || row.commune_id || undefined,
+    communeIds: communes.map((item) => item.id),
     year: row.year || new Date(row.created_at).getFullYear(),
+    pageCount: row.page_count || undefined,
+    previewPageCount: row.preview_page_count || undefined,
+    keywords: row.keywords || [],
+    author: row.author || undefined,
+    publisher: row.publisher || undefined,
     description: row.description || "",
     source: row.source || "Thư viện tỉnh Tây Ninh",
     previewFileUrl: row.preview_file_url,
@@ -83,8 +117,45 @@ function mapDocument(row: DocumentRow): Document {
     isPreviewOnly: row.is_preview_only,
     contactNote: row.contact_note || "Vui lòng liên hệ thư viện để đọc bản đầy đủ.",
     createdAt: row.created_at,
-    commune
+    commune,
+    communes
   };
+}
+
+async function fetchDocumentRows(supabase: NonNullable<ReturnType<typeof getSupabaseAdminClient> | ReturnType<typeof getSupabasePublicClient>>) {
+  const full = await supabase.from("documents").select(documentSelect).order("created_at", { ascending: false });
+
+  if (!full.error) {
+    return full;
+  }
+
+  return supabase.from("documents").select(legacyDocumentSelect).order("created_at", { ascending: false });
+}
+
+async function fetchDocumentRowBySlug(
+  supabase: NonNullable<ReturnType<typeof getSupabaseAdminClient> | ReturnType<typeof getSupabasePublicClient>>,
+  slug: string
+) {
+  const full = await supabase.from("documents").select(documentSelect).eq("slug", slug).maybeSingle();
+
+  if (!full.error) {
+    return full;
+  }
+
+  return supabase.from("documents").select(legacyDocumentSelect).eq("slug", slug).maybeSingle();
+}
+
+async function fetchDocumentRowById(
+  supabase: NonNullable<ReturnType<typeof getSupabaseAdminClient>>,
+  id: string
+) {
+  const full = await supabase.from("documents").select(documentSelect).eq("id", id).maybeSingle();
+
+  if (!full.error) {
+    return full;
+  }
+
+  return supabase.from("documents").select(legacyDocumentSelect).eq("id", id).maybeSingle();
 }
 
 export async function getCommunes() {
@@ -162,10 +233,7 @@ export async function getDocuments() {
     return mockDocuments.map(enrichMockDocument);
   }
 
-  const { data, error } = await supabase
-    .from("documents")
-    .select(documentSelect)
-    .order("created_at", { ascending: false });
+  const { data, error } = await fetchDocumentRows(supabase);
 
   if (error) {
     return mockDocuments.map(enrichMockDocument);
@@ -182,10 +250,7 @@ export async function getAdminDocuments() {
     return getDocuments();
   }
 
-  const { data, error } = await supabase
-    .from("documents")
-    .select(documentSelect)
-    .order("created_at", { ascending: false });
+  const { data, error } = await fetchDocumentRows(supabase);
 
   if (error) {
     return getDocuments();
@@ -203,11 +268,7 @@ export async function getAdminDocumentById(id: string) {
     return documents.find((document) => document.id === id);
   }
 
-  const { data, error } = await supabase
-    .from("documents")
-    .select(documentSelect)
-    .eq("id", id)
-    .maybeSingle();
+  const { data, error } = await fetchDocumentRowById(supabase, id);
 
   if (error || !data) {
     const documents = await getDocuments();
@@ -219,7 +280,7 @@ export async function getAdminDocumentById(id: string) {
 
 export async function getDocumentsByCommune(communeId: string) {
   const docs = await getDocuments();
-  return docs.filter((document) => document.communeId === communeId);
+  return docs.filter((document) => document.communeIds?.includes(communeId) || document.communeId === communeId);
 }
 
 export async function getDocumentBySlug(slug: string) {
@@ -231,11 +292,7 @@ export async function getDocumentBySlug(slug: string) {
     return document ? enrichMockDocument(document) : undefined;
   }
 
-  const { data, error } = await supabase
-    .from("documents")
-    .select(documentSelect)
-    .eq("slug", slug)
-    .maybeSingle();
+  const { data, error } = await fetchDocumentRowBySlug(supabase, slug);
 
   if (error || !data) {
     const document = mockDocuments.find((item) => item.slug === slug);

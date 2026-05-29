@@ -45,9 +45,63 @@ function yearValue(formData: FormData) {
   return Number.isFinite(year) ? year : null;
 }
 
+function numberValue(formData: FormData, key: string) {
+  const value = textValue(formData, key);
+  if (!value) return null;
+  const number = Number(value);
+  return Number.isFinite(number) ? number : null;
+}
+
+function keywordsValue(formData: FormData) {
+  const value = textValue(formData, "keywords");
+  if (!value) return null;
+  return value
+    .split(",")
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
 function fileValue(formData: FormData, key: string) {
   const value = formData.get(key);
   return value instanceof File && value.size > 0 ? value : null;
+}
+
+function validatePdfFile(file: File) {
+  const maxSize = 50 * 1024 * 1024;
+
+  if (file.type !== "application/pdf") {
+    throw new Error("Chỉ được upload file PDF.");
+  }
+
+  if (file.size > maxSize) {
+    throw new Error("File PDF không được vượt quá 50MB.");
+  }
+}
+
+function validateImageFile(file: File) {
+  const maxSize = 5 * 1024 * 1024;
+  const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+
+  if (!allowedTypes.includes(file.type)) {
+    throw new Error("Ảnh bìa chỉ hỗ trợ JPG, PNG hoặc WEBP.");
+  }
+
+  if (file.size > maxSize) {
+    throw new Error("Ảnh bìa không được vượt quá 5MB.");
+  }
+}
+
+function communeIdsValue(formData: FormData, documentType: DocumentType) {
+  if (documentType !== "dia_chi") {
+    return [];
+  }
+
+  const values = formData
+    .getAll("commune_ids")
+    .filter((value): value is string => typeof value === "string" && value.trim().length > 0)
+    .map((value) => value.trim());
+  const legacyValue = optionalTextValue(formData, "commune_id");
+  return Array.from(new Set(legacyValue ? [legacyValue, ...values] : values));
 }
 
 function safeFileName(file: File) {
@@ -104,11 +158,60 @@ async function uploadPublicFile(file: File, folder: string) {
   return data.publicUrl;
 }
 
+async function syncDocumentCommunes(
+  supabase: NonNullable<ReturnType<typeof getSupabaseAdminClient>>,
+  documentId: string,
+  communeIds: string[]
+) {
+  const { error: deleteError } = await supabase.from("document_communes").delete().eq("document_id", documentId);
+
+  if (deleteError) {
+    if (deleteError.message.includes("document_communes") || deleteError.message.includes("schema cache")) {
+      return;
+    }
+    throw new Error(deleteError.message);
+  }
+
+  if (!communeIds.length) {
+    return;
+  }
+
+  const { error } = await supabase.from("document_communes").insert(
+    communeIds.map((communeId) => ({
+      document_id: documentId,
+      commune_id: communeId
+    }))
+  );
+
+  if (error) {
+    if (error.message.includes("document_communes") || error.message.includes("schema cache")) {
+      return;
+    }
+    throw new Error(error.message);
+  }
+}
+
+function legacyDocumentData<T extends Record<string, unknown>>(documentData: T) {
+  const legacyData = { ...documentData };
+  delete legacyData.page_count;
+  delete legacyData.preview_page_count;
+  delete legacyData.keywords;
+  delete legacyData.author;
+  delete legacyData.publisher;
+  return legacyData;
+}
+
 async function documentPayload(formData: FormData, existingPreviewUrl?: string, existingCoverUrl?: string) {
   const title = textValue(formData, "title");
   const slug = slugify(textValue(formData, "slug") || title);
+  const documentType = documentTypeValue(formData);
+  const communeIds = communeIdsValue(formData, documentType);
   const previewFile = fileValue(formData, "preview_file");
   const coverFile = fileValue(formData, "cover_image");
+
+  if (previewFile) validatePdfFile(previewFile);
+  if (coverFile) validateImageFile(coverFile);
+
   const previewFileUrl =
     previewFile ? await uploadPublicFile(previewFile, "pdf") : optionalTextValue(formData, "preview_file_url") || existingPreviewUrl;
   const coverImageUrl =
@@ -123,28 +226,30 @@ async function documentPayload(formData: FormData, existingPreviewUrl?: string, 
   }
 
   if (!previewFileUrl) {
-    throw new Error("Cần upload file PDF preview hoặc nhập URL PDF preview.");
+    throw new Error("Cần upload file PDF hoặc nhập URL PDF.");
   }
 
-  const documentType = documentTypeValue(formData);
-  const isProvincialDocument = documentType === "tai_lieu_cap_tinh";
-
   return {
-    title,
-    slug,
-    // Supabase production may still have the original two-value enum. Store province-level
-    // documents as dia_chi without a commune, then map them back when reading.
-    document_type: isProvincialDocument ? "dia_chi" : documentType,
-    commune_id: isProvincialDocument ? null : optionalTextValue(formData, "commune_id"),
-    year: yearValue(formData),
-    description: optionalTextValue(formData, "description"),
-    source: optionalTextValue(formData, "source") || "Thư viện tỉnh Tây Ninh",
-    preview_file_url: previewFileUrl,
-    cover_image_url: coverImageUrl,
-    is_preview_only: isPreviewOnlyValue(formData),
-    contact_note:
-      optionalTextValue(formData, "contact_note") || "Vui lòng liên hệ thư viện để đọc bản đầy đủ.",
-    updated_at: new Date().toISOString()
+    documentData: {
+      title,
+      slug,
+      document_type: documentType,
+      commune_id: documentType === "tai_lieu_cap_tinh" ? null : communeIds[0] || optionalTextValue(formData, "commune_id"),
+      year: yearValue(formData),
+      page_count: numberValue(formData, "page_count"),
+      preview_page_count: numberValue(formData, "preview_page_count") || 10,
+      keywords: keywordsValue(formData),
+      author: optionalTextValue(formData, "author"),
+      publisher: optionalTextValue(formData, "publisher"),
+      description: optionalTextValue(formData, "description"),
+      source: optionalTextValue(formData, "source") || "Thư viện tỉnh Tây Ninh",
+      preview_file_url: previewFileUrl,
+      cover_image_url: coverImageUrl,
+      is_preview_only: isPreviewOnlyValue(formData),
+      contact_note: optionalTextValue(formData, "contact_note") || "Vui lòng liên hệ thư viện để đọc bản đầy đủ.",
+      updated_at: new Date().toISOString()
+    },
+    communeIds
   };
 }
 
@@ -156,12 +261,22 @@ export async function createDocumentAction(formData: FormData) {
     redirect(`/admin/documents?nhom=${documentGroupParam(selectedDocumentType)}&status=missing-env`);
   }
 
-  const payload = await documentPayload(formData);
-  payload.slug = await uniqueDocumentSlug(supabase, payload.slug);
-  const { error } = await supabase.from("documents").insert(payload);
+  const { documentData, communeIds } = await documentPayload(formData);
+  documentData.slug = await uniqueDocumentSlug(supabase, documentData.slug);
+  let { data, error } = await supabase.from("documents").insert(documentData).select("id").single();
+
+  if (error?.message.includes("schema cache")) {
+    const retry = await supabase.from("documents").insert(legacyDocumentData(documentData)).select("id").single();
+    data = retry.data;
+    error = retry.error;
+  }
 
   if (error) {
     throw new Error(error.message);
+  }
+
+  if (data?.id) {
+    await syncDocumentCommunes(supabase, data.id, communeIds);
   }
 
   revalidatePath("/");
@@ -178,17 +293,24 @@ export async function updateDocumentAction(documentId: string, formData: FormDat
     redirect(`/admin/documents?nhom=${documentGroupParam(selectedDocumentType)}&status=missing-env`);
   }
 
-  const payload = await documentPayload(
+  const { documentData, communeIds } = await documentPayload(
     formData,
     optionalTextValue(formData, "existing_preview_file_url") || undefined,
     optionalTextValue(formData, "existing_cover_image_url") || undefined
   );
-  payload.slug = await uniqueDocumentSlug(supabase, payload.slug, documentId);
-  const { error } = await supabase.from("documents").update(payload).eq("id", documentId);
+  documentData.slug = await uniqueDocumentSlug(supabase, documentData.slug, documentId);
+  let { error } = await supabase.from("documents").update(documentData).eq("id", documentId);
+
+  if (error?.message.includes("schema cache")) {
+    const retry = await supabase.from("documents").update(legacyDocumentData(documentData)).eq("id", documentId);
+    error = retry.error;
+  }
 
   if (error) {
     throw new Error(error.message);
   }
+
+  await syncDocumentCommunes(supabase, documentId, communeIds);
 
   revalidatePath("/");
   revalidatePath("/tai-lieu");

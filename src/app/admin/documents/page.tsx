@@ -85,13 +85,16 @@ function DocumentTable({
             ) : null}
             {documents.map((document) => {
               const commune = document.commune;
+              const scopeLabel = document.communes?.length
+                ? document.communes.map((item) => `${typePrefix(item.type)} ${item.name}`).join(", ")
+                : commune
+                  ? `${typePrefix(commune.type)} ${commune.name}`
+                  : "Cấp tỉnh";
               return (
                 <tr key={document.id}>
                   <td className="px-4 py-4 font-medium text-ink">{document.title}</td>
                   <td className="px-4 py-4 text-ink/68">{documentTypeLabel(document.documentType)}</td>
-                  <td className="px-4 py-4 text-ink/68">
-                    {commune ? `${typePrefix(commune.type)} ${commune.name}` : "Cấp tỉnh"}
-                  </td>
+                  <td className="px-4 py-4 text-ink/68">{scopeLabel}</td>
                   <td className="px-4 py-4 text-ink/68">{document.year}</td>
                   <td className="px-4 py-4">
                     <span className="rounded bg-palm/10 px-2.5 py-1 text-xs font-semibold text-palm">

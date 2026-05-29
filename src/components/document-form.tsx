@@ -15,7 +15,9 @@ type SignedUpload = {
   publicUrl: string;
 };
 
-const maxSupabaseFileSize = 50 * 1024 * 1024;
+const maxPdfFileSize = 50 * 1024 * 1024;
+const maxImageFileSize = 5 * 1024 * 1024;
+const allowedImageTypes = ["image/jpeg", "image/png", "image/webp"];
 
 function browserSupabaseClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -28,12 +30,24 @@ function browserSupabaseClient() {
   return createClient(url, anonKey);
 }
 
-async function signedUpload(file: File, folder: "pdf" | "covers") {
-  if (file.size > maxSupabaseFileSize) {
-    throw new Error(
-      "File vượt quá 50MB. Hãy nén PDF, chia nhỏ file hoặc dùng link PDF đã lưu ở nơi khác."
-    );
+function validateClientFile(file: File, folder: "pdf" | "covers") {
+  if (folder === "pdf") {
+    if (file.type !== "application/pdf") throw new Error("Chỉ được upload file PDF.");
+    if (file.size > maxPdfFileSize) throw new Error("File PDF không được vượt quá 50MB.");
+    return;
   }
+
+  if (!allowedImageTypes.includes(file.type)) {
+    throw new Error("Ảnh bìa chỉ hỗ trợ JPG, PNG hoặc WEBP.");
+  }
+
+  if (file.size > maxImageFileSize) {
+    throw new Error("Ảnh bìa không được vượt quá 5MB.");
+  }
+}
+
+async function signedUpload(file: File, folder: "pdf" | "covers") {
+  validateClientFile(file, folder);
 
   const response = await fetch("/admin/uploads", {
     method: "POST",
@@ -64,6 +78,10 @@ async function signedUpload(file: File, folder: "pdf" | "covers") {
   return payload.publicUrl;
 }
 
+function keywordValue(document?: Document) {
+  return document?.keywords?.join(", ") || "";
+}
+
 export function DocumentForm({ communes, document }: { communes: Commune[]; document?: Document }) {
   const action = document ? updateDocumentAction.bind(null, document.id) : createDocumentAction;
   const formRef = useRef<HTMLFormElement>(null);
@@ -74,14 +92,12 @@ export function DocumentForm({ communes, document }: { communes: Commune[]; docu
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [selectedDocumentType, setSelectedDocumentType] = useState<DocumentType>(document?.documentType || "dia_chi");
-  const [selectedCommuneId, setSelectedCommuneId] = useState(document?.communeId || "");
+  const [selectedCommuneIds, setSelectedCommuneIds] = useState<string[]>(
+    document?.communeIds?.length ? document.communeIds : document?.communeId ? [document.communeId] : []
+  );
 
-  const emptyCommuneLabel =
-    selectedDocumentType === "bao_tay_ninh"
-      ? "Báo Tây Ninh - không gắn xã/phường cụ thể"
-      : selectedDocumentType === "tai_lieu_cap_tinh"
-        ? "Không gắn xã/phường - tài liệu cấp tỉnh"
-        : "Chọn xã/phường liên quan hoặc để trống";
+  const canAttachCommunes = selectedDocumentType === "dia_chi";
+  const primaryCommuneId = canAttachCommunes ? selectedCommuneIds[0] || "" : "";
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     const form = formRef.current;
@@ -124,6 +140,7 @@ export function DocumentForm({ communes, document }: { communes: Commune[]; docu
     <form ref={formRef} action={action} onSubmit={handleSubmit} className="grid gap-6 rounded border border-ink/10 bg-white p-6 shadow-sm">
       <input type="hidden" name="existing_preview_file_url" value={document?.previewFileUrl || ""} />
       <input type="hidden" name="existing_cover_image_url" value={document?.coverImageUrl || ""} />
+      <input type="hidden" name="commune_id" value={primaryCommuneId} />
 
       {uploadError ? (
         <div className="rounded border border-lacquer/20 bg-lacquer/8 p-4 text-sm font-medium text-lacquer">
@@ -148,7 +165,7 @@ export function DocumentForm({ communes, document }: { communes: Commune[]; docu
             name="slug"
             defaultValue={document?.slug}
             className="rounded border border-ink/12 px-3 py-2.5 font-normal outline-none transition focus:border-palm"
-            placeholder="dia-chi-xa-tan-bien-preview"
+            placeholder="dia-chi-xa-tan-bien"
           />
         </label>
       </div>
@@ -162,8 +179,8 @@ export function DocumentForm({ communes, document }: { communes: Commune[]; docu
             onChange={(event) => {
               const nextType = event.target.value as DocumentType;
               setSelectedDocumentType(nextType);
-              if (nextType === "bao_tay_ninh" || nextType === "tai_lieu_cap_tinh") {
-                setSelectedCommuneId("");
+              if (nextType !== "dia_chi") {
+                setSelectedCommuneIds([]);
               }
             }}
             className="rounded border border-ink/12 px-3 py-2.5 font-normal outline-none transition focus:border-palm"
@@ -174,23 +191,7 @@ export function DocumentForm({ communes, document }: { communes: Commune[]; docu
           </select>
         </label>
         <label className="grid gap-2 text-sm font-semibold text-ink">
-          Xã/phường
-          <select
-            name="commune_id"
-            value={selectedCommuneId}
-            onChange={(event) => setSelectedCommuneId(event.target.value)}
-            className="rounded border border-ink/12 px-3 py-2.5 font-normal outline-none transition focus:border-palm"
-          >
-            <option value="">{emptyCommuneLabel}</option>
-            {communes.map((commune) => (
-              <option key={commune.id} value={commune.id}>
-                {typePrefix(commune.type)} {commune.name}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="grid gap-2 text-sm font-semibold text-ink">
-          Năm
+          Năm xuất bản
           <input
             name="year"
             defaultValue={document?.year || new Date().getFullYear()}
@@ -198,7 +199,41 @@ export function DocumentForm({ communes, document }: { communes: Commune[]; docu
             className="rounded border border-ink/12 px-3 py-2.5 font-normal outline-none transition focus:border-palm"
           />
         </label>
+        <label className="grid gap-2 text-sm font-semibold text-ink">
+          Số trang xem thử
+          <input
+            name="preview_page_count"
+            defaultValue={document?.previewPageCount || 10}
+            type="number"
+            min={0}
+            className="rounded border border-ink/12 px-3 py-2.5 font-normal outline-none transition focus:border-palm"
+          />
+        </label>
       </div>
+
+      <label className="grid gap-2 text-sm font-semibold text-ink">
+        Xã/phường liên quan
+        <select
+          name="commune_ids"
+          multiple
+          size={8}
+          value={selectedCommuneIds}
+          disabled={!canAttachCommunes}
+          onChange={(event) => {
+            setSelectedCommuneIds(Array.from(event.currentTarget.selectedOptions, (option) => option.value));
+          }}
+          className="rounded border border-ink/12 px-3 py-2.5 font-normal outline-none transition focus:border-palm disabled:bg-paper disabled:text-ink/45"
+        >
+          {communes.map((commune) => (
+            <option key={commune.id} value={commune.id}>
+              {typePrefix(commune.type)} {commune.name}
+            </option>
+          ))}
+        </select>
+        <span className="text-xs font-normal leading-5 text-ink/55">
+          Chỉ tài liệu địa chí cần gắn xã/phường. Có thể giữ Ctrl để chọn nhiều đơn vị.
+        </span>
+      </label>
 
       <label className="grid gap-2 text-sm font-semibold text-ink">
         Mô tả
@@ -213,6 +248,25 @@ export function DocumentForm({ communes, document }: { communes: Commune[]; docu
 
       <div className="grid gap-4 md:grid-cols-2">
         <label className="grid gap-2 text-sm font-semibold text-ink">
+          Tác giả
+          <input
+            name="author"
+            defaultValue={document?.author || ""}
+            className="rounded border border-ink/12 px-3 py-2.5 font-normal outline-none transition focus:border-palm"
+          />
+        </label>
+        <label className="grid gap-2 text-sm font-semibold text-ink">
+          Nhà xuất bản
+          <input
+            name="publisher"
+            defaultValue={document?.publisher || ""}
+            className="rounded border border-ink/12 px-3 py-2.5 font-normal outline-none transition focus:border-palm"
+          />
+        </label>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-3">
+        <label className="grid gap-2 text-sm font-semibold text-ink">
           Nguồn
           <input
             name="source"
@@ -221,14 +275,34 @@ export function DocumentForm({ communes, document }: { communes: Commune[]; docu
           />
         </label>
         <label className="grid gap-2 text-sm font-semibold text-ink">
-          Ghi chú liên hệ
+          Số trang
           <input
-            name="contact_note"
-            defaultValue={document?.contactNote || "Vui lòng liên hệ thư viện để đọc bản đầy đủ."}
+            name="page_count"
+            defaultValue={document?.pageCount || ""}
+            type="number"
+            min={0}
             className="rounded border border-ink/12 px-3 py-2.5 font-normal outline-none transition focus:border-palm"
           />
         </label>
+        <label className="grid gap-2 text-sm font-semibold text-ink">
+          Từ khóa
+          <input
+            name="keywords"
+            defaultValue={keywordValue(document)}
+            className="rounded border border-ink/12 px-3 py-2.5 font-normal outline-none transition focus:border-palm"
+            placeholder="di tích, lịch sử, văn hóa"
+          />
+        </label>
       </div>
+
+      <label className="grid gap-2 text-sm font-semibold text-ink">
+        Ghi chú liên hệ
+        <input
+          name="contact_note"
+          defaultValue={document?.contactNote || "Vui lòng liên hệ thư viện để đọc bản đầy đủ."}
+          className="rounded border border-ink/12 px-3 py-2.5 font-normal outline-none transition focus:border-palm"
+        />
+      </label>
 
       <div className="grid gap-4 md:grid-cols-2">
         <label className="grid gap-2 text-sm font-semibold text-ink">
@@ -253,9 +327,9 @@ export function DocumentForm({ communes, document }: { communes: Commune[]; docu
           <span className="flex flex-col gap-3 rounded border border-dashed border-ink/20 px-3 py-5 text-sm font-normal text-ink/55">
             <span className="flex items-center gap-3">
               <Upload className="h-4 w-4" aria-hidden="true" />
-              Upload hoặc dán URL ảnh
+              Upload JPG, PNG, WEBP hoặc dán URL ảnh
             </span>
-            <input ref={coverInputRef} name="cover_image" type="file" accept="image/*" className="text-sm" />
+            <input ref={coverInputRef} name="cover_image" type="file" accept="image/jpeg,image/png,image/webp" className="text-sm" />
             <input
               ref={coverUrlRef}
               name="cover_image_url"
@@ -280,7 +354,8 @@ export function DocumentForm({ communes, document }: { communes: Commune[]; docu
       </label>
 
       <div className="rounded bg-paper p-4 text-sm leading-6 text-ink/68">
-        File được upload trực tiếp lên Supabase Storage, sau đó hệ thống lưu thông tin tài liệu vào bảng <strong>documents</strong>. Giới hạn hiện tại của bucket là <strong>50MB/file</strong>.
+        PDF tối đa <strong>50MB</strong>. Ảnh bìa tối đa <strong>5MB</strong>, chỉ hỗ trợ JPG, PNG hoặc WEBP.
+        Tài liệu địa chí có thể gắn nhiều xã/phường qua bảng <strong>document_communes</strong>.
       </div>
 
       <div className="flex flex-wrap gap-3 border-t border-ink/10 pt-5">

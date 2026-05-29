@@ -8,6 +8,13 @@ import { documentTypeShortLabel, typePrefix } from "@/lib/utils";
 
 export function DocumentCard({ document }: { document: Document }) {
   const commune = document.commune || getCommuneById(document.communeId);
+  const attachedCommunes = document.communes?.length ? document.communes : commune ? [commune] : [];
+  const communeLabel =
+    attachedCommunes.length > 1
+      ? `${attachedCommunes.length} xã/phường`
+      : commune
+        ? `${typePrefix(commune.type)} ${commune.name}`
+        : "Cấp tỉnh";
   const readLabel = document.isPreviewOnly ? "Đọc thử" : "Đọc đầy đủ";
   const statusLabel = document.isPreviewOnly ? "Preview" : "Bản đầy đủ";
 
@@ -37,12 +44,10 @@ export function DocumentCard({ document }: { document: Document }) {
         <p className="mt-4 line-clamp-3 min-h-[4.5rem] text-sm leading-6 text-ink/68">{document.description}</p>
 
         <div className="mt-4 min-h-7">
-          {commune ? (
+          {attachedCommunes.length ? (
             <p className="inline-flex max-w-full items-center gap-2 rounded bg-paper px-2.5 py-1 text-xs font-medium text-ink/70">
               <Library className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-              <span className="truncate">
-                {typePrefix(commune.type)} {commune.name}
-              </span>
+              <span className="truncate">{communeLabel}</span>
             </p>
           ) : (
             <p className="inline-flex max-w-full items-center gap-2 rounded bg-paper px-2.5 py-1 text-xs font-medium text-ink/70">
