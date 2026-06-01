@@ -1,6 +1,6 @@
 import { DocumentList } from "@/components/document-list";
 import { PageShell, SectionHeader } from "@/components/page-shell";
-import { getDocuments } from "@/lib/repository";
+import { searchDocuments } from "@/lib/repository";
 import type { DocumentType } from "@/lib/types";
 
 function documentTypeFromQuery(value?: string): DocumentType | "all" {
@@ -49,9 +49,13 @@ export default async function DocumentsPage({
   searchParams: Promise<{ loai?: string; q?: string }>;
 }) {
   const params = await searchParams;
-  const documents = await getDocuments();
   const initialFilter = documentTypeFromQuery(params.loai);
   const initialQuery = params.q?.trim() || "";
+  const documents = await searchDocuments({
+    query: initialQuery,
+    documentType: initialFilter,
+    limit: 120
+  });
   const copy = pageCopy(initialFilter);
 
   return (

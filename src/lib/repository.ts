@@ -9,6 +9,7 @@ import {
 } from "@/lib/data";
 import { getSupabaseAdminClient, getSupabasePublicClient, isSupabaseConfigured } from "@/lib/supabase-server";
 import type { Commune, CommuneType, Document, DocumentType } from "@/lib/types";
+import { normalizeVietnamese } from "@/lib/utils";
 
 type CommuneRow = {
   id: string;
@@ -45,6 +46,17 @@ type DocumentRow = {
   created_at: string;
   communes?: CommuneRow | CommuneRow[] | null;
   document_communes?: DocumentCommuneRow[] | null;
+};
+
+type SearchDocumentsOptions = {
+  query?: string;
+  documentType?: DocumentType | "all";
+  limit?: number;
+};
+
+type SearchDocumentsRow = {
+  document_id: string;
+  rank: number | null;
 };
 
 const fallbackCover =
@@ -130,6 +142,19 @@ async function fetchDocumentRows(supabase: NonNullable<ReturnType<typeof getSupa
   }
 
   return supabase.from("documents").select(legacyDocumentSelect).order("created_at", { ascending: false });
+}
+
+async function fetchDocumentRowsByIds(
+  supabase: NonNullable<ReturnType<typeof getSupabaseAdminClient> | ReturnType<typeof getSupabasePublicClient>>,
+  ids: string[]
+) {
+  const full = await supabase.from("documents").select(documentSelect).in("id", ids);
+
+  if (!full.error) {
+    return full;
+  }
+
+  return supabase.from("documents").select(legacyDocumentSelect).in("id", ids);
 }
 
 async function fetchDocumentRowBySlug(
@@ -240,6 +265,83 @@ export async function getDocuments() {
   }
 
   return data.map((row) => mapDocument(row as DocumentRow));
+}
+
+function documentMatchesSearch(document: Document, options: SearchDocumentsOptions) {
+  const type = options.documentType || "all";
+  if (type !== "all" && document.documentType !== type) {
+    return false;
+  }
+
+  const query = normalizeVietnamese(options.query?.trim() || "");
+  if (!query) {
+    return true;
+  }
+
+  const searchableText = normalizeVietnamese(
+    [
+      document.title,
+      document.description,
+      String(document.year),
+      document.source,
+      document.slug,
+      document.commune?.name || "",
+      document.communes?.map((commune) => commune.name).join(" ") || "",
+      document.author || "",
+      document.publisher || "",
+      document.keywords?.join(" ") || "",
+      document.documentType === "tai_lieu_cap_tinh" ? "cap tinh tai lieu cap tinh" : ""
+    ].join(" ")
+  );
+
+  return searchableText.includes(query);
+}
+
+export async function searchDocuments(options: SearchDocumentsOptions = {}) {
+  noStore();
+
+  const query = options.query?.trim() || "";
+  const documentType = options.documentType || "all";
+  const limit = options.limit || 120;
+  const supabase = getSupabaseAdminClient() || getSupabasePublicClient();
+
+  if (!supabase) {
+    return mockDocuments.map(enrichMockDocument).filter((document) => documentMatchesSearch(document, options));
+  }
+
+  if (query) {
+    const { data: searchRows, error: searchError } = await supabase.rpc("search_documents", {
+      search_query: query,
+      filter_type: documentType === "all" ? null : documentType,
+      result_limit: limit
+    });
+
+    if (!searchError && searchRows) {
+      const rankedRows = searchRows as SearchDocumentsRow[];
+      const ids = rankedRows.map((row) => row.document_id).filter(Boolean);
+
+      if (!ids.length) {
+        return [];
+      }
+
+      const { data, error } = await fetchDocumentRowsByIds(supabase, ids);
+
+      if (!error) {
+        const order = new Map(ids.map((id, index) => [id, index]));
+        return data
+          .map((row) => mapDocument(row as DocumentRow))
+          .sort((a, b) => (order.get(a.id) ?? 0) - (order.get(b.id) ?? 0));
+      }
+    }
+  }
+
+  const { data, error } = await fetchDocumentRows(supabase);
+
+  if (error) {
+    return mockDocuments.map(enrichMockDocument).filter((document) => documentMatchesSearch(document, options));
+  }
+
+  return data.map((row) => mapDocument(row as DocumentRow)).filter((document) => documentMatchesSearch(document, options));
 }
 
 export async function getAdminDocuments() {

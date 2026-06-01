@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState, useTransition } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { FileText, Files, Newspaper, Search } from "lucide-react";
 
 import { DocumentCard } from "@/components/document-card";
 import type { Document, DocumentType } from "@/lib/types";
-import { cn, normalizeVietnamese } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 
 type Filter = "all" | DocumentType;
 
@@ -25,6 +26,10 @@ export function DocumentList({
   initialFilter?: Filter;
   initialQuery?: string;
 }) {
+  const pathname = usePathname();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const [isPending, startTransition] = useTransition();
   const [query, setQuery] = useState(initialQuery);
   const [filter, setFilter] = useState<Filter>(initialFilter);
 
@@ -36,32 +41,35 @@ export function DocumentList({
     setQuery(initialQuery);
   }, [initialQuery]);
 
-  const filteredDocuments = useMemo(() => {
-    const normalizedQuery = normalizeVietnamese(query.trim());
+  useEffect(() => {
+    const timeout = window.setTimeout(() => {
+      const params = new URLSearchParams(searchParams.toString());
+      const cleanQuery = query.trim();
 
-    return documents.filter((document) => {
-      const matchesType = filter === "all" || document.documentType === filter;
-      const scopeName = document.documentType === "tai_lieu_cap_tinh" ? "cap tinh tai lieu cap tinh" : "";
-      const searchableText = normalizeVietnamese(
-        [
-          document.title,
-          document.description,
-          String(document.year),
-          document.source,
-          document.slug,
-          document.commune?.name || "",
-          document.communes?.map((commune) => commune.name).join(" ") || "",
-          document.author || "",
-          document.publisher || "",
-          document.keywords?.join(" ") || "",
-          scopeName
-        ].join(" ")
-      );
-      const matchesQuery = normalizedQuery.length === 0 || searchableText.includes(normalizedQuery);
+      if (cleanQuery) {
+        params.set("q", cleanQuery);
+      } else {
+        params.delete("q");
+      }
 
-      return matchesType && matchesQuery;
-    });
-  }, [documents, filter, query]);
+      if (filter === "all") {
+        params.delete("loai");
+      } else {
+        params.set("loai", filter);
+      }
+
+      const nextUrl = params.toString() ? `${pathname}?${params.toString()}` : pathname;
+      const currentUrl = `${pathname}${window.location.search}`;
+
+      if (nextUrl !== currentUrl) {
+        startTransition(() => {
+          router.replace(nextUrl, { scroll: false });
+        });
+      }
+    }, 350);
+
+    return () => window.clearTimeout(timeout);
+  }, [filter, pathname, query, router, searchParams]);
 
   return (
     <section className="mt-8">
@@ -74,7 +82,7 @@ export function DocumentList({
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               className="min-w-0 flex-1 bg-transparent text-sm text-ink outline-none placeholder:text-ink/45"
-              placeholder="Tìm theo tên tài liệu, xã/phường hoặc cấp tỉnh"
+              placeholder="Tìm theo tên, mô tả, từ khóa, năm, nguồn"
             />
           </label>
           <div className="flex flex-wrap gap-2">
@@ -100,12 +108,14 @@ export function DocumentList({
           </div>
         </div>
 
-        <p className="mt-3 text-sm text-ink/55">Đang hiển thị {filteredDocuments.length} tài liệu</p>
+        <p className="mt-3 text-sm text-ink/55">
+          {isPending ? "Đang tìm trên Supabase..." : `Đang hiển thị ${documents.length} tài liệu`}
+        </p>
       </div>
 
-      {filteredDocuments.length > 0 ? (
+      {documents.length > 0 ? (
         <div className="mt-5 grid items-stretch gap-5 md:grid-cols-2 lg:grid-cols-3">
-          {filteredDocuments.map((document) => (
+          {documents.map((document) => (
             <DocumentCard key={document.id} document={document} />
           ))}
         </div>
