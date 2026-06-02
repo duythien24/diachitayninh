@@ -1,18 +1,32 @@
+create or replace function documents_search_text(
+  p_title text,
+  p_description text,
+  p_source text,
+  p_author text,
+  p_publisher text,
+  p_year int,
+  p_keywords text[]
+)
+returns text
+language sql
+immutable
+as $$
+  select
+    coalesce(p_title, '') || ' ' ||
+    coalesce(p_description, '') || ' ' ||
+    coalesce(p_source, '') || ' ' ||
+    coalesce(p_author, '') || ' ' ||
+    coalesce(p_publisher, '') || ' ' ||
+    coalesce(p_year::text, '') || ' ' ||
+    coalesce(array_to_string(p_keywords, ' '), '');
+$$;
+
 create index if not exists documents_search_idx
 on documents
 using gin (
   to_tsvector(
     'simple',
-    concat_ws(
-      ' ',
-      title,
-      coalesce(description, ''),
-      coalesce(source, ''),
-      coalesce(author, ''),
-      coalesce(publisher, ''),
-      coalesce(year::text, ''),
-      coalesce(array_to_string(keywords, ' '), '')
-    )
+    documents_search_text(title, description, source, author, publisher, year, keywords)
   )
 );
 
@@ -36,16 +50,7 @@ as $$
       d.created_at,
       to_tsvector(
         'simple',
-        concat_ws(
-          ' ',
-          d.title,
-          coalesce(d.description, ''),
-          coalesce(d.source, ''),
-          coalesce(d.author, ''),
-          coalesce(d.publisher, ''),
-          coalesce(d.year::text, ''),
-          coalesce(array_to_string(d.keywords, ' '), '')
-        )
+        documents_search_text(d.title, d.description, d.source, d.author, d.publisher, d.year, d.keywords)
       ) as search_vector
     from documents d
     where filter_type is null or d.document_type = filter_type
