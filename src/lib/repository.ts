@@ -51,12 +51,28 @@ type DocumentRow = {
 type SearchDocumentsOptions = {
   query?: string;
   documentType?: DocumentType | "all";
+  communeId?: string;
+  year?: number;
+  author?: string;
+  publisher?: string;
   limit?: number;
+  offset?: number;
 };
 
 type SearchDocumentsRow = {
   document_id: string;
   rank: number | null;
+};
+
+export type DocumentSearchResult = {
+  documents: Document[];
+  hasMore: boolean;
+};
+
+export type DocumentFilterOptions = {
+  years: number[];
+  authors: string[];
+  publishers: string[];
 };
 
 const fallbackCover =
@@ -273,6 +289,31 @@ function documentMatchesSearch(document: Document, options: SearchDocumentsOptio
     return false;
   }
 
+  if (options.communeId) {
+    const communeIds = document.communeIds?.length ? document.communeIds : document.communeId ? [document.communeId] : [];
+    if (!communeIds.includes(options.communeId)) {
+      return false;
+    }
+  }
+
+  if (options.year && document.year !== options.year) {
+    return false;
+  }
+
+  if (options.author?.trim()) {
+    const authorQuery = normalizeVietnamese(options.author.trim());
+    if (!normalizeVietnamese(document.author || "").includes(authorQuery)) {
+      return false;
+    }
+  }
+
+  if (options.publisher?.trim()) {
+    const publisherQuery = normalizeVietnamese(options.publisher.trim());
+    if (!normalizeVietnamese(document.publisher || "").includes(publisherQuery)) {
+      return false;
+    }
+  }
+
   const query = normalizeVietnamese(options.query?.trim() || "");
   if (!query) {
     return true;
@@ -297,23 +338,34 @@ function documentMatchesSearch(document: Document, options: SearchDocumentsOptio
   return searchableText.includes(query);
 }
 
-export async function searchDocuments(options: SearchDocumentsOptions = {}) {
+export async function searchDocuments(options: SearchDocumentsOptions = {}): Promise<DocumentSearchResult> {
   noStore();
 
   const query = options.query?.trim() || "";
   const documentType = options.documentType || "all";
   const limit = options.limit || 120;
+  const offset = options.offset || 0;
+  const requestedLimit = limit + 1;
   const supabase = getSupabaseAdminClient() || getSupabasePublicClient();
 
   if (!supabase) {
-    return mockDocuments.map(enrichMockDocument).filter((document) => documentMatchesSearch(document, options));
+    const documents = mockDocuments.map(enrichMockDocument).filter((document) => documentMatchesSearch(document, options));
+    return {
+      documents: documents.slice(0, limit),
+      hasMore: documents.length > limit
+    };
   }
 
-  if (query) {
+  if (query || documentType !== "all" || options.communeId || options.year || options.author || options.publisher) {
     const { data: searchRows, error: searchError } = await supabase.rpc("search_documents", {
       search_query: query,
       filter_type: documentType === "all" ? null : documentType,
-      result_limit: limit
+      filter_commune_id: options.communeId || null,
+      filter_year: options.year || null,
+      filter_author: options.author?.trim() || "",
+      filter_publisher: options.publisher?.trim() || "",
+      result_limit: requestedLimit,
+      result_offset: offset
     });
 
     if (!searchError && searchRows) {
@@ -321,16 +373,23 @@ export async function searchDocuments(options: SearchDocumentsOptions = {}) {
       const ids = rankedRows.map((row) => row.document_id).filter(Boolean);
 
       if (!ids.length) {
-        return [];
+        return {
+          documents: [],
+          hasMore: false
+        };
       }
 
       const { data, error } = await fetchDocumentRowsByIds(supabase, ids);
 
       if (!error) {
         const order = new Map(ids.map((id, index) => [id, index]));
-        return data
+        const documents = data
           .map((row) => mapDocument(row as DocumentRow))
           .sort((a, b) => (order.get(a.id) ?? 0) - (order.get(b.id) ?? 0));
+        return {
+          documents: documents.slice(0, limit),
+          hasMore: documents.length > limit
+        };
       }
     }
   }
@@ -338,10 +397,55 @@ export async function searchDocuments(options: SearchDocumentsOptions = {}) {
   const { data, error } = await fetchDocumentRows(supabase);
 
   if (error) {
-    return mockDocuments.map(enrichMockDocument).filter((document) => documentMatchesSearch(document, options));
+    const documents = mockDocuments.map(enrichMockDocument).filter((document) => documentMatchesSearch(document, options));
+    return {
+      documents: documents.slice(0, limit),
+      hasMore: documents.length > limit
+    };
   }
 
-  return data.map((row) => mapDocument(row as DocumentRow)).filter((document) => documentMatchesSearch(document, options));
+  const documents = data.map((row) => mapDocument(row as DocumentRow)).filter((document) => documentMatchesSearch(document, options));
+  return {
+    documents: documents.slice(offset, offset + limit),
+    hasMore: documents.length > offset + limit
+  };
+}
+
+export async function getDocumentFilterOptions(): Promise<DocumentFilterOptions> {
+  noStore();
+
+  const supabase = getSupabaseAdminClient() || getSupabasePublicClient();
+  const rows = supabase
+    ? await supabase.from("documents").select("year,author,publisher").limit(1000)
+    : { data: mockDocuments, error: null };
+
+  const data = rows.error || !rows.data ? mockDocuments : rows.data;
+  const years = new Set<number>();
+  const authors = new Set<string>();
+  const publishers = new Set<string>();
+
+  for (const row of data as Array<Partial<DocumentRow> | Document>) {
+    if (row.year) {
+      years.add(row.year);
+    }
+
+    const author = "author" in row ? row.author : undefined;
+    const publisher = "publisher" in row ? row.publisher : undefined;
+
+    if (author?.trim()) {
+      authors.add(author.trim());
+    }
+
+    if (publisher?.trim()) {
+      publishers.add(publisher.trim());
+    }
+  }
+
+  return {
+    years: Array.from(years).sort((left, right) => right - left),
+    authors: Array.from(authors).sort((left, right) => left.localeCompare(right, "vi")),
+    publishers: Array.from(publishers).sort((left, right) => left.localeCompare(right, "vi"))
+  };
 }
 
 export async function getAdminDocuments() {

@@ -88,9 +88,9 @@ export default async function CommuneDetailPage({ params }: { params: Promise<{ 
     { label: "Giai đoạn tư liệu", value: yearRange(relatedDocuments), icon: CalendarDays }
   ];
   const quickLinks = [
-    { label: "Tất cả tài liệu của địa phương", href: `/tai-lieu?q=${encodeURIComponent(commune.name)}` },
-    { label: "Chỉ xem tài liệu địa chí", href: `/tai-lieu?loai=dia_chi&q=${encodeURIComponent(commune.name)}` },
-    { label: "Chỉ xem Báo Tây Ninh", href: `/tai-lieu?loai=bao_tay_ninh&q=${encodeURIComponent(commune.name)}` }
+    { label: "Tất cả tài liệu của địa phương", href: `/tai-lieu?xa=${commune.id}` },
+    { label: "Chỉ xem tài liệu địa chí", href: `/tai-lieu?loai=dia_chi&xa=${commune.id}` },
+    { label: "Chỉ xem Báo Tây Ninh", href: `/tai-lieu?loai=bao_tay_ninh&xa=${commune.id}` }
   ];
 
   return (
@@ -210,7 +210,7 @@ export default async function CommuneDetailPage({ params }: { params: Promise<{ 
             <h2 className="text-2xl font-semibold text-ink">Tài liệu liên quan</h2>
           </div>
           <Link
-            href={`/tai-lieu?q=${encodeURIComponent(commune.name)}`}
+            href={`/tai-lieu?xa=${commune.id}`}
             className="inline-flex min-h-10 items-center rounded border border-ink/10 px-3 py-2 text-sm font-semibold text-ink transition hover:bg-white"
           >
             Xem toàn bộ trong kho tài liệu
