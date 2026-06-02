@@ -5,8 +5,10 @@ import { getCommunes, getDocuments } from "@/lib/repository";
 export default async function CommunesPage() {
   const [communes, documents] = await Promise.all([getCommunes(), getDocuments()]);
   const documentCounts = documents.reduce<Record<string, number>>((counts, document) => {
-    if (document.communeId) {
-      counts[document.communeId] = (counts[document.communeId] || 0) + 1;
+    const communeIds = document.communeIds?.length ? document.communeIds : document.communeId ? [document.communeId] : [];
+
+    for (const communeId of communeIds) {
+      counts[communeId] = (counts[communeId] || 0) + 1;
     }
 
     return counts;
