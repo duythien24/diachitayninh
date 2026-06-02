@@ -1,31 +1,52 @@
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { BookOpenCheck, LockKeyhole, LogIn } from "lucide-react";
 
 import {
   adminSessionCookie,
+  adminSessionMaxAge,
   createAdminSessionValue,
   safeAdminNextPath
 } from "@/lib/admin-auth";
+import { clearLoginRateLimit, getLoginRateLimitState, recordLoginFailure } from "@/lib/admin-rate-limit";
 import { verifyAdminLogin } from "@/lib/admin-users";
+
+function clientIpFromHeaders(headerStore: Headers) {
+  const forwardedFor = headerStore.get("x-forwarded-for");
+  if (forwardedFor) {
+    return forwardedFor.split(",")[0]?.trim() || "unknown";
+  }
+
+  return headerStore.get("x-real-ip") || "unknown";
+}
 
 async function loginAction(formData: FormData) {
   "use server";
 
-  const username = String(formData.get("username") || "");
+  const username = String(formData.get("username") || "").trim();
   const password = String(formData.get("password") || "");
   const nextPath = safeAdminNextPath(String(formData.get("next") || "/admin"));
+  const headerStore = await headers();
+  const clientIp = clientIpFromHeaders(headerStore);
+
+  const currentLimit = getLoginRateLimitState(clientIp, username);
+  if (currentLimit.locked) {
+    redirect(`/admin/login?error=locked&next=${encodeURIComponent(nextPath)}`);
+  }
 
   const login = await verifyAdminLogin(username, password);
 
   if (!login) {
-    redirect(`/admin/login?error=1&next=${encodeURIComponent(nextPath)}`);
+    const nextLimit = recordLoginFailure(clientIp, username);
+    redirect(`/admin/login?error=${nextLimit.locked ? "locked" : "1"}&next=${encodeURIComponent(nextPath)}`);
   }
+
+  clearLoginRateLimit(clientIp, username);
 
   const cookieStore = await cookies();
   cookieStore.set(adminSessionCookie, await createAdminSessionValue(login.username), {
     httpOnly: true,
-    maxAge: 60 * 60 * 8,
+    maxAge: adminSessionMaxAge,
     path: "/",
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production"
@@ -71,7 +92,9 @@ export default async function AdminLoginPage({
 
           {params.error ? (
             <div className="mt-5 rounded border border-lacquer/20 bg-lacquer/8 p-3 text-sm font-medium text-lacquer">
-              Tài khoản hoặc mật khẩu chưa đúng.
+              {params.error === "locked"
+                ? "Tài khoản hoặc địa chỉ truy cập này đã nhập sai quá nhiều lần. Vui lòng thử lại sau 10 phút."
+                : "Tài khoản hoặc mật khẩu chưa đúng."}
             </div>
           ) : null}
 
