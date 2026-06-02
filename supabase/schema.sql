@@ -21,9 +21,17 @@ create table if not exists communes (
   type text not null check (type in ('xa', 'phuong')),
   district_old text,
   description text,
+  cover_image_url text,
+  keywords text[],
   slug text not null unique,
-  created_at timestamptz not null default now()
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
 );
+
+alter table communes
+  add column if not exists cover_image_url text,
+  add column if not exists keywords text[],
+  add column if not exists updated_at timestamptz not null default now();
 
 create table if not exists documents (
   id uuid primary key default gen_random_uuid(),
@@ -225,6 +233,12 @@ create trigger documents_set_updated_at
 drop trigger if exists admin_users_set_updated_at on admin_users;
 create trigger admin_users_set_updated_at
   before update on admin_users
+  for each row
+  execute function set_updated_at();
+
+drop trigger if exists communes_set_updated_at on communes;
+create trigger communes_set_updated_at
+  before update on communes
   for each row
   execute function set_updated_at();
 

@@ -1,12 +1,16 @@
 import Link from "next/link";
-import { FilePlus2, FileText, Newspaper, ShieldCheck, Users } from "lucide-react";
+import { Building2, FilePlus2, FileText, Newspaper, ShieldCheck, Users } from "lucide-react";
 
 import { PageShell, SectionHeader } from "@/components/page-shell";
 import { getCurrentAdmin } from "@/lib/admin-users";
-import { getAdminDocuments, usingMockData } from "@/lib/repository";
+import { getAdminCommunes, getAdminDocuments, usingMockData } from "@/lib/repository";
 
 export default async function AdminPage() {
-  const [documents, currentAdmin] = await Promise.all([getAdminDocuments(), getCurrentAdmin()]);
+  const [documents, communes, currentAdmin] = await Promise.all([
+    getAdminDocuments(),
+    getAdminCommunes(),
+    getCurrentAdmin()
+  ]);
   const isMock = usingMockData();
   const communeDocumentCount = documents.filter((document) => document.documentType === "dia_chi").length;
   const newspaperDocumentCount = documents.filter((document) => document.documentType === "bao_tay_ninh").length;
@@ -26,11 +30,12 @@ export default async function AdminPage() {
         </div>
       ) : null}
 
-      <div className="mt-8 grid gap-4 md:grid-cols-3">
+      <div className="mt-8 grid gap-4 md:grid-cols-4">
         {[
           { label: "Tài liệu cấp xã", value: communeDocumentCount, icon: FileText },
           { label: "Tài liệu báo", value: newspaperDocumentCount, icon: Newspaper },
-          { label: "Tài liệu cấp tỉnh", value: provincialDocumentCount, icon: ShieldCheck }
+          { label: "Tài liệu cấp tỉnh", value: provincialDocumentCount, icon: ShieldCheck },
+          { label: "Xã/phường", value: communes.length, icon: Building2 }
         ].map((item) => {
           const Icon = item.icon;
           return (
@@ -57,6 +62,13 @@ export default async function AdminPage() {
         >
           <FilePlus2 className="h-4 w-4" aria-hidden="true" />
           Thêm tài liệu
+        </Link>
+        <Link
+          href="/admin/communes"
+          className="inline-flex min-h-11 items-center gap-2 rounded border border-ink/12 bg-white px-4 py-3 text-sm font-semibold text-ink transition hover:bg-paper"
+        >
+          <Building2 className="h-4 w-4" aria-hidden="true" />
+          Quản trị xã/phường
         </Link>
         <Link
           href="/admin/accounts"

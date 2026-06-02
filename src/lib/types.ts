@@ -8,6 +8,8 @@ export type Commune = {
   type: CommuneType;
   districtOld: string;
   description: string;
+  coverImageUrl?: string;
+  keywords?: string[];
   slug: string;
 };
 

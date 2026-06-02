@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ArrowLeft, CalendarDays, FileText, Library, Newspaper, Tags } from "lucide-react";
@@ -8,7 +9,7 @@ import { PageShell } from "@/components/page-shell";
 import { communeMergeInfoBySlug } from "@/lib/merge-info";
 import { getCommunes, getCommuneBySlug, getDocumentsByCommune } from "@/lib/repository";
 import type { Document, DocumentType } from "@/lib/types";
-import { cn, communeDescription, typePrefix } from "@/lib/utils";
+import { cn, typePrefix } from "@/lib/utils";
 
 export async function generateStaticParams() {
   const communes = await getCommunes();
@@ -27,7 +28,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
   return {
     title: `${typePrefix(commune.type)} ${commune.name} | Địa chí Tây Ninh`,
-    description: communeDescription(commune.name, commune.type)
+    description: commune.description
   };
 }
 
@@ -47,8 +48,15 @@ function yearRange(documents: Document[]) {
   return firstYear === lastYear ? String(firstYear) : `${firstYear} - ${lastYear}`;
 }
 
-function topKeywords(documents: Document[]) {
+function topKeywords(documents: Document[], communeKeywords: string[] = []) {
   const counts = new Map<string, number>();
+
+  for (const keyword of communeKeywords) {
+    const cleanKeyword = keyword.trim();
+    if (cleanKeyword) {
+      counts.set(cleanKeyword, (counts.get(cleanKeyword) || 0) + 5);
+    }
+  }
 
   for (const document of documents) {
     for (const keyword of document.keywords || []) {
@@ -79,7 +87,7 @@ export default async function CommuneDetailPage({ params }: { params: Promise<{ 
 
   const relatedDocuments = await getDocumentsByCommune(commune.id);
   const mergeInfo = communeMergeInfoBySlug[commune.slug];
-  const keywords = topKeywords(relatedDocuments);
+  const keywords = topKeywords(relatedDocuments, commune.keywords || []);
   const featuredDocuments = latestDocuments(relatedDocuments);
   const stats = [
     { label: "Tổng tài liệu", value: relatedDocuments.length, icon: FileText },
@@ -112,7 +120,19 @@ export default async function CommuneDetailPage({ params }: { params: Promise<{ 
               {relatedDocuments.length} tài liệu
             </span>
           </div>
-          <p className="mt-5 max-w-3xl leading-7 text-ink/70">{communeDescription(commune.name, commune.type)}</p>
+          {commune.coverImageUrl ? (
+            <div className="relative mt-6 aspect-[16/7] overflow-hidden rounded bg-paper">
+              <Image
+                src={commune.coverImageUrl}
+                alt=""
+                fill
+                sizes="(min-width: 1024px) 50vw, 100vw"
+                className="object-cover"
+              />
+            </div>
+          ) : null}
+
+          <p className="mt-5 max-w-3xl leading-7 text-ink/70">{commune.description}</p>
 
           <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
             {stats.map((item, index) => {

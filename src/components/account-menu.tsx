@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { FileText, KeyRound, LogIn, LogOut, UserCircle } from "lucide-react";
+import { Building2, FileText, KeyRound, LogIn, LogOut, UserCircle } from "lucide-react";
 
 import type { AdminRole } from "@/lib/admin-users";
 
@@ -81,6 +81,15 @@ export function AccountMenu({ account }: { account: AccountSession | null }) {
           >
             <FileText className="h-4 w-4" aria-hidden="true" />
             Quản lý tài liệu
+          </Link>
+          <Link
+            href="/admin/communes"
+            onClick={() => setIsOpen(false)}
+            className="flex items-center gap-2 px-4 py-3 text-sm font-semibold text-ink/72 transition hover:bg-paper hover:text-ink"
+            role="menuitem"
+          >
+            <Building2 className="h-4 w-4" aria-hidden="true" />
+            Quản trị xã/phường
           </Link>
           {account.role === "super_admin" ? (
             <Link

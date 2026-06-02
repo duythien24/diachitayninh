@@ -17,8 +17,11 @@ type CommuneRow = {
   type: CommuneType;
   district_old: string | null;
   description: string | null;
+  cover_image_url?: string | null;
+  keywords?: string[] | null;
   slug: string;
   created_at: string;
+  updated_at?: string;
 };
 
 type DocumentCommuneRow = {
@@ -84,6 +87,9 @@ const documentSelect =
 const legacyDocumentSelect =
   "id,title,slug,document_type,commune_id,year,description,source,preview_file_url,cover_image_url,is_preview_only,contact_note,created_at,communes(id,name,type,district_old,description,slug,created_at)";
 
+const communeSelect = "id,name,type,district_old,description,cover_image_url,keywords,slug,created_at,updated_at";
+const legacyCommuneSelect = "id,name,type,district_old,description,slug,created_at";
+
 function enrichMockDocument(document: Document): Document {
   const commune = getMockCommuneById(document.communeId);
   return {
@@ -102,11 +108,47 @@ function mapCommune(row: CommuneRow): Commune {
     districtOld: row.district_old || "Đơn vị hành chính sau sắp xếp năm 2025",
     description:
       row.description ||
-      "Hồ sơ địa chí đang được số hóa theo từng đợt. Giai đoạn đầu ưu tiên bản đọc thử, thông tin nguồn và hướng dẫn liên hệ thư viện.",
+      "Kho tư liệu địa chí, báo chí địa phương và tài liệu liên quan đến đơn vị hành chính này trên địa bàn tỉnh Tây Ninh.",
+    coverImageUrl: row.cover_image_url || undefined,
+    keywords: row.keywords || [],
     slug: row.slug
   };
 }
 
+async function fetchCommuneRows(
+  supabase: NonNullable<ReturnType<typeof getSupabaseAdminClient> | ReturnType<typeof getSupabasePublicClient>>
+) {
+  const full = await supabase.from("communes").select(communeSelect).order("type", { ascending: true }).order("name", { ascending: true });
+
+  if (!full.error) {
+    return full;
+  }
+
+  return supabase.from("communes").select(legacyCommuneSelect).order("type", { ascending: true }).order("name", { ascending: true });
+}
+
+async function fetchCommuneRowBySlug(
+  supabase: NonNullable<ReturnType<typeof getSupabaseAdminClient> | ReturnType<typeof getSupabasePublicClient>>,
+  slug: string
+) {
+  const full = await supabase.from("communes").select(communeSelect).eq("slug", slug).maybeSingle();
+
+  if (!full.error) {
+    return full;
+  }
+
+  return supabase.from("communes").select(legacyCommuneSelect).eq("slug", slug).maybeSingle();
+}
+
+async function fetchCommuneRowById(supabase: NonNullable<ReturnType<typeof getSupabaseAdminClient>>, id: string) {
+  const full = await supabase.from("communes").select(communeSelect).eq("id", id).maybeSingle();
+
+  if (!full.error) {
+    return full;
+  }
+
+  return supabase.from("communes").select(legacyCommuneSelect).eq("id", id).maybeSingle();
+}
 function mapLinkedCommunes(row: DocumentRow) {
   const legacyCommuneRow = Array.isArray(row.communes) ? row.communes[0] : row.communes;
   const linkedCommunes = (row.document_communes || [])
@@ -207,11 +249,7 @@ export async function getCommunes() {
     return mockCommunes;
   }
 
-  const { data, error } = await supabase
-    .from("communes")
-    .select("id,name,type,district_old,description,slug,created_at")
-    .order("type", { ascending: true })
-    .order("name", { ascending: true });
+  const { data, error } = await fetchCommuneRows(supabase);
 
   if (error || !data?.length) {
     return mockCommunes;
@@ -228,11 +266,7 @@ export async function getCommuneBySlug(slug: string) {
     return mockCommunes.find((commune) => commune.slug === slug);
   }
 
-  const { data, error } = await supabase
-    .from("communes")
-    .select("id,name,type,district_old,description,slug,created_at")
-    .eq("slug", slug)
-    .maybeSingle();
+  const { data, error } = await fetchCommuneRowBySlug(supabase, slug);
 
   if (error || !data) {
     return mockCommunes.find((commune) => commune.slug === slug);
@@ -253,14 +287,47 @@ export async function getCommuneById(id?: string) {
     return getMockCommuneById(id);
   }
 
-  const { data, error } = await supabase
-    .from("communes")
-    .select("id,name,type,district_old,description,slug,created_at")
-    .eq("id", id)
-    .maybeSingle();
+  const full = await supabase.from("communes").select(communeSelect).eq("id", id).maybeSingle();
+  const { data, error } = !full.error
+    ? full
+    : await supabase.from("communes").select(legacyCommuneSelect).eq("id", id).maybeSingle();
 
   if (error || !data) {
     return getMockCommuneById(id);
+  }
+
+  return mapCommune(data as CommuneRow);
+}
+
+export async function getAdminCommunes() {
+  noStore();
+
+  const supabase = getSupabaseAdminClient();
+  if (!supabase) {
+    return mockCommunes;
+  }
+
+  const { data, error } = await fetchCommuneRows(supabase);
+
+  if (error || !data?.length) {
+    return mockCommunes;
+  }
+
+  return data.map((row) => mapCommune(row as CommuneRow));
+}
+
+export async function getAdminCommuneById(id: string) {
+  noStore();
+
+  const supabase = getSupabaseAdminClient();
+  if (!supabase) {
+    return mockCommunes.find((commune) => commune.id === id);
+  }
+
+  const { data, error } = await fetchCommuneRowById(supabase, id);
+
+  if (error || !data) {
+    return mockCommunes.find((commune) => commune.id === id);
   }
 
   return mapCommune(data as CommuneRow);
