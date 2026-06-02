@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Building2, FilePlus2, FileText, Newspaper, ShieldCheck, Users } from "lucide-react";
+import { BarChart3, Building2, FilePlus2, FileText, Newspaper, ShieldCheck, Users } from "lucide-react";
 
 import { PageShell, SectionHeader } from "@/components/page-shell";
 import { getCurrentAdmin } from "@/lib/admin-users";
@@ -50,8 +50,15 @@ export default async function AdminPage() {
 
       <div className="mt-8 flex flex-wrap gap-3">
         <Link
-          href="/admin/documents"
+          href="/admin/statistics"
           className="inline-flex min-h-11 items-center gap-2 rounded bg-palm px-4 py-3 text-sm font-semibold text-white transition hover:bg-palm/90"
+        >
+          <BarChart3 className="h-4 w-4" aria-hidden="true" />
+          Thống kê dữ liệu
+        </Link>
+        <Link
+          href="/admin/documents"
+          className="inline-flex min-h-11 items-center gap-2 rounded border border-ink/12 bg-white px-4 py-3 text-sm font-semibold text-ink transition hover:bg-paper"
         >
           <FileText className="h-4 w-4" aria-hidden="true" />
           Quản lý tài liệu

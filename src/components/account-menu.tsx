@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { Building2, FileText, KeyRound, LogIn, LogOut, UserCircle } from "lucide-react";
+import { BarChart3, Building2, FileText, KeyRound, LogIn, LogOut, UserCircle } from "lucide-react";
 
 import type { AdminRole } from "@/lib/admin-users";
 
@@ -73,6 +73,15 @@ export function AccountMenu({ account }: { account: AccountSession | null }) {
             <p className="text-sm font-semibold text-ink">{account.username}</p>
             <p className="mt-1 text-xs text-ink/55">{account.roleLabel}</p>
           </div>
+          <Link
+            href="/admin/statistics"
+            onClick={() => setIsOpen(false)}
+            className="flex items-center gap-2 px-4 py-3 text-sm font-semibold text-ink/72 transition hover:bg-paper hover:text-ink"
+            role="menuitem"
+          >
+            <BarChart3 className="h-4 w-4" aria-hidden="true" />
+            Thống kê dữ liệu
+          </Link>
           <Link
             href="/admin/documents"
             onClick={() => setIsOpen(false)}
