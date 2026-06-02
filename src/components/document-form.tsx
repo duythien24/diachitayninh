@@ -82,6 +82,18 @@ function keywordValue(document?: Document) {
   return document?.keywords?.join(", ") || "";
 }
 
+function typeHelpText(type: DocumentType) {
+  if (type === "bao_tay_ninh") {
+    return "Báo Tây Ninh không bắt buộc gắn xã/phường. Nếu bài/số báo liên quan riêng địa phương nào, có thể bổ sung sau bằng loại địa chí hoặc metadata chi tiết hơn.";
+  }
+
+  if (type === "tai_lieu_cap_tinh") {
+    return "Tài liệu cấp tỉnh được lưu ở phạm vi toàn tỉnh, không gắn riêng xã/phường nào.";
+  }
+
+  return "Giữ Ctrl để chọn nhiều xã/phường nếu một tài liệu liên quan nhiều đơn vị.";
+}
+
 export function DocumentForm({ communes, document }: { communes: Commune[]; document?: Document }) {
   const action = document ? updateDocumentAction.bind(null, document.id) : createDocumentAction;
   const formRef = useRef<HTMLFormElement>(null);
@@ -90,6 +102,7 @@ export function DocumentForm({ communes, document }: { communes: Commune[]; docu
   const coverInputRef = useRef<HTMLInputElement>(null);
   const coverUrlRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [uploadStatus, setUploadStatus] = useState<string | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [selectedDocumentType, setSelectedDocumentType] = useState<DocumentType>(document?.documentType || "dia_chi");
   const [selectedCommuneIds, setSelectedCommuneIds] = useState<string[]>(
@@ -116,22 +129,27 @@ export function DocumentForm({ communes, document }: { communes: Commune[]; docu
     event.preventDefault();
     setUploadError(null);
     setIsUploading(true);
+    setUploadStatus("Đang kiểm tra file...");
 
     try {
       if (previewFile && previewUrlRef.current) {
+        setUploadStatus("Đang upload PDF lên Supabase Storage...");
         previewUrlRef.current.value = await signedUpload(previewFile, "pdf");
         if (previewInputRef.current) previewInputRef.current.value = "";
       }
 
       if (coverFile && coverUrlRef.current) {
+        setUploadStatus("Đang upload ảnh bìa...");
         coverUrlRef.current.value = await signedUpload(coverFile, "covers");
         if (coverInputRef.current) coverInputRef.current.value = "";
       }
 
+      setUploadStatus("Upload xong, đang lưu dữ liệu...");
       form.dataset.filesUploaded = "true";
       form.requestSubmit();
     } catch (error) {
       setUploadError(error instanceof Error ? error.message : "Không upload được file lên Supabase Storage.");
+      setUploadStatus(null);
       setIsUploading(false);
     }
   }
@@ -145,6 +163,12 @@ export function DocumentForm({ communes, document }: { communes: Commune[]; docu
       {uploadError ? (
         <div className="rounded border border-lacquer/20 bg-lacquer/8 p-4 text-sm font-medium text-lacquer">
           {uploadError}
+        </div>
+      ) : null}
+
+      {uploadStatus ? (
+        <div className="rounded border border-palm/20 bg-palm/8 p-4 text-sm font-medium text-palm">
+          {uploadStatus}
         </div>
       ) : null}
 
@@ -211,29 +235,33 @@ export function DocumentForm({ communes, document }: { communes: Commune[]; docu
         </label>
       </div>
 
-      <label className="grid gap-2 text-sm font-semibold text-ink">
-        Xã/phường liên quan
-        <select
-          name="commune_ids"
-          multiple
-          size={8}
-          value={selectedCommuneIds}
-          disabled={!canAttachCommunes}
-          onChange={(event) => {
-            setSelectedCommuneIds(Array.from(event.currentTarget.selectedOptions, (option) => option.value));
-          }}
-          className="rounded border border-ink/12 px-3 py-2.5 font-normal outline-none transition focus:border-palm disabled:bg-paper disabled:text-ink/45"
-        >
-          {communes.map((commune) => (
-            <option key={commune.id} value={commune.id}>
-              {typePrefix(commune.type)} {commune.name}
-            </option>
-          ))}
-        </select>
-        <span className="text-xs font-normal leading-5 text-ink/55">
-          Chỉ tài liệu địa chí cần gắn xã/phường. Có thể giữ Ctrl để chọn nhiều đơn vị.
-        </span>
-      </label>
+      {canAttachCommunes ? (
+        <label className="grid gap-2 text-sm font-semibold text-ink">
+          Xã/phường liên quan
+          <select
+            name="commune_ids"
+            multiple
+            size={8}
+            value={selectedCommuneIds}
+            onChange={(event) => {
+              setSelectedCommuneIds(Array.from(event.currentTarget.selectedOptions, (option) => option.value));
+            }}
+            className="rounded border border-ink/12 px-3 py-2.5 font-normal outline-none transition focus:border-palm"
+          >
+            {communes.map((commune) => (
+              <option key={commune.id} value={commune.id}>
+                {typePrefix(commune.type)} {commune.name}
+              </option>
+            ))}
+          </select>
+          <span className="text-xs font-normal leading-5 text-ink/55">{typeHelpText(selectedDocumentType)}</span>
+        </label>
+      ) : (
+        <div className="rounded border border-ink/10 bg-paper p-4 text-sm leading-6 text-ink/65">
+          <p className="font-semibold text-ink">Phạm vi tài liệu</p>
+          <p className="mt-1">{typeHelpText(selectedDocumentType)}</p>
+        </div>
+      )}
 
       <label className="grid gap-2 text-sm font-semibold text-ink">
         Mô tả
@@ -365,7 +393,7 @@ export function DocumentForm({ communes, document }: { communes: Commune[]; docu
           className="inline-flex items-center gap-2 rounded bg-palm px-4 py-3 text-sm font-semibold text-white transition hover:bg-palm/90 disabled:cursor-wait disabled:bg-palm/60"
         >
           <Save className="h-4 w-4" aria-hidden="true" />
-          {isUploading ? "Đang upload file..." : "Lưu tài liệu"}
+          {isUploading ? "Đang xử lý..." : "Lưu tài liệu"}
         </button>
       </div>
     </form>

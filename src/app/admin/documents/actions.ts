@@ -201,6 +201,34 @@ function legacyDocumentData<T extends Record<string, unknown>>(documentData: T) 
   return legacyData;
 }
 
+function storagePathFromPublicUrl(publicUrl?: string | null) {
+  if (!publicUrl) return null;
+
+  try {
+    const url = new URL(publicUrl);
+    const marker = `/storage/v1/object/public/${bucketName}/`;
+    const markerIndex = url.pathname.indexOf(marker);
+
+    if (markerIndex === -1) {
+      return null;
+    }
+
+    return decodeURIComponent(url.pathname.slice(markerIndex + marker.length));
+  } catch {
+    return null;
+  }
+}
+
+async function removePublicFiles(urls: Array<string | null | undefined>) {
+  const supabase = getSupabaseAdminClient();
+  if (!supabase) return;
+
+  const paths = Array.from(new Set(urls.map((url) => storagePathFromPublicUrl(url)).filter((path): path is string => Boolean(path))));
+  if (!paths.length) return;
+
+  await supabase.storage.from(bucketName).remove(paths);
+}
+
 async function documentPayload(formData: FormData, existingPreviewUrl?: string, existingCoverUrl?: string) {
   const title = textValue(formData, "title");
   const slug = slugify(textValue(formData, "slug") || title);
@@ -326,11 +354,22 @@ export async function deleteDocumentAction(documentId: string, formData: FormDat
     redirect(`/admin/documents?nhom=${documentGroup}&status=missing-env`);
   }
 
+  const { data: existingDocument } = await supabase
+    .from("documents")
+    .select("preview_file_url,cover_image_url")
+    .eq("id", documentId)
+    .maybeSingle();
+
   const { error } = await supabase.from("documents").delete().eq("id", documentId);
 
   if (error) {
     throw new Error(error.message);
   }
+
+  await removePublicFiles([
+    existingDocument?.preview_file_url as string | null | undefined,
+    existingDocument?.cover_image_url as string | null | undefined
+  ]);
 
   revalidatePath("/");
   revalidatePath("/tai-lieu");
