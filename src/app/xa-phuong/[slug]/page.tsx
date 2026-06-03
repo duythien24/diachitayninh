@@ -77,6 +77,10 @@ function latestDocuments(documents: Document[]) {
   return [...documents].sort((left, right) => right.year - left.year || right.createdAt.localeCompare(left.createdAt)).slice(0, 6);
 }
 
+function documentsOfType(documents: Document[], type: DocumentType) {
+  return documents.filter((document) => document.documentType === type);
+}
+
 export default async function CommuneDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const commune = await getCommuneBySlug(slug);
@@ -100,6 +104,36 @@ export default async function CommuneDetailPage({ params }: { params: Promise<{ 
     { label: "Chỉ xem tài liệu địa chí", href: `/tai-lieu?loai=dia_chi&xa=${commune.id}` },
     { label: "Chỉ xem Báo Tây Ninh", href: `/tai-lieu?loai=bao_tay_ninh&xa=${commune.id}` }
   ];
+  const documentGroups = [
+    {
+      type: "dia_chi" as const,
+      title: "Địa chí địa phương",
+      description: "Tài liệu về lịch sử, di tích, địa danh và đời sống của địa phương.",
+      href: `/tai-lieu?loai=dia_chi&xa=${commune.id}`,
+      icon: Library
+    },
+    {
+      type: "bao_tay_ninh" as const,
+      title: "Báo Tây Ninh",
+      description: "Các số báo, bài viết và chuyên đề báo chí có liên quan đến địa phương.",
+      href: `/tai-lieu?loai=bao_tay_ninh&xa=${commune.id}`,
+      icon: Newspaper
+    },
+    {
+      type: "tai_lieu_cap_tinh" as const,
+      title: "Tài liệu cấp tỉnh",
+      description: "Tư liệu cấp tỉnh được gắn thêm với địa phương này khi có liên quan.",
+      href: `/tai-lieu?loai=tai_lieu_cap_tinh&xa=${commune.id}`,
+      icon: FileText
+    }
+  ].map((group) => {
+    const documents = documentsOfType(relatedDocuments, group.type);
+    return {
+      ...group,
+      documents: latestDocuments(documents).slice(0, 3),
+      count: documents.length
+    };
+  });
 
   return (
     <PageShell>
@@ -221,6 +255,72 @@ export default async function CommuneDetailPage({ params }: { params: Promise<{ 
             )}
           </div>
         </aside>
+      </section>
+
+      <section className="mt-10">
+        <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-wide text-lacquer">Theo nhóm tư liệu</p>
+            <h2 className="mt-2 text-2xl font-semibold text-ink">Cấu trúc tài liệu của {commune.name}</h2>
+          </div>
+          <Link
+            href={`/tai-lieu?xa=${commune.id}`}
+            className="inline-flex min-h-10 items-center rounded border border-ink/10 px-3 py-2 text-sm font-semibold text-ink transition hover:bg-white"
+          >
+            Xem tất cả
+          </Link>
+        </div>
+
+        <div className="grid gap-5 lg:grid-cols-3">
+          {documentGroups.map((group, index) => {
+            const Icon = group.icon;
+            return (
+              <article key={group.type} className="flex min-h-[17rem] flex-col rounded border border-ink/10 bg-white p-5 shadow-sm">
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <p className="text-sm font-semibold uppercase tracking-wide text-lacquer">{group.count} tài liệu</p>
+                    <h3 className="mt-2 text-xl font-semibold text-ink">{group.title}</h3>
+                  </div>
+                  <span
+                    className={cn(
+                      "inline-flex h-11 w-11 shrink-0 items-center justify-center rounded text-white",
+                      index === 0 ? "bg-palm" : index === 1 ? "bg-blue" : "bg-gold"
+                    )}
+                  >
+                    <Icon className="h-5 w-5" aria-hidden="true" />
+                  </span>
+                </div>
+                <p className="mt-3 text-sm leading-6 text-ink/64">{group.description}</p>
+
+                {group.documents.length ? (
+                  <div className="mt-4 space-y-2">
+                    {group.documents.map((document) => (
+                      <Link
+                        key={document.id}
+                        href={`/tai-lieu/${document.slug}`}
+                        className="block rounded border border-ink/8 bg-paper/60 px-3 py-2 text-sm font-semibold text-ink transition hover:border-palm/25 hover:bg-paper"
+                      >
+                        <span className="line-clamp-1">{document.title}</span>
+                        <span className="mt-1 block text-xs font-medium text-ink/50">{document.year}</span>
+                      </Link>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="mt-4 rounded border border-dashed border-ink/16 bg-paper/60 px-3 py-2 text-sm leading-6 text-ink/55">
+                    Chưa có tài liệu thuộc nhóm này.
+                  </p>
+                )}
+
+                <Link
+                  href={group.href}
+                  className="mt-auto inline-flex min-h-10 items-center justify-center rounded border border-ink/10 px-3 py-2 text-sm font-semibold text-ink transition hover:bg-paper"
+                >
+                  Mở nhóm tài liệu
+                </Link>
+              </article>
+            );
+          })}
+        </div>
       </section>
 
       <section className="mt-10">
