@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Building2, FileText, Info } from "lucide-react";
 
 import { AccountMenu } from "@/components/account-menu";
+import { MobileNav } from "@/components/mobile-nav";
 import { adminRoleLabel, getCurrentAdmin } from "@/lib/admin-users";
 
 const nav = [
@@ -56,6 +57,7 @@ export async function SiteHeader() {
           })}
           <AccountMenu account={account} />
         </nav>
+        <MobileNav account={account} />
       </div>
     </header>
   );

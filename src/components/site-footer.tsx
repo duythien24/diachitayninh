@@ -36,22 +36,12 @@ export function SiteFooter() {
               <Phone className="h-5 w-5 shrink-0 text-brass" aria-hidden="true" />
               <span>Hotline: (0272) 3837050</span>
             </a>
-            <a
-              href="https://thuvien.tayninh.gov.vn"
-              target="_blank"
-              rel="noreferrer"
-              className={linkClass}
-            >
+            <a href="https://thuvien.tayninh.gov.vn" target="_blank" rel="noreferrer" className={linkClass}>
               <Globe className="h-5 w-5 shrink-0 text-brass" aria-hidden="true" />
               <span>Website: thuvien.tayninh.gov.vn</span>
               <ExternalLink className="ml-auto h-4 w-4 shrink-0" aria-hidden="true" />
             </a>
-            <a
-              href="https://www.facebook.com/ThuvientinhTayNinh"
-              target="_blank"
-              rel="noreferrer"
-              className={linkClass}
-            >
+            <a href="https://www.facebook.com/ThuvientinhTayNinh" target="_blank" rel="noreferrer" className={linkClass}>
               <Facebook className="h-5 w-5 shrink-0 text-brass" aria-hidden="true" />
               <span>Facebook: Thư viện tỉnh Tây Ninh</span>
               <ExternalLink className="ml-auto h-4 w-4 shrink-0" aria-hidden="true" />

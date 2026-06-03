@@ -21,13 +21,7 @@ export function DocumentCard({ document }: { document: Document }) {
   return (
     <article className="flex h-full min-h-[520px] flex-col overflow-hidden rounded border border-ink/10 bg-white shadow-sm transition hover:-translate-y-0.5 hover:border-palm/25 hover:shadow-soft">
       <div className="relative aspect-[5/3] overflow-hidden bg-ink/5">
-        <Image
-          src={document.coverImageUrl}
-          alt=""
-          fill
-          sizes="(min-width: 1024px) 33vw, 100vw"
-          className="object-cover"
-        />
+        <Image src={document.coverImageUrl} alt="" fill sizes="(min-width: 1024px) 33vw, 100vw" className="object-cover" />
         <div className="absolute left-3 top-3 max-w-[68%] truncate rounded bg-white/94 px-2.5 py-1 text-xs font-semibold text-ink shadow-sm">
           {documentTypeShortLabel(document.documentType)}
         </div>
@@ -38,9 +32,7 @@ export function DocumentCard({ document }: { document: Document }) {
 
       <div className="flex flex-1 flex-col p-5">
         <p className="text-sm text-ink/55">{document.year}</p>
-        <h2 className="mt-1 line-clamp-2 min-h-[3.05rem] text-lg font-semibold leading-snug text-ink">
-          {document.title}
-        </h2>
+        <h2 className="mt-1 line-clamp-2 min-h-[3.05rem] text-lg font-semibold leading-snug text-ink">{document.title}</h2>
         <p className="mt-4 line-clamp-3 min-h-[4.5rem] text-sm leading-6 text-ink/68">{document.description}</p>
 
         <div className="mt-4 min-h-7">

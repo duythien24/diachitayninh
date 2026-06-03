@@ -25,9 +25,7 @@ export function CommuneList({ communes }: { communes: CommuneListItem[] }) {
     const normalizedQuery = normalizeVietnamese(query.trim());
 
     return communes.filter((commune) => {
-      const matchesType =
-        filter === "all" ||
-        (filter === "has_docs" ? Boolean(commune.documentCount) : commune.type === filter);
+      const matchesType = filter === "all" || (filter === "has_docs" ? Boolean(commune.documentCount) : commune.type === filter);
       const searchableText = normalizeVietnamese(`${commune.name} ${commune.slug} ${commune.districtOld || ""}`);
       const matchesQuery = normalizedQuery.length === 0 || searchableText.includes(normalizedQuery);
 
@@ -82,17 +80,13 @@ export function CommuneList({ communes }: { communes: CommuneListItem[] }) {
               <div className="flex items-start justify-between gap-4">
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
-                    <p className="text-xs font-semibold uppercase tracking-wide text-lacquer">
-                      {typePrefix(commune.type)}
-                    </p>
+                    <p className="text-xs font-semibold uppercase tracking-wide text-lacquer">{typePrefix(commune.type)}</p>
                     {commune.documentCount ? (
                       <span className="rounded bg-palm/10 px-2 py-0.5 text-xs font-semibold text-palm">
                         {commune.documentCount} tài liệu
                       </span>
                     ) : (
-                      <span className="rounded bg-ink/5 px-2 py-0.5 text-xs font-semibold text-ink/45">
-                        Đang bổ sung
-                      </span>
+                      <span className="rounded bg-ink/5 px-2 py-0.5 text-xs font-semibold text-ink/45">Đang bổ sung</span>
                     )}
                   </div>
                   <h2 className="mt-2 truncate text-lg font-semibold text-ink">{commune.name}</h2>

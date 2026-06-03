@@ -24,7 +24,8 @@ const archiveCards = [
   {
     eyebrow: "Kho địa chí",
     title: "Địa chí Tây Ninh",
-    description: "Tra cứu tài liệu địa chí theo 96 xã, phường; mở bản PDF đọc thử hoặc bản đầy đủ nếu đã được cấp quyền công bố.",
+    description:
+      "Tra cứu tài liệu địa chí theo 96 xã, phường; mở bản PDF đọc thử hoặc bản đầy đủ nếu đã được cấp quyền công bố.",
     href: "/tai-lieu?loai=dia_chi",
     primaryLabel: "Mở địa chí",
     secondaryHref: "/xa-phuong",
@@ -35,7 +36,8 @@ const archiveCards = [
   {
     eyebrow: "Kho báo chí",
     title: "Báo Tây Ninh",
-    description: "Xem các số báo, chuyên đề và tuyển chọn bài viết địa phương đã được số hóa dưới dạng bản đọc trực tuyến.",
+    description:
+      "Xem các số báo, chuyên đề và tuyển chọn bài viết địa phương đã được số hóa dưới dạng bản đọc trực tuyến.",
     href: "/tai-lieu?loai=bao_tay_ninh",
     primaryLabel: "Mở báo chí",
     secondaryHref: "/tai-lieu?loai=bao_tay_ninh",
