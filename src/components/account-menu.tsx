@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { Activity, BarChart3, Building2, FileText, KeyRound, LogIn, LogOut, UserCircle } from "lucide-react";
+import { Activity, BarChart3, Building2, FileText, KeyRound, LogIn, LogOut, ServerCog, UserCircle } from "lucide-react";
 
 import type { AdminRole } from "@/lib/admin-users";
 
@@ -54,6 +54,14 @@ export function AccountMenu({ account }: { account: AccountSession | null }) {
     );
   }
 
+  const links = [
+    { href: "/admin/statistics", label: "Thống kê dữ liệu", icon: BarChart3 },
+    { href: "/admin/system", label: "Kiểm tra hệ thống", icon: ServerCog },
+    { href: "/admin/audit", label: "Lịch sử thao tác", icon: Activity },
+    { href: "/admin/documents", label: "Quản lý tài liệu", icon: FileText },
+    { href: "/admin/communes", label: "Quản trị xã/phường", icon: Building2 }
+  ];
+
   return (
     <div ref={menuRef} className="relative">
       <button
@@ -68,47 +76,26 @@ export function AccountMenu({ account }: { account: AccountSession | null }) {
       </button>
 
       {isOpen ? (
-        <div className="absolute right-0 top-full mt-2 w-64 overflow-hidden rounded border border-ink/10 bg-white shadow-soft" role="menu">
+        <div className="absolute right-0 top-full z-50 mt-2 w-64 overflow-hidden rounded border border-ink/10 bg-white shadow-soft" role="menu">
           <div className="border-b border-ink/10 px-4 py-3">
             <p className="text-sm font-semibold text-ink">{account.username}</p>
             <p className="mt-1 text-xs text-ink/55">{account.roleLabel}</p>
           </div>
-          <Link
-            href="/admin/statistics"
-            onClick={() => setIsOpen(false)}
-            className="flex items-center gap-2 px-4 py-3 text-sm font-semibold text-ink/72 transition hover:bg-paper hover:text-ink"
-            role="menuitem"
-          >
-            <BarChart3 className="h-4 w-4" aria-hidden="true" />
-            Thống kê dữ liệu
-          </Link>
-          <Link
-            href="/admin/audit"
-            onClick={() => setIsOpen(false)}
-            className="flex items-center gap-2 px-4 py-3 text-sm font-semibold text-ink/72 transition hover:bg-paper hover:text-ink"
-            role="menuitem"
-          >
-            <Activity className="h-4 w-4" aria-hidden="true" />
-            Lịch sử thao tác
-          </Link>
-          <Link
-            href="/admin/documents"
-            onClick={() => setIsOpen(false)}
-            className="flex items-center gap-2 px-4 py-3 text-sm font-semibold text-ink/72 transition hover:bg-paper hover:text-ink"
-            role="menuitem"
-          >
-            <FileText className="h-4 w-4" aria-hidden="true" />
-            Quản lý tài liệu
-          </Link>
-          <Link
-            href="/admin/communes"
-            onClick={() => setIsOpen(false)}
-            className="flex items-center gap-2 px-4 py-3 text-sm font-semibold text-ink/72 transition hover:bg-paper hover:text-ink"
-            role="menuitem"
-          >
-            <Building2 className="h-4 w-4" aria-hidden="true" />
-            Quản trị xã/phường
-          </Link>
+          {links.map((item) => {
+            const Icon = item.icon;
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                onClick={() => setIsOpen(false)}
+                className="flex items-center gap-2 px-4 py-3 text-sm font-semibold text-ink/72 transition hover:bg-paper hover:text-ink"
+                role="menuitem"
+              >
+                <Icon className="h-4 w-4" aria-hidden="true" />
+                {item.label}
+              </Link>
+            );
+          })}
           {account.role === "super_admin" ? (
             <Link
               href="/admin/accounts"

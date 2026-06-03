@@ -40,8 +40,6 @@ Trong Vercel project -> `Settings` -> `Environment Variables`, cần có:
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 - `SUPABASE_SERVICE_ROLE_KEY`
 - `NEXT_PUBLIC_SUPABASE_STORAGE_BUCKET`
-- `ADMIN_USERNAME`
-- `ADMIN_PASSWORD`
 - `ADMIN_SESSION_SECRET`
 
 Ghi chú:
@@ -50,7 +48,25 @@ Ghi chú:
 - `ADMIN_SESSION_SECRET` nên là chuỗi mạnh, khác mật khẩu admin.
 - Sau khi đổi env, cần redeploy Vercel.
 
-## 4. Kiểm Tra Search RPC
+## 4. Kiểm Tra Hệ Thống Sau Deploy
+
+Đăng nhập admin rồi mở:
+
+```txt
+/admin/system
+```
+
+Trang này kiểm tra nhanh:
+
+- Env Supabase và session admin.
+- Kết nối public/admin Supabase.
+- Bucket Storage.
+- Các bảng `communes`, `documents`, `document_communes`, `admin_users`, `admin_audit_logs`.
+- RPC `search_documents`.
+
+Nếu mục nào báo lỗi, làm theo dòng hướng dẫn hiển thị trong trang trước khi tiếp tục nhập dữ liệu.
+
+## 5. Kiểm Tra Search RPC
 
 Code đang gọi Supabase RPC `search_documents`. Nếu thiếu function này, trang tài liệu vẫn có fallback nhưng tìm kiếm sẽ kém hiệu quả.
 
@@ -74,7 +90,7 @@ from search_documents(
 
 Nếu trả về danh sách `document_id`, RPC hoạt động.
 
-## 5. Kiểm Tra Metadata Xã/Phường
+## 6. Kiểm Tra Metadata Xã/Phường
 
 Trang quản trị xã/phường cần các cột metadata trong bảng `communes`.
 
@@ -93,7 +109,7 @@ Sau đó kiểm tra:
 4. Lưu mô tả, từ khóa hoặc ảnh đại diện.
 5. Mở trang public của xã/phường đó để xác nhận nội dung đã cập nhật.
 
-## 6. Kiểm Tra Tài Khoản Admin
+## 7. Kiểm Tra Tài Khoản Admin
 
 Tài khoản `super_admin` có quyền:
 
@@ -111,7 +127,7 @@ Checklist bảo mật:
 3. Kiểm tra đăng xuất sau khi thao tác xong.
 4. Nếu nghi ngờ lộ mật khẩu, đổi mật khẩu admin và `ADMIN_SESSION_SECRET`, sau đó redeploy.
 
-## 7. Kiểm Tra Audit Log Quản Trị
+## 8. Kiểm Tra Audit Log Quản Trị
 
 Trang `/admin/audit` cần bảng `admin_audit_logs`.
 
@@ -129,7 +145,7 @@ Sau đó kiểm tra:
 3. Mở `/admin/audit`.
 4. Xác nhận log hiển thị tài khoản thao tác, loại thao tác, đối tượng và thời gian.
 
-## 8. Kiểm Tra Sau Deploy
+## 9. Kiểm Tra Sau Deploy
 
 Sau mỗi lần push/deploy:
 
@@ -137,11 +153,12 @@ Sau mỗi lần push/deploy:
 2. Mở `/tai-lieu` và thử tìm kiếm.
 3. Mở `/xa-phuong` và một trang xã/phường chi tiết.
 4. Đăng nhập `/admin/login`.
-5. Thử thêm/sửa một tài liệu test.
-6. Thử cập nhật một xã/phường test.
-7. Kiểm tra Vercel logs nếu có lỗi server-side.
+5. Mở `/admin/system` để kiểm tra SQL/env.
+6. Thử thêm/sửa một tài liệu test.
+7. Thử cập nhật một xã/phường test.
+8. Kiểm tra Vercel logs nếu có lỗi server-side.
 
-## 9. Hướng Nâng Cấp Sau Này
+## 10. Hướng Nâng Cấp Sau Này
 
 Chưa cần OCR/AI search ngay. Khi dữ liệu PDF nhiều hơn, nên làm theo thứ tự:
 

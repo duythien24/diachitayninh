@@ -1,9 +1,53 @@
 import Link from "next/link";
-import { Activity, BarChart3, Building2, FilePlus2, FileText, Newspaper, ShieldCheck, Users } from "lucide-react";
+import {
+  Activity,
+  BarChart3,
+  Building2,
+  FilePlus2,
+  FileText,
+  Newspaper,
+  ServerCog,
+  ShieldCheck,
+  Users
+} from "lucide-react";
 
 import { PageShell, SectionHeader } from "@/components/page-shell";
 import { getCurrentAdmin } from "@/lib/admin-users";
 import { getAdminCommunes, getAdminDocuments, usingMockData } from "@/lib/repository";
+
+const adminLinks = [
+  {
+    href: "/admin/statistics",
+    label: "Thống kê dữ liệu",
+    icon: BarChart3,
+    primary: true
+  },
+  {
+    href: "/admin/system",
+    label: "Kiểm tra hệ thống",
+    icon: ServerCog
+  },
+  {
+    href: "/admin/audit",
+    label: "Lịch sử thao tác",
+    icon: Activity
+  },
+  {
+    href: "/admin/documents",
+    label: "Quản lý tài liệu",
+    icon: FileText
+  },
+  {
+    href: "/admin/documents/new",
+    label: "Thêm tài liệu",
+    icon: FilePlus2
+  },
+  {
+    href: "/admin/communes",
+    label: "Quản trị xã/phường",
+    icon: Building2
+  }
+];
 
 export default async function AdminPage() {
   const [documents, communes, currentAdmin] = await Promise.all([
@@ -49,41 +93,23 @@ export default async function AdminPage() {
       </div>
 
       <div className="mt-8 flex flex-wrap gap-3">
-        <Link
-          href="/admin/statistics"
-          className="inline-flex min-h-11 items-center gap-2 rounded bg-palm px-4 py-3 text-sm font-semibold text-white transition hover:bg-palm/90"
-        >
-          <BarChart3 className="h-4 w-4" aria-hidden="true" />
-          Thống kê dữ liệu
-        </Link>
-        <Link
-          href="/admin/audit"
-          className="inline-flex min-h-11 items-center gap-2 rounded border border-ink/12 bg-white px-4 py-3 text-sm font-semibold text-ink transition hover:bg-paper"
-        >
-          <Activity className="h-4 w-4" aria-hidden="true" />
-          Lịch sử thao tác
-        </Link>
-        <Link
-          href="/admin/documents"
-          className="inline-flex min-h-11 items-center gap-2 rounded border border-ink/12 bg-white px-4 py-3 text-sm font-semibold text-ink transition hover:bg-paper"
-        >
-          <FileText className="h-4 w-4" aria-hidden="true" />
-          Quản lý tài liệu
-        </Link>
-        <Link
-          href="/admin/documents/new"
-          className="inline-flex min-h-11 items-center gap-2 rounded border border-ink/12 bg-white px-4 py-3 text-sm font-semibold text-ink transition hover:bg-paper"
-        >
-          <FilePlus2 className="h-4 w-4" aria-hidden="true" />
-          Thêm tài liệu
-        </Link>
-        <Link
-          href="/admin/communes"
-          className="inline-flex min-h-11 items-center gap-2 rounded border border-ink/12 bg-white px-4 py-3 text-sm font-semibold text-ink transition hover:bg-paper"
-        >
-          <Building2 className="h-4 w-4" aria-hidden="true" />
-          Quản trị xã/phường
-        </Link>
+        {adminLinks.map((item) => {
+          const Icon = item.icon;
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={
+                item.primary
+                  ? "inline-flex min-h-11 items-center gap-2 rounded bg-palm px-4 py-3 text-sm font-semibold text-white transition hover:bg-palm/90"
+                  : "inline-flex min-h-11 items-center gap-2 rounded border border-ink/12 bg-white px-4 py-3 text-sm font-semibold text-ink transition hover:bg-paper"
+              }
+            >
+              <Icon className="h-4 w-4" aria-hidden="true" />
+              {item.label}
+            </Link>
+          );
+        })}
         <Link
           href="/admin/accounts"
           className="inline-flex min-h-11 items-center gap-2 rounded border border-ink/12 bg-white px-4 py-3 text-sm font-semibold text-ink transition hover:bg-paper"
