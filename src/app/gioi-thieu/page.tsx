@@ -5,7 +5,7 @@ import { Archive, BookOpen, FileSearch, Library, Mail, ShieldCheck } from "lucid
 import { PageShell, SectionHeader } from "@/components/page-shell";
 
 export const metadata: Metadata = {
-  title: "Giới thiệu dự án | Địa chí Tây Ninh",
+  title: "Giới thiệu dự án",
   description:
     "Giới thiệu mục tiêu, nguồn tài liệu, chính sách bản đọc thử/toàn văn và thông tin liên hệ của dự án Địa chí số Tây Ninh."
 };
@@ -67,20 +67,20 @@ export default function AboutProjectPage() {
           </div>
           <div className="mt-5 space-y-4 text-sm leading-7 text-ink/70">
             <p>
-              Hệ thống chia tài liệu thành ba nhóm: địa chí xã/phường, Báo Tây Ninh và tài liệu cấp tỉnh. Mỗi tài liệu
-              có thể có mô tả, năm xuất bản, tác giả, nhà xuất bản, số trang, từ khóa và một hoặc nhiều xã/phường liên quan.
+              Hệ thống chia tài liệu thành ba nhóm: địa chí xã/phường, Báo Tây Ninh và tài liệu cấp tỉnh. Mỗi tài liệu có thể có
+              mô tả, năm xuất bản, tác giả, nhà xuất bản, số trang, từ khóa và một hoặc nhiều xã/phường liên quan.
             </p>
             <p>
-              Tài liệu được đánh dấu “Preview” chỉ công bố bản đọc thử. Người đọc cần bản đầy đủ sẽ liên hệ Thư viện tỉnh
-              Tây Ninh để được phục vụ theo quy định lưu trữ, bản quyền và khai thác tài liệu.
+              Tài liệu được đánh dấu “Preview” chỉ công bố bản đọc thử. Người đọc cần bản đầy đủ sẽ liên hệ Thư viện tỉnh Tây
+              Ninh để được phục vụ theo quy định lưu trữ, bản quyền và khai thác tài liệu.
             </p>
             <p>
-              Tài liệu được đánh dấu “Bản đầy đủ” có thể đọc trực tuyến toàn văn. Tài liệu nội bộ hoặc chưa đủ điều kiện
-              công bố không nên upload lên web; chỉ nên đưa lên bản rút gọn có watermark.
+              Tài liệu được đánh dấu “Bản đầy đủ” có thể đọc trực tuyến toàn văn. Tài liệu nội bộ hoặc chưa đủ điều kiện công bố
+              không nên upload lên web; chỉ nên đưa lên bản rút gọn có watermark.
             </p>
             <p>
-              Hệ thống hiện hỗ trợ tìm kiếm theo từ khóa, loại tài liệu, xã/phường, năm, tác giả và nhà xuất bản. Khi dữ
-              liệu PDF tăng mạnh, bước nâng cấp tiếp theo là OCR nội dung PDF để tìm kiếm sâu trong nội dung sách/báo.
+              Hệ thống hiện hỗ trợ tìm kiếm theo từ khóa, loại tài liệu, xã/phường, năm, tác giả và nhà xuất bản. Khi dữ liệu PDF
+              tăng mạnh, bước nâng cấp tiếp theo là OCR nội dung PDF để tìm kiếm sâu trong nội dung sách/báo.
             </p>
           </div>
           <div className="mt-6 flex flex-wrap gap-3">
