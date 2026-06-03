@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
+import { writeAuditLog } from "@/lib/audit-log";
 import {
   getCurrentAdmin,
   hashAdminPassword,
@@ -67,7 +68,17 @@ export async function createAdminUserAction(formData: FormData) {
     redirect("/admin/accounts?status=create-failed");
   }
 
+  await writeAuditLog({
+    action: "account.create",
+    entityType: "account",
+    entityLabel: username,
+    metadata: {
+      role: "document_manager"
+    }
+  });
+
   revalidatePath("/admin/accounts");
+  revalidatePath("/admin/audit");
   redirect("/admin/accounts?status=created");
 }
 
@@ -115,7 +126,18 @@ export async function changeCurrentAdminPasswordAction(formData: FormData) {
     redirect("/admin/accounts?status=password-failed");
   }
 
+  await writeAuditLog({
+    action: "account.password_change",
+    entityType: "account",
+    entityId: currentAdmin.userId,
+    entityLabel: currentAdmin.username,
+    metadata: {
+      source: currentAdmin.source
+    }
+  });
+
   revalidatePath("/admin/accounts");
+  revalidatePath("/admin/audit");
   redirect("/admin/accounts?status=password-updated");
 }
 
@@ -126,6 +148,7 @@ export async function deleteAdminUserAction(userId: string) {
   }
 
   const supabase = adminClient();
+  const { data: user } = await supabase.from("admin_users").select("username,role").eq("id", userId).maybeSingle();
   const { error } = await supabase.from("admin_users").delete().eq("id", userId);
 
   if (error) {
@@ -135,6 +158,17 @@ export async function deleteAdminUserAction(userId: string) {
     redirect("/admin/accounts?status=delete-failed");
   }
 
+  await writeAuditLog({
+    action: "account.delete",
+    entityType: "account",
+    entityId: userId,
+    entityLabel: (user?.username as string | undefined) || userId,
+    metadata: {
+      role: user?.role || "document_manager"
+    }
+  });
+
   revalidatePath("/admin/accounts");
+  revalidatePath("/admin/audit");
   redirect("/admin/accounts?status=deleted");
 }

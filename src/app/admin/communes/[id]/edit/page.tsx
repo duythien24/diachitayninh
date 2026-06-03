@@ -35,6 +35,7 @@ export default async function EditCommunePage({ params }: { params: Promise<{ id
 
           <form action={action} className="mt-8 grid gap-5 rounded border border-ink/10 bg-white p-6 shadow-sm">
             <input type="hidden" name="slug" value={commune.slug} />
+            <input type="hidden" name="name" value={commune.name} />
             <input type="hidden" name="existing_cover_image_url" value={commune.coverImageUrl || ""} />
 
             <label className="grid gap-2 text-sm font-semibold text-ink">

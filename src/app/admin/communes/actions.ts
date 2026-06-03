@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
+import { writeAuditLog } from "@/lib/audit-log";
 import { getCurrentAdmin } from "@/lib/admin-users";
 import { getSupabaseAdminClient } from "@/lib/supabase-server";
 import { slugify } from "@/lib/utils";
@@ -120,6 +121,19 @@ export async function updateCommuneAction(communeId: string, formData: FormData)
   }
 
   const slug = textValue(formData, "slug");
+  const communeName = textValue(formData, "name") || communeId;
+
+  await writeAuditLog({
+    action: "commune.update",
+    entityType: "commune",
+    entityId: communeId,
+    entityLabel: communeName,
+    metadata: {
+      slug,
+      hasCoverImage: Boolean(coverImageUrl),
+      keywords: communeData.keywords || []
+    }
+  });
 
   revalidatePath("/");
   revalidatePath("/xa-phuong");
@@ -127,5 +141,6 @@ export async function updateCommuneAction(communeId: string, formData: FormData)
     revalidatePath(`/xa-phuong/${slug}`);
   }
   revalidatePath("/admin/communes");
+  revalidatePath("/admin/audit");
   redirect("/admin/communes?status=updated");
 }

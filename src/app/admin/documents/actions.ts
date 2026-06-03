@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
+import { writeAuditLog } from "@/lib/audit-log";
 import { getSupabaseAdminClient } from "@/lib/supabase-server";
 import type { DocumentType } from "@/lib/types";
 import { slugify } from "@/lib/utils";
@@ -305,11 +306,23 @@ export async function createDocumentAction(formData: FormData) {
 
   if (data?.id) {
     await syncDocumentCommunes(supabase, data.id, communeIds);
+    await writeAuditLog({
+      action: "document.create",
+      entityType: "document",
+      entityId: data.id,
+      entityLabel: documentData.title,
+      metadata: {
+        documentType: documentData.document_type,
+        year: documentData.year,
+        communeIds
+      }
+    });
   }
 
   revalidatePath("/");
   revalidatePath("/tai-lieu");
   revalidatePath("/admin/documents");
+  revalidatePath("/admin/audit");
   redirect(`/admin/documents?nhom=${documentGroupParam(selectedDocumentType)}&status=created`);
 }
 
@@ -339,10 +352,22 @@ export async function updateDocumentAction(documentId: string, formData: FormDat
   }
 
   await syncDocumentCommunes(supabase, documentId, communeIds);
+  await writeAuditLog({
+    action: "document.update",
+    entityType: "document",
+    entityId: documentId,
+    entityLabel: documentData.title,
+    metadata: {
+      documentType: documentData.document_type,
+      year: documentData.year,
+      communeIds
+    }
+  });
 
   revalidatePath("/");
   revalidatePath("/tai-lieu");
   revalidatePath("/admin/documents");
+  revalidatePath("/admin/audit");
   redirect(`/admin/documents?nhom=${documentGroupParam(selectedDocumentType)}&status=updated`);
 }
 
@@ -356,7 +381,7 @@ export async function deleteDocumentAction(documentId: string, formData: FormDat
 
   const { data: existingDocument } = await supabase
     .from("documents")
-    .select("preview_file_url,cover_image_url")
+    .select("title,document_type,preview_file_url,cover_image_url")
     .eq("id", documentId)
     .maybeSingle();
 
@@ -370,9 +395,19 @@ export async function deleteDocumentAction(documentId: string, formData: FormDat
     existingDocument?.preview_file_url as string | null | undefined,
     existingDocument?.cover_image_url as string | null | undefined
   ]);
+  await writeAuditLog({
+    action: "document.delete",
+    entityType: "document",
+    entityId: documentId,
+    entityLabel: (existingDocument?.title as string | undefined) || documentId,
+    metadata: {
+      documentType: existingDocument?.document_type || documentGroup
+    }
+  });
 
   revalidatePath("/");
   revalidatePath("/tai-lieu");
   revalidatePath("/admin/documents");
+  revalidatePath("/admin/audit");
   redirect(`/admin/documents?nhom=${documentGroup}&status=deleted`);
 }

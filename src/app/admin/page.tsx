@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { BarChart3, Building2, FilePlus2, FileText, Newspaper, ShieldCheck, Users } from "lucide-react";
+import { Activity, BarChart3, Building2, FilePlus2, FileText, Newspaper, ShieldCheck, Users } from "lucide-react";
 
 import { PageShell, SectionHeader } from "@/components/page-shell";
 import { getCurrentAdmin } from "@/lib/admin-users";
@@ -55,6 +55,13 @@ export default async function AdminPage() {
         >
           <BarChart3 className="h-4 w-4" aria-hidden="true" />
           Thống kê dữ liệu
+        </Link>
+        <Link
+          href="/admin/audit"
+          className="inline-flex min-h-11 items-center gap-2 rounded border border-ink/12 bg-white px-4 py-3 text-sm font-semibold text-ink transition hover:bg-paper"
+        >
+          <Activity className="h-4 w-4" aria-hidden="true" />
+          Lịch sử thao tác
         </Link>
         <Link
           href="/admin/documents"

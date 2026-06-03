@@ -14,6 +14,7 @@ Thực hiện định kỳ trước khi sửa schema hoặc import nhiều dữ 
    - `documents`
    - `document_communes`
    - `admin_users`
+   - `admin_audit_logs`
 5. Lưu file backup theo tên có ngày, ví dụ `supabase-backup-2026-06-02.sql`.
 
 ## 2. Backup Supabase Storage
@@ -110,7 +111,25 @@ Checklist bảo mật:
 3. Kiểm tra đăng xuất sau khi thao tác xong.
 4. Nếu nghi ngờ lộ mật khẩu, đổi mật khẩu admin và `ADMIN_SESSION_SECRET`, sau đó redeploy.
 
-## 7. Kiểm Tra Sau Deploy
+## 7. Kiểm Tra Audit Log Quản Trị
+
+Trang `/admin/audit` cần bảng `admin_audit_logs`.
+
+Chạy file SQL:
+
+```sql
+-- Supabase SQL Editor
+-- copy nội dung file supabase/admin-audit-logs.sql và chạy
+```
+
+Sau đó kiểm tra:
+
+1. Đăng nhập admin.
+2. Thêm hoặc sửa một tài liệu test.
+3. Mở `/admin/audit`.
+4. Xác nhận log hiển thị tài khoản thao tác, loại thao tác, đối tượng và thời gian.
+
+## 8. Kiểm Tra Sau Deploy
 
 Sau mỗi lần push/deploy:
 
@@ -122,7 +141,7 @@ Sau mỗi lần push/deploy:
 6. Thử cập nhật một xã/phường test.
 7. Kiểm tra Vercel logs nếu có lỗi server-side.
 
-## 8. Hướng Nâng Cấp Sau Này
+## 9. Hướng Nâng Cấp Sau Này
 
 Chưa cần OCR/AI search ngay. Khi dữ liệu PDF nhiều hơn, nên làm theo thứ tự:
 
