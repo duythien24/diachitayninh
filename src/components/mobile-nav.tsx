@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { Building2, FileText, Info, LogIn, LogOut, Menu, ShieldCheck, X } from "lucide-react";
+import { Building2, CircleHelp, FileText, Info, LogIn, LogOut, Menu, ShieldCheck, X } from "lucide-react";
 
 import type { AccountSession } from "@/components/account-menu";
 
@@ -58,6 +58,14 @@ export function MobileNav({ account }: { account: AccountSession | null }) {
                 >
                   <ShieldCheck className="h-4 w-4 text-ink/55" aria-hidden="true" />
                   Quản lý tài liệu
+                </Link>
+                <Link
+                  href="/admin/huong-dan"
+                  onClick={() => setIsOpen(false)}
+                  className="flex min-h-12 items-center gap-3 px-4 py-3 text-sm font-semibold text-ink transition hover:bg-white"
+                >
+                  <CircleHelp className="h-4 w-4 text-ink/55" aria-hidden="true" />
+                  Hướng dẫn quản trị
                 </Link>
                 <form action="/admin/logout" method="post">
                   <button

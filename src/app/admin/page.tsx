@@ -5,6 +5,7 @@ import {
   BarChart3,
   Building2,
   CheckCircle2,
+  CircleHelp,
   FilePlus2,
   FileText,
   Newspaper,
@@ -28,6 +29,11 @@ const adminLinks = [
     href: "/admin/system",
     label: "Kiểm tra hệ thống",
     icon: ServerCog
+  },
+  {
+    href: "/admin/huong-dan",
+    label: "Hướng dẫn quản trị",
+    icon: CircleHelp
   },
   {
     href: "/admin/audit",

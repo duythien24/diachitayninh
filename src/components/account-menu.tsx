@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { Activity, BarChart3, Building2, FileText, KeyRound, LogIn, LogOut, ServerCog, UserCircle } from "lucide-react";
+import { Activity, BarChart3, Building2, CircleHelp, FileText, KeyRound, LogIn, LogOut, ServerCog, UserCircle } from "lucide-react";
 
 import type { AdminRole } from "@/lib/admin-users";
 
@@ -57,6 +57,7 @@ export function AccountMenu({ account }: { account: AccountSession | null }) {
   const links = [
     { href: "/admin/statistics", label: "Thống kê dữ liệu", icon: BarChart3 },
     { href: "/admin/system", label: "Kiểm tra hệ thống", icon: ServerCog },
+    { href: "/admin/huong-dan", label: "Hướng dẫn quản trị", icon: CircleHelp },
     { href: "/admin/audit", label: "Lịch sử thao tác", icon: Activity },
     { href: "/admin/documents", label: "Quản lý tài liệu", icon: FileText },
     { href: "/admin/communes", label: "Quản trị xã/phường", icon: Building2 }
