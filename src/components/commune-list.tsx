@@ -2,17 +2,18 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { ArrowRight, Search } from "lucide-react";
+import { ArrowRight, Building2, CheckCircle2, Clock3, MapPinned, Search } from "lucide-react";
 
 import type { Commune, CommuneType } from "@/lib/types";
 import { cn, normalizeVietnamese, typePrefix } from "@/lib/utils";
 
-type Filter = "all" | CommuneType | "has_docs";
+type Filter = "all" | CommuneType | "has_docs" | "no_docs";
 export type CommuneListItem = Commune & { documentCount?: number };
 
 const filters: Array<{ label: string; value: Filter }> = [
-  { label: "Có tài liệu", value: "has_docs" },
   { label: "Tất cả", value: "all" },
+  { label: "Có tài liệu", value: "has_docs" },
+  { label: "Chưa có tài liệu", value: "no_docs" },
   { label: "Xã", value: "xa" },
   { label: "Phường", value: "phuong" }
 ];
@@ -21,11 +22,27 @@ export function CommuneList({ communes }: { communes: CommuneListItem[] }) {
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<Filter>("all");
 
+  const summary = useMemo(() => {
+    const hasDocuments = communes.filter((commune) => Boolean(commune.documentCount)).length;
+    return [
+      { label: "Tổng đơn vị", value: communes.length, icon: MapPinned },
+      { label: "Có tài liệu", value: hasDocuments, icon: CheckCircle2 },
+      { label: "Đang bổ sung", value: communes.length - hasDocuments, icon: Clock3 },
+      { label: "Phường", value: communes.filter((commune) => commune.type === "phuong").length, icon: Building2 }
+    ];
+  }, [communes]);
+
   const filteredCommunes = useMemo(() => {
     const normalizedQuery = normalizeVietnamese(query.trim());
 
     return communes.filter((commune) => {
-      const matchesType = filter === "all" || (filter === "has_docs" ? Boolean(commune.documentCount) : commune.type === filter);
+      const matchesType =
+        filter === "all" ||
+        (filter === "has_docs"
+          ? Boolean(commune.documentCount)
+          : filter === "no_docs"
+            ? !commune.documentCount
+            : commune.type === filter);
       const searchableText = normalizeVietnamese(`${commune.name} ${commune.slug} ${commune.districtOld || ""}`);
       const matchesQuery = normalizedQuery.length === 0 || searchableText.includes(normalizedQuery);
 
@@ -36,6 +53,22 @@ export function CommuneList({ communes }: { communes: CommuneListItem[] }) {
   return (
     <section className="mt-8">
       <div className="rounded border border-ink/10 bg-white p-3 shadow-sm">
+        <div className="mb-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          {summary.map((item, index) => {
+            const Icon = item.icon;
+            return (
+              <div key={item.label} className="rounded border border-ink/8 bg-paper/70 p-4">
+                <Icon
+                  className={cn("h-5 w-5", index === 1 ? "text-palm" : index === 2 ? "text-gold" : "text-lacquer")}
+                  aria-hidden="true"
+                />
+                <p className="mt-3 text-2xl font-semibold text-ink">{item.value}</p>
+                <p className="mt-1 text-sm text-ink/55">{item.label}</p>
+              </div>
+            );
+          })}
+        </div>
+
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <label className="flex min-h-12 items-center gap-3 rounded border border-ink/10 bg-paper/80 px-4 text-ink/55 lg:w-[30rem]">
             <Search className="h-4 w-4" aria-hidden="true" />
@@ -91,7 +124,10 @@ export function CommuneList({ communes }: { communes: CommuneListItem[] }) {
                   </div>
                   <h2 className="mt-2 truncate text-lg font-semibold text-ink">{commune.name}</h2>
                 </div>
-                <ArrowRight className="h-4 w-4 shrink-0 text-ink/35 transition group-hover:translate-x-1 group-hover:text-palm" aria-hidden="true" />
+                <ArrowRight
+                  className="h-4 w-4 shrink-0 text-ink/35 transition group-hover:translate-x-1 group-hover:text-palm"
+                  aria-hidden="true"
+                />
               </div>
               <p className="mt-3 line-clamp-3 text-sm leading-6 text-ink/62">{commune.description}</p>
             </Link>

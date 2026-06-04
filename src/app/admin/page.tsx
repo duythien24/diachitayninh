@@ -1,8 +1,10 @@
 import Link from "next/link";
 import {
   Activity,
+  AlertTriangle,
   BarChart3,
   Building2,
+  CheckCircle2,
   FilePlus2,
   FileText,
   Newspaper,
@@ -59,13 +61,40 @@ export default async function AdminPage() {
   const communeDocumentCount = documents.filter((document) => document.documentType === "dia_chi").length;
   const newspaperDocumentCount = documents.filter((document) => document.documentType === "bao_tay_ninh").length;
   const provincialDocumentCount = documents.filter((document) => document.documentType === "tai_lieu_cap_tinh").length;
+  const previewDocumentCount = documents.filter((document) => document.isPreviewOnly).length;
+  const fullDocumentCount = documents.length - previewDocumentCount;
+  const missingPageCount = documents.filter((document) => !document.pageCount).length;
+  const missingKeywordCount = documents.filter((document) => !document.keywords?.length).length;
+  const missingCommuneLinkCount = documents.filter(
+    (document) => document.documentType !== "tai_lieu_cap_tinh" && !document.communeIds?.length && !document.communeId
+  ).length;
+  const qualityItems = [
+    {
+      label: "Thiếu số trang",
+      value: missingPageCount,
+      description: "Nên bổ sung để người đọc biết dung lượng tài liệu.",
+      warning: missingPageCount > 0
+    },
+    {
+      label: "Thiếu từ khóa",
+      value: missingKeywordCount,
+      description: "Từ khóa giúp tìm kiếm và gợi ý tài liệu liên quan chính xác hơn.",
+      warning: missingKeywordCount > 0
+    },
+    {
+      label: "Chưa gắn xã/phường",
+      value: missingCommuneLinkCount,
+      description: "Chỉ tính tài liệu địa chí hoặc báo chí cần gắn địa phương.",
+      warning: missingCommuneLinkCount > 0
+    }
+  ];
 
   return (
     <PageShell>
       <SectionHeader
         eyebrow="Quản trị"
         title="Bảng điều khiển tài liệu"
-        description="Theo dõi số lượng tài liệu theo từng nhóm và truy cập nhanh các công cụ quản trị nội dung."
+        description="Theo dõi số lượng tài liệu theo từng nhóm, chất lượng metadata và truy cập nhanh các công cụ quản trị nội dung."
       />
 
       {isMock ? (
@@ -91,6 +120,51 @@ export default async function AdminPage() {
           );
         })}
       </div>
+
+      <section className="mt-8 grid gap-5 lg:grid-cols-[1fr_22rem]">
+        <div className="rounded border border-ink/10 bg-white p-5 shadow-sm">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <p className="text-sm font-semibold uppercase tracking-wide text-lacquer">Chất lượng dữ liệu</p>
+              <h2 className="mt-2 text-2xl font-semibold text-ink">Việc nên rà soát trước khi công bố rộng rãi</h2>
+            </div>
+            <Link
+              href="/admin/documents"
+              className="inline-flex min-h-10 items-center rounded border border-ink/10 px-3 py-2 text-sm font-semibold text-ink transition hover:bg-paper"
+            >
+              Mở danh sách tài liệu
+            </Link>
+          </div>
+          <div className="mt-5 grid gap-3 md:grid-cols-3">
+            {qualityItems.map((item) => {
+              const Icon = item.warning ? AlertTriangle : CheckCircle2;
+              return (
+                <div key={item.label} className="rounded border border-ink/10 bg-paper/70 p-4">
+                  <Icon className={item.warning ? "h-5 w-5 text-gold" : "h-5 w-5 text-palm"} aria-hidden="true" />
+                  <p className="mt-4 text-2xl font-semibold text-ink">{item.value}</p>
+                  <p className="mt-1 text-sm font-semibold text-ink">{item.label}</p>
+                  <p className="mt-2 text-sm leading-6 text-ink/58">{item.description}</p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="rounded border border-ink/10 bg-white p-5 shadow-sm">
+          <p className="text-sm font-semibold uppercase tracking-wide text-lacquer">Trạng thái đọc</p>
+          <h2 className="mt-2 text-2xl font-semibold text-ink">Preview / toàn văn</h2>
+          <div className="mt-5 space-y-3">
+            <div className="rounded border border-palm/15 bg-palm/8 p-4">
+              <p className="text-2xl font-semibold text-palm">{fullDocumentCount}</p>
+              <p className="mt-1 text-sm text-ink/62">Tài liệu đọc đầy đủ</p>
+            </div>
+            <div className="rounded border border-gold/20 bg-gold/10 p-4">
+              <p className="text-2xl font-semibold text-ink">{previewDocumentCount}</p>
+              <p className="mt-1 text-sm text-ink/62">Tài liệu chỉ đọc thử</p>
+            </div>
+          </div>
+        </div>
+      </section>
 
       <div className="mt-8 flex flex-wrap gap-3">
         {adminLinks.map((item) => {

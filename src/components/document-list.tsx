@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState, useTransition } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { ArrowDown, FileText, Files, Newspaper, RotateCcw, Search } from "lucide-react";
+import { ArrowDown, FileText, Files, Newspaper, RotateCcw, Search, X } from "lucide-react";
 
 import { DocumentCard } from "@/components/document-card";
 import type { Commune, Document, DocumentType } from "@/lib/types";
@@ -117,6 +117,54 @@ export function DocumentList({
     params.set("page", String(currentPage + 1));
     return `${pathname}?${params.toString()}`;
   }, [currentPage, pathname, searchParams]);
+  const selectedCommune = useMemo(
+    () => communes.find((commune) => commune.id === communeId),
+    [communes, communeId]
+  );
+  const activeFilters = [
+    query.trim()
+      ? {
+          key: "query",
+          label: `Từ khóa: ${query.trim()}`,
+          clear: () => setQuery("")
+        }
+      : null,
+    filter !== "all"
+      ? {
+          key: "type",
+          label: filters.find((item) => item.value === filter)?.label || "Loại tài liệu",
+          clear: () => setFilter("all")
+        }
+      : null,
+    selectedCommune
+      ? {
+          key: "commune",
+          label: `${typePrefix(selectedCommune.type)} ${selectedCommune.name}`,
+          clear: () => setCommuneId("")
+        }
+      : null,
+    year
+      ? {
+          key: "year",
+          label: `Năm: ${year}`,
+          clear: () => setYear("")
+        }
+      : null,
+    author
+      ? {
+          key: "author",
+          label: `Tác giả: ${author}`,
+          clear: () => setAuthor("")
+        }
+      : null,
+    publisher
+      ? {
+          key: "publisher",
+          label: `NXB: ${publisher}`,
+          clear: () => setPublisher("")
+        }
+      : null
+  ].filter((item): item is { key: string; label: string; clear: () => void } => Boolean(item));
 
   return (
     <section className="mt-8">
@@ -216,8 +264,27 @@ export function DocumentList({
         </div>
 
         <p className="mt-3 text-sm text-ink/55">
-          {isPending ? "Đang tìm trên Supabase..." : `Đang hiển thị ${documents.length} tài liệu`}
+          {isPending
+            ? "Đang tìm trên Supabase..."
+            : `Đang hiển thị ${documents.length}${hasMore ? "+" : ""} tài liệu`}
         </p>
+
+        {activeFilters.length ? (
+          <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-ink/8 pt-3">
+            <span className="text-xs font-semibold uppercase tracking-wide text-ink/45">Đang lọc</span>
+            {activeFilters.map((item) => (
+              <button
+                key={item.key}
+                type="button"
+                onClick={item.clear}
+                className="inline-flex min-h-8 items-center gap-1.5 rounded-full border border-palm/15 bg-palm/8 px-3 py-1 text-xs font-semibold text-palm transition hover:border-palm/25 hover:bg-palm/12"
+              >
+                {item.label}
+                <X className="h-3.5 w-3.5" aria-hidden="true" />
+              </button>
+            ))}
+          </div>
+        ) : null}
       </div>
 
       {documents.length > 0 ? (
