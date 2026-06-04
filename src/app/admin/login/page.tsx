@@ -2,6 +2,7 @@ import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { BookOpenCheck, LockKeyhole, LogIn } from "lucide-react";
 
+import { PasswordField } from "@/components/password-field";
 import {
   adminSessionCookie,
   adminSessionMaxAge,
@@ -110,16 +111,7 @@ export default async function AdminLoginPage({
             />
           </label>
 
-          <label className="mt-4 grid gap-2 text-sm font-semibold text-ink">
-            Mật khẩu
-            <input
-              name="password"
-              type="password"
-              autoComplete="current-password"
-              className="rounded border border-ink/12 px-3 py-3 font-normal outline-none transition focus:border-palm"
-              required
-            />
-          </label>
+          <PasswordField label="Mật khẩu" name="password" autoComplete="current-password" className="mt-4 grid gap-2 text-sm font-semibold text-ink" />
 
           <button
             type="submit"

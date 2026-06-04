@@ -93,7 +93,7 @@ function validateImageFile(file: File) {
 }
 
 function communeIdsValue(formData: FormData, documentType: DocumentType) {
-  if (documentType !== "dia_chi") {
+  if (documentType === "tai_lieu_cap_tinh") {
     return [];
   }
 

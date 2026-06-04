@@ -84,7 +84,7 @@ function keywordValue(document?: Document) {
 
 function typeHelpText(type: DocumentType) {
   if (type === "bao_tay_ninh") {
-    return "Báo Tây Ninh không bắt buộc gắn xã/phường. Nếu bài/số báo liên quan riêng địa phương nào, có thể bổ sung sau bằng loại địa chí hoặc metadata chi tiết hơn.";
+    return "Có thể chọn một hoặc nhiều xã/phường nếu số báo, bài báo hoặc chuyên đề có nội dung liên quan đến địa phương đó.";
   }
 
   if (type === "tai_lieu_cap_tinh") {
@@ -109,7 +109,7 @@ export function DocumentForm({ communes, document }: { communes: Commune[]; docu
     document?.communeIds?.length ? document.communeIds : document?.communeId ? [document.communeId] : []
   );
 
-  const canAttachCommunes = selectedDocumentType === "dia_chi";
+  const canAttachCommunes = selectedDocumentType !== "tai_lieu_cap_tinh";
   const primaryCommuneId = canAttachCommunes ? selectedCommuneIds[0] || "" : "";
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -203,7 +203,7 @@ export function DocumentForm({ communes, document }: { communes: Commune[]; docu
             onChange={(event) => {
               const nextType = event.target.value as DocumentType;
               setSelectedDocumentType(nextType);
-              if (nextType !== "dia_chi") {
+              if (nextType === "tai_lieu_cap_tinh") {
                 setSelectedCommuneIds([]);
               }
             }}
