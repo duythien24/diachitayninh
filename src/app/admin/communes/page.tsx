@@ -1,9 +1,9 @@
 import Link from "next/link";
-import { ArrowRight, Building2, Image as ImageIcon, KeyRound, Search, Tags } from "lucide-react";
+import { ArrowRight, Building2, KeyRound, Tags } from "lucide-react";
 
+import { AdminCommuneTable } from "@/components/admin-commune-table";
 import { PageShell, SectionHeader } from "@/components/page-shell";
 import { getAdminCommunes, getAdminDocuments, usingMockData } from "@/lib/repository";
-import { cn, typePrefix } from "@/lib/utils";
 
 function statusMessage(status?: string) {
   if (status === "updated") return "Đã cập nhật thông tin xã/phường.";
@@ -31,6 +31,10 @@ export default async function AdminCommunesPage({
   const completedCount = communes.filter(
     (commune) => Boolean(commune.description?.trim()) || Boolean(commune.coverImageUrl) || Boolean(commune.keywords?.length)
   ).length;
+  const communeRows = communes.map((commune) => ({
+    ...commune,
+    documentCount: documentCountByCommune.get(commune.id) || 0
+  }));
 
   return (
     <PageShell>
@@ -82,70 +86,7 @@ export default async function AdminCommunesPage({
         })}
       </div>
 
-      <section className="mt-8 overflow-hidden rounded border border-ink/10 bg-white shadow-sm">
-        <div className="border-b border-ink/8 bg-paper px-4 py-3">
-          <div className="flex items-center gap-2 text-sm font-semibold text-ink/70">
-            <Search className="h-4 w-4" aria-hidden="true" />
-            Danh sách 96 xã/phường
-          </div>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[900px] border-collapse text-left text-sm">
-            <thead className="bg-paper/70 text-ink/70">
-              <tr>
-                <th className="px-4 py-3 font-semibold">Tên đơn vị</th>
-                <th className="px-4 py-3 font-semibold">Loại</th>
-                <th className="px-4 py-3 font-semibold">Tài liệu</th>
-                <th className="px-4 py-3 font-semibold">Ảnh</th>
-                <th className="px-4 py-3 font-semibold">Từ khóa</th>
-                <th className="px-4 py-3 font-semibold">Thao tác</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-ink/8">
-              {communes.map((commune) => {
-                const documentCount = documentCountByCommune.get(commune.id) || 0;
-                return (
-                  <tr key={commune.id} className={cn(documentCount ? "bg-palm/3" : "bg-white")}>
-                    <td className="px-4 py-4">
-                      <p className="font-semibold text-ink">{commune.name}</p>
-                      <p className="mt-1 line-clamp-1 max-w-xl text-xs text-ink/55">{commune.description}</p>
-                    </td>
-                    <td className="px-4 py-4 text-ink/68">{typePrefix(commune.type)}</td>
-                    <td className="px-4 py-4">
-                      <span className="rounded bg-palm/10 px-2.5 py-1 text-xs font-semibold text-palm">
-                        {documentCount} tài liệu
-                      </span>
-                    </td>
-                    <td className="px-4 py-4">
-                      <span
-                        className={cn(
-                          "inline-flex items-center gap-1.5 rounded px-2.5 py-1 text-xs font-semibold",
-                          commune.coverImageUrl ? "bg-palm/10 text-palm" : "bg-ink/5 text-ink/45"
-                        )}
-                      >
-                        <ImageIcon className="h-3.5 w-3.5" aria-hidden="true" />
-                        {commune.coverImageUrl ? "Đã có" : "Chưa có"}
-                      </span>
-                    </td>
-                    <td className="px-4 py-4 text-ink/68">
-                      {commune.keywords?.length ? commune.keywords.slice(0, 3).join(", ") : "Chưa có"}
-                    </td>
-                    <td className="px-4 py-4">
-                      <Link
-                        href={`/admin/communes/${commune.id}/edit`}
-                        className="inline-flex min-h-9 items-center justify-center gap-2 rounded border border-ink/12 px-3 py-2 text-sm font-semibold text-ink transition hover:bg-paper"
-                      >
-                        Sửa
-                        <ArrowRight className="h-4 w-4" aria-hidden="true" />
-                      </Link>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      </section>
+      <AdminCommuneTable communes={communeRows} />
     </PageShell>
   );
 }
