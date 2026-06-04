@@ -10,6 +10,7 @@ import {
   Link2,
   ListChecks,
   Search,
+  ServerCog,
   ShieldCheck,
   Upload
 } from "lucide-react";
@@ -89,6 +90,12 @@ const adminTasks = [
     href: "/admin/audit",
     description: "Tra lại ai đã thêm, sửa, xóa tài liệu, xã/phường hoặc tài khoản.",
     icon: ListChecks
+  },
+  {
+    title: "Kiểm tra hệ thống",
+    href: "/admin/system",
+    description: "Rà cấu hình Supabase, Storage, RPC tìm kiếm và schema mở rộng sau khi deploy hoặc chạy SQL.",
+    icon: ServerCog
   },
   {
     title: "Tài khoản và mật khẩu",
