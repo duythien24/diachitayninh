@@ -2,13 +2,13 @@ import Link from "next/link";
 import Image from "next/image";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { ArrowLeft, CalendarDays, FileText, Library, Newspaper, Tags } from "lucide-react";
+import { ArrowLeft, ArrowRight, Building2, CalendarDays, FileText, Library, Newspaper, Tags } from "lucide-react";
 
 import { DocumentCard } from "@/components/document-card";
 import { PageShell } from "@/components/page-shell";
 import { communeMergeInfoBySlug } from "@/lib/merge-info";
-import { getCommunes, getCommuneBySlug, getDocumentsByCommune } from "@/lib/repository";
-import type { Document, DocumentType } from "@/lib/types";
+import { getCommunes, getCommuneBySlug, getDocuments } from "@/lib/repository";
+import type { Commune, Document, DocumentType } from "@/lib/types";
 import { cn, typePrefix } from "@/lib/utils";
 
 export async function generateStaticParams() {
@@ -81,6 +81,29 @@ function documentsOfType(documents: Document[], type: DocumentType) {
   return documents.filter((document) => document.documentType === type);
 }
 
+function documentsForCommune(documents: Document[], communeId: string) {
+  return documents.filter((document) => document.communeIds?.includes(communeId) || document.communeId === communeId);
+}
+
+function suggestedCommunes(documents: Document[], currentCommuneId: string) {
+  const map = new Map<string, { commune: Commune; count: number }>();
+
+  for (const document of documents) {
+    for (const commune of document.communes || []) {
+      if (commune.id === currentCommuneId) continue;
+      const current = map.get(commune.id);
+      map.set(commune.id, {
+        commune,
+        count: (current?.count || 0) + 1
+      });
+    }
+  }
+
+  return Array.from(map.values())
+    .sort((left, right) => right.count - left.count || left.commune.name.localeCompare(right.commune.name, "vi"))
+    .slice(0, 6);
+}
+
 export default async function CommuneDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const commune = await getCommuneBySlug(slug);
@@ -89,7 +112,9 @@ export default async function CommuneDetailPage({ params }: { params: Promise<{ 
     notFound();
   }
 
-  const relatedDocuments = await getDocumentsByCommune(commune.id);
+  const allDocuments = await getDocuments();
+  const relatedDocuments = documentsForCommune(allDocuments, commune.id);
+  const communeSuggestions = suggestedCommunes(allDocuments, commune.id);
   const mergeInfo = communeMergeInfoBySlug[commune.slug];
   const keywords = topKeywords(relatedDocuments, commune.keywords || []);
   const featuredDocuments = latestDocuments(relatedDocuments);
@@ -322,6 +347,31 @@ export default async function CommuneDetailPage({ params }: { params: Promise<{ 
           })}
         </div>
       </section>
+
+      {communeSuggestions.length ? (
+        <section className="mt-10">
+          <div className="mb-4 flex items-center gap-2">
+            <Building2 className="h-5 w-5 text-lacquer" aria-hidden="true" />
+            <h2 className="text-2xl font-semibold text-ink">Xã/phường có tư liệu liên quan</h2>
+          </div>
+          <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+            {communeSuggestions.map(({ commune: suggestedCommune, count }) => (
+              <Link
+                key={suggestedCommune.id}
+                href={`/xa-phuong/${suggestedCommune.slug}`}
+                className="group flex min-h-24 items-center justify-between gap-4 rounded border border-ink/10 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-palm/30 hover:shadow-soft"
+              >
+                <span>
+                  <span className="text-xs font-semibold uppercase tracking-wide text-lacquer">{typePrefix(suggestedCommune.type)}</span>
+                  <span className="mt-1 block font-semibold text-ink group-hover:text-palm">{suggestedCommune.name}</span>
+                  <span className="mt-1 block text-sm text-ink/55">{count} tài liệu đang gắn</span>
+                </span>
+                <ArrowRight className="h-4 w-4 shrink-0 text-ink/35 transition group-hover:text-palm" aria-hidden="true" />
+              </Link>
+            ))}
+          </div>
+        </section>
+      ) : null}
 
       <section className="mt-10">
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
