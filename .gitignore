@@ -19,6 +19,9 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
+# local import/cache output
+tmp/
+
 # system
 .DS_Store
 Thumbs.db
