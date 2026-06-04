@@ -1,7 +1,7 @@
-import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Eye, Files, Library } from "lucide-react";
 
+import { DocumentCoverImage } from "@/components/document-cover-image";
 import { getCommuneById } from "@/lib/data";
 import type { Document } from "@/lib/types";
 import { documentTypeShortLabel, typePrefix } from "@/lib/utils";
@@ -21,7 +21,7 @@ export function DocumentCard({ document }: { document: Document }) {
   return (
     <article className="flex h-full min-h-[520px] flex-col overflow-hidden rounded border border-ink/10 bg-white shadow-sm transition hover:-translate-y-0.5 hover:border-palm/25 hover:shadow-soft">
       <div className="relative aspect-[5/3] overflow-hidden bg-ink/5">
-        <Image src={document.coverImageUrl} alt="" fill sizes="(min-width: 1024px) 33vw, 100vw" className="object-cover" />
+        <DocumentCoverImage src={document.coverImageUrl} alt="" fill sizes="(min-width: 1024px) 33vw, 100vw" className="object-cover" />
         <div className="absolute left-3 top-3 max-w-[68%] truncate rounded bg-white/94 px-2.5 py-1 text-xs font-semibold text-ink shadow-sm">
           {documentTypeShortLabel(document.documentType)}
         </div>

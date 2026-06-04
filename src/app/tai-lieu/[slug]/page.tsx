@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, Eye, LockKeyhole } from "lucide-react";
 
 import { ContactPanel } from "@/components/contact-panel";
+import { DocumentCoverImage } from "@/components/document-cover-image";
 import { DocumentCard } from "@/components/document-card";
 import { PageShell } from "@/components/page-shell";
 import { getDocuments, getDocumentBySlug } from "@/lib/repository";
@@ -87,7 +87,7 @@ export default async function DocumentDetailPage({ params }: { params: Promise<{
       <section className="mt-6 grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
         <div className="rounded border border-ink/10 bg-white p-6 shadow-sm">
           <div className="relative aspect-[16/8] overflow-hidden rounded bg-ink/5">
-            <Image src={document.coverImageUrl} alt="" fill sizes="100vw" className="object-cover" />
+            <DocumentCoverImage src={document.coverImageUrl} alt="" fill sizes="100vw" className="object-cover" />
           </div>
           <div className="mt-6 flex flex-wrap gap-2 text-xs font-semibold">
             <span className="rounded bg-paper px-2.5 py-1 text-ink/70">{documentTypeLabel(document.documentType)}</span>

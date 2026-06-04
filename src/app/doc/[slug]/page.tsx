@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import { ArrowLeft, BookOpen, CalendarDays, ExternalLink, FileText, Library, LockKeyhole, Tags } from "lucide-react";
 
 import { ContactPanel } from "@/components/contact-panel";
+import { isTayNinhLibraryUrl } from "@/components/document-cover-image";
 import { PageShell } from "@/components/page-shell";
 import { getDocuments, getDocumentBySlug } from "@/lib/repository";
 import { documentTypeLabel, typePrefix } from "@/lib/utils";
@@ -39,6 +40,7 @@ export default async function PdfReaderPage({ params }: { params: Promise<{ slug
 
   const isPreview = document.isPreviewOnly;
   const communes = document.communes?.length ? document.communes : document.commune ? [document.commune] : [];
+  const usesLibraryViewer = isTayNinhLibraryUrl(document.previewFileUrl);
 
   return (
     <PageShell>
@@ -67,7 +69,29 @@ export default async function PdfReaderPage({ params }: { params: Promise<{ slug
             <LockKeyhole className="h-4 w-4" aria-hidden="true" />
             {isPreview ? "Bản đọc thử - Thư viện tỉnh Tây Ninh" : "Bản đầy đủ - Thư viện tỉnh Tây Ninh"}
           </div>
-          <iframe src={document.previewFileUrl} title={document.title} className="h-[76vh] w-full bg-white" />
+          {usesLibraryViewer ? (
+            <div className="flex min-h-[62vh] items-center justify-center bg-paper px-6 py-12">
+              <div className="max-w-xl rounded border border-ink/10 bg-white p-6 text-center shadow-sm">
+                <p className="text-sm font-semibold uppercase tracking-wide text-lacquer">Trình đọc của Thư viện tỉnh Tây Ninh</p>
+                <h2 className="mt-3 text-2xl font-semibold text-ink">Mở tài liệu tại kho thư viện</h2>
+                <p className="mt-3 text-sm leading-6 text-ink/68">
+                  Tài liệu này được phục vụ bằng trình đọc riêng của Thư viện tỉnh Tây Ninh. Để tránh lỗi trắng trang khi nhúng chéo website,
+                  hãy mở bằng tab mới.
+                </p>
+                <a
+                  href={document.previewFileUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="mt-5 inline-flex min-h-11 items-center justify-center gap-2 rounded bg-palm px-4 py-3 text-sm font-semibold text-white transition hover:bg-palm/90"
+                >
+                  <ExternalLink className="h-4 w-4" aria-hidden="true" />
+                  Mở bản đọc tại Thư viện
+                </a>
+              </div>
+            </div>
+          ) : (
+            <iframe src={document.previewFileUrl} title={document.title} className="h-[76vh] w-full bg-white" />
+          )}
         </section>
         <aside className="space-y-4">
           <section className="rounded border border-ink/10 bg-white p-5 shadow-soft">
