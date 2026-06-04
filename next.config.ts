@@ -23,6 +23,10 @@ const nextConfig: NextConfig = {
       {
         protocol: "https",
         hostname: supabaseImageHost
+      },
+      {
+        protocol: "https",
+        hostname: "thuvien.tayninh.gov.vn"
       }
     ]
   }

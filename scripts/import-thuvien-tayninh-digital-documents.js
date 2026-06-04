@@ -284,6 +284,7 @@ function matchedCommunes(document, communeTerms) {
 async function main() {
   loadEnv();
   const dryRun = process.argv.includes("--dry-run");
+  const strictLocalOnly = process.argv.includes("--strict-local");
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -314,7 +315,7 @@ async function main() {
   for (const document of sourceDocuments) {
     const communeMatches = matchedCommunes(document, communeTerms);
 
-    if (!isLocalDocument(document, communeMatches)) {
+    if (strictLocalOnly && !isLocalDocument(document, communeMatches)) {
       skipped.push({ fileId: document.FILEID, title: document.TITLE, reason: "not-local" });
       continue;
     }
