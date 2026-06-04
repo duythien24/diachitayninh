@@ -62,6 +62,37 @@ async function tableCheck(table: string, action?: string): Promise<SystemCheck> 
   };
 }
 
+async function columnCheck(table: string, columns: string[], action?: string): Promise<SystemCheck> {
+  const supabase = getSupabaseAdminClient();
+  const label = `${table}: ${columns.join(", ")}`;
+
+  if (!supabase) {
+    return {
+      label,
+      status: "error",
+      detail: "Thiếu Supabase service role nên chưa kiểm tra được cột.",
+      action: "Kiểm tra biến SUPABASE_SERVICE_ROLE_KEY trên Vercel."
+    };
+  }
+
+  const { error } = await supabase.from(table).select(columns.join(","), { head: true }).limit(1);
+
+  if (error) {
+    return {
+      label,
+      status: "error",
+      detail: errorDetail(error),
+      action
+    };
+  }
+
+  return {
+    label,
+    status: "ok",
+    detail: "Đã có đủ các cột cần thiết."
+  };
+}
+
 async function publicConnectionCheck(): Promise<SystemCheck> {
   const supabase = getSupabasePublicClient();
   if (!supabase) {
@@ -164,8 +195,19 @@ async function storageBucketCheck(): Promise<SystemCheck> {
 }
 
 export async function getSystemCheckGroups(): Promise<SystemCheckGroup[]> {
-  const [publicConnection, adminConnection, searchRpc, storageBucket, communes, documents, documentCommunes, adminUsers, auditLogs] =
-    await Promise.all([
+  const [
+    publicConnection,
+    adminConnection,
+    searchRpc,
+    storageBucket,
+    communes,
+    documents,
+    documentCommunes,
+    adminUsers,
+    auditLogs,
+    documentMetadataColumns,
+    communeMetadataColumns
+  ] = await Promise.all([
       publicConnectionCheck(),
       adminConnectionCheck(),
       searchRpcCheck(),
@@ -174,7 +216,17 @@ export async function getSystemCheckGroups(): Promise<SystemCheckGroup[]> {
       tableCheck("documents", "Chạy lại supabase/schema.sql hoặc kiểm tra bảng documents."),
       tableCheck("document_communes", "Chạy file supabase/upgrade-document-metadata.sql hoặc phần tạo bảng document_communes."),
       tableCheck("admin_users", "Chạy file supabase/add-admin-users.sql để tạo bảng admin_users."),
-      tableCheck("admin_audit_logs", "Chạy file supabase/admin-audit-logs.sql để bật lịch sử thao tác.")
+      tableCheck("admin_audit_logs", "Chạy file supabase/admin-audit-logs.sql để bật lịch sử thao tác."),
+      columnCheck(
+        "documents",
+        ["page_count", "preview_page_count", "keywords", "author", "publisher"],
+        "Chạy file supabase/upgrade-document-metadata.sql hoặc phần thêm metadata cho bảng documents."
+      ),
+      columnCheck(
+        "communes",
+        ["cover_image_url", "keywords", "updated_at"],
+        "Chạy file supabase/commune-admin-metadata.sql để thêm metadata cho xã/phường."
+      )
     ]);
 
   return [
@@ -197,6 +249,11 @@ export async function getSystemCheckGroups(): Promise<SystemCheckGroup[]> {
       title: "Database",
       description: "Các bảng chính mà website đang dùng.",
       checks: [communes, documents, documentCommunes, adminUsers, auditLogs]
+    },
+    {
+      title: "Schema mở rộng",
+      description: "Các cột phục vụ metadata tài liệu, nhiều xã/phường và quản trị nội dung sâu hơn.",
+      checks: [documentMetadataColumns, communeMetadataColumns]
     },
     {
       title: "Tìm kiếm",

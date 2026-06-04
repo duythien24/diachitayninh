@@ -166,3 +166,34 @@ Chưa cần OCR/AI search ngay. Khi dữ liệu PDF nhiều hơn, nên làm theo
 2. Lưu nội dung OCR vào bảng riêng, ví dụ `document_pages`.
 3. Tạo full-text search index cho nội dung OCR.
 4. Chỉ sau đó mới thêm AI search hoặc semantic search.
+
+## 11. Checklist Sau Khi Nâng Schema
+
+Chạy checklist này mỗi khi cập nhật SQL hoặc deploy code mới có thay đổi Supabase.
+
+1. Chạy đầy đủ các file SQL liên quan:
+   - `supabase/upgrade-document-metadata.sql`
+   - `supabase/search-documents.sql`
+   - `supabase/commune-admin-metadata.sql`
+   - `supabase/admin-audit-logs.sql`
+   - `supabase/add-admin-users.sql`
+2. Mở `/admin/system` và kiểm tra tất cả nhóm đang ở trạng thái ổn.
+3. Test thêm tài liệu địa chí gắn ít nhất 2 xã/phường.
+4. Test thêm tài liệu Báo Tây Ninh, có thể gắn xã/phường hoặc để theo phạm vi báo chí.
+5. Test thêm tài liệu cấp tỉnh, không chọn xã/phường.
+6. Vào `/tai-lieu` tìm theo tên tài liệu, năm, tác giả hoặc nhà xuất bản.
+7. Vào trang chi tiết tài liệu để kiểm tra tác giả, nhà xuất bản, số trang, từ khóa và nhiều xã/phường.
+8. Vào `/admin/audit` kiểm tra thao tác thêm/sửa/xóa đã được ghi log.
+
+Nếu `/admin/system` báo lỗi thiếu cột, ưu tiên sửa Supabase trước khi sửa giao diện.
+
+## 12. Checklist Kiểm Thử Nhanh Trước Khi Bàn Giao
+
+1. Trang chủ hiển thị đủ 3 kho: địa chí, báo chí, cấp tỉnh.
+2. Header hiển thị đúng trạng thái đăng nhập và menu tài khoản.
+3. `/tai-lieu` tìm kiếm và lọc không bị trắng trang.
+4. `/xa-phuong` ưu tiên xã/phường có tài liệu và vẫn hiển thị xã/phường chưa có tài liệu.
+5. Trang chi tiết xã/phường hiển thị mô tả, tài liệu liên quan và metadata nếu có.
+6. Trang đọc PDF mở được file public từ Supabase Storage.
+7. Tài khoản admin cao nhất xóa được tài khoản thường, tài khoản thường không xóa được admin.
+8. Đổi mật khẩu xong đăng xuất rồi đăng nhập lại bằng mật khẩu mới.

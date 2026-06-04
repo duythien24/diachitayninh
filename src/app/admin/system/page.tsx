@@ -27,6 +27,7 @@ const groupIcons: Record<string, typeof ServerCog> = {
   "Biến môi trường": KeyRound,
   "Kết nối Supabase": HardDrive,
   Database,
+  "Schema mở rộng": Database,
   "Tìm kiếm": SearchCheck
 };
 
