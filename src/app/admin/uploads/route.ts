@@ -9,6 +9,13 @@ const maxPdfFileSize = 50 * 1024 * 1024;
 const maxImageFileSize = 5 * 1024 * 1024;
 const allowedImageTypes = ["image/jpeg", "image/png", "image/webp"];
 
+type UploadRequestBody = {
+  fileName?: string;
+  contentType?: string;
+  fileSize?: number;
+  folder?: string;
+};
+
 function safeFileName(name: string) {
   const segments = name.split(".");
   const extension = segments.length > 1 ? segments.pop() : "";
@@ -40,6 +47,24 @@ function validateUpload(contentType: string | undefined, fileSize: number | unde
   return null;
 }
 
+function storageErrorMessage(message: string) {
+  const normalizedMessage = message.toLowerCase();
+
+  if (normalizedMessage.includes("bucket not found") || normalizedMessage.includes("not found")) {
+    return `Không tìm thấy Storage bucket "${bucketName}". Vào Supabase Storage tạo bucket này hoặc kiểm tra NEXT_PUBLIC_SUPABASE_STORAGE_BUCKET.`;
+  }
+
+  if (normalizedMessage.includes("row-level security") || normalizedMessage.includes("permission") || normalizedMessage.includes("unauthorized")) {
+    return "Supabase Storage từ chối upload. Kiểm tra service role key, quyền bucket và trạng thái đăng nhập quản trị.";
+  }
+
+  if (normalizedMessage.includes("payload") || normalizedMessage.includes("too large")) {
+    return "File vượt quá giới hạn upload của hệ thống. PDF tối đa 50MB, ảnh bìa tối đa 5MB.";
+  }
+
+  return message;
+}
+
 export async function POST(request: NextRequest) {
   const currentAdmin = await getCurrentAdmin();
 
@@ -52,12 +77,13 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Chưa cấu hình Supabase service role." }, { status: 500 });
   }
 
-  const body = (await request.json()) as {
-    fileName?: string;
-    contentType?: string;
-    fileSize?: number;
-    folder?: string;
-  };
+  let body: UploadRequestBody;
+
+  try {
+    body = (await request.json()) as UploadRequestBody;
+  } catch {
+    return NextResponse.json({ error: "Dữ liệu upload không hợp lệ. Vui lòng chọn lại file và thử lại." }, { status: 400 });
+  }
   const folder = body.folder === "covers" ? "covers" : "pdf";
 
   if (!body.fileName) {
@@ -73,7 +99,7 @@ export async function POST(request: NextRequest) {
   const { data, error } = await supabase.storage.from(bucketName).createSignedUploadUrl(path);
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: storageErrorMessage(error.message) }, { status: 500 });
   }
 
   const publicUrl = supabase.storage.from(bucketName).getPublicUrl(path).data.publicUrl;
