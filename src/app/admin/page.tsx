@@ -8,6 +8,7 @@ import {
   CircleHelp,
   FilePlus2,
   FileText,
+  HardDrive,
   Newspaper,
   ServerCog,
   ShieldCheck,
@@ -49,6 +50,11 @@ const adminLinks = [
     href: "/admin/documents/new",
     label: "Thêm tài liệu",
     icon: FilePlus2
+  },
+  {
+    href: "/admin/files",
+    label: "Quản lý file Storage",
+    icon: HardDrive
   },
   {
     href: "/admin/communes",

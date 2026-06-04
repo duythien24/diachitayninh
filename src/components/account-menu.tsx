@@ -2,7 +2,19 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { Activity, BarChart3, Building2, CircleHelp, FileText, KeyRound, LogIn, LogOut, ServerCog, UserCircle } from "lucide-react";
+import {
+  Activity,
+  BarChart3,
+  Building2,
+  CircleHelp,
+  FileText,
+  HardDrive,
+  KeyRound,
+  LogIn,
+  LogOut,
+  ServerCog,
+  UserCircle
+} from "lucide-react";
 
 import type { AdminRole } from "@/lib/admin-users";
 
@@ -60,6 +72,7 @@ export function AccountMenu({ account }: { account: AccountSession | null }) {
     { href: "/admin/huong-dan", label: "Hướng dẫn quản trị", icon: CircleHelp },
     { href: "/admin/audit", label: "Lịch sử thao tác", icon: Activity },
     { href: "/admin/documents", label: "Quản lý tài liệu", icon: FileText },
+    { href: "/admin/files", label: "Quản lý file Storage", icon: HardDrive },
     { href: "/admin/communes", label: "Quản trị xã/phường", icon: Building2 }
   ];
 

@@ -4,6 +4,7 @@ import {
   BookOpenCheck,
   CheckCircle2,
   FileText,
+  HardDrive,
   Image as ImageIcon,
   KeyRound,
   Library,
@@ -72,6 +73,12 @@ const adminTasks = [
     href: "/admin/documents/new",
     description: "Upload PDF/ảnh bìa, chọn loại tài liệu, gắn xã/phường và chọn chế độ đọc.",
     icon: Upload
+  },
+  {
+    title: "Quản lý file Storage",
+    href: "/admin/files",
+    description: "Kiểm tra PDF/ảnh bìa đã upload, dung lượng, file đang dùng và file chưa gắn tài liệu.",
+    icon: HardDrive
   },
   {
     title: "Quản trị xã/phường",
