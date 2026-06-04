@@ -1,10 +1,10 @@
-import { KeyRound, ShieldCheck, Trash2, UserPlus, Users } from "lucide-react";
+import { KeyRound, ShieldCheck, UserPlus, Users } from "lucide-react";
 
 import {
   changeCurrentAdminPasswordAction,
-  createAdminUserAction,
-  deleteAdminUserAction
+  createAdminUserAction
 } from "@/app/admin/accounts/actions";
+import { DeleteAdminUserButton } from "@/components/delete-admin-user-button";
 import { PageShell, SectionHeader } from "@/components/page-shell";
 import { PasswordField } from "@/components/password-field";
 import { adminRoleLabel, getAdminUsers, getCurrentAdmin } from "@/lib/admin-users";
@@ -202,15 +202,7 @@ export default async function AdminAccountsPage({
                       </div>
 
                       {currentAdmin?.userId !== user.id ? (
-                        <form action={deleteAdminUserAction.bind(null, user.id)}>
-                          <button
-                            type="submit"
-                            className="inline-flex items-center gap-2 rounded border border-lacquer/20 px-3 py-2 text-sm font-semibold text-lacquer transition hover:bg-lacquer/8"
-                          >
-                            <Trash2 className="h-4 w-4" aria-hidden="true" />
-                            Xóa
-                          </button>
-                        </form>
+                        <DeleteAdminUserButton userId={user.id} username={user.username} />
                       ) : (
                         <span className="rounded bg-paper px-3 py-2 text-sm font-semibold text-ink/55">
                           Đang đăng nhập
