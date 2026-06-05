@@ -147,6 +147,24 @@ export default async function HomePage() {
   const featuredDocument =
     documentsWithSearchText.find((item) => ["tay ninh 180", "tay ninh 30 nam", "dia chi tay ninh"].some((term) => item.searchText.includes(term)))
       ?.document || latestDocuments[0];
+  const documentCountByCommuneId = new Map<string, number>();
+
+  for (const document of documents) {
+    const communeIds = Array.from(new Set(document.communeIds?.length ? document.communeIds : document.communeId ? [document.communeId] : []));
+
+    for (const communeId of communeIds) {
+      documentCountByCommuneId.set(communeId, (documentCountByCommuneId.get(communeId) || 0) + 1);
+    }
+  }
+
+  const featuredCommunes = communes
+    .map((commune) => ({
+      ...commune,
+      documentCount: documentCountByCommuneId.get(commune.id) || 0
+    }))
+    .filter((commune) => commune.documentCount > 0)
+    .sort((left, right) => right.documentCount - left.documentCount || left.name.localeCompare(right.name, "vi"))
+    .slice(0, 6);
 
   return (
     <>
@@ -321,6 +339,55 @@ export default async function HomePage() {
             ) : null}
           </div>
         </section>
+
+        {featuredCommunes.length ? (
+          <section className="mt-14">
+            <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <p className="text-sm font-semibold uppercase tracking-wide text-lacquer">Địa phương nổi bật</p>
+                <h2 className="mt-2 text-3xl font-semibold text-ink">Nơi đang có nhiều tư liệu để khám phá</h2>
+                <p className="mt-3 max-w-2xl leading-7 text-ink/68">
+                  Bạn đọc có thể bắt đầu từ quê quán, nơi đang sống hoặc một địa danh quen thuộc để đi vào kho tư liệu theo cách gần gũi hơn.
+                </p>
+              </div>
+              <Link
+                href="/xa-phuong"
+                className="inline-flex min-h-11 items-center justify-center gap-2 rounded border border-ink/12 bg-white px-4 py-3 text-sm font-semibold text-ink transition hover:bg-paper"
+              >
+                Xem 96 xã/phường
+                <ArrowRight className="h-4 w-4" aria-hidden="true" />
+              </Link>
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {featuredCommunes.map((commune, index) => (
+                <Link
+                  key={commune.id}
+                  href={`/xa-phuong/${commune.slug}`}
+                  className="group flex min-h-44 flex-col rounded border border-ink/10 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-palm/30 hover:shadow-soft"
+                >
+                  <span className="flex items-start justify-between gap-4">
+                    <span className="grid h-11 w-11 place-items-center rounded bg-paper text-palm">
+                      <Building2 className="h-5 w-5" aria-hidden="true" />
+                    </span>
+                    <span className="rounded bg-brass/15 px-2.5 py-1 text-xs font-semibold text-lacquer">
+                      #{index + 1}
+                    </span>
+                  </span>
+                  <span className="mt-5 text-xs font-semibold uppercase tracking-wide text-lacquer">
+                    {commune.type === "phuong" ? "Phường" : "Xã"}
+                  </span>
+                  <span className="mt-1 text-xl font-semibold text-ink">{commune.name}</span>
+                  <span className="mt-3 line-clamp-2 text-sm leading-6 text-ink/62">{commune.description}</span>
+                  <span className="mt-auto flex items-center justify-between gap-3 pt-5 text-sm font-semibold text-palm">
+                    <span>{commune.documentCount} tài liệu liên quan</span>
+                    <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" aria-hidden="true" />
+                  </span>
+                </Link>
+              ))}
+            </div>
+          </section>
+        ) : null}
 
         <section className="mt-14">
           <div className="flex flex-col gap-8 lg:grid lg:grid-cols-[1fr_1.1fr] lg:items-start">
