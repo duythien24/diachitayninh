@@ -1,12 +1,12 @@
 "use client";
 
-import { Save, Upload } from "lucide-react";
-import { FormEvent, useRef, useState } from "react";
+import { Save, Search, Upload, X } from "lucide-react";
+import { FormEvent, useMemo, useRef, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
 
 import { createDocumentAction, updateDocumentAction } from "@/app/admin/documents/actions";
 import type { Commune, Document, DocumentType } from "@/lib/types";
-import { typePrefix } from "@/lib/utils";
+import { normalizeVietnamese, typePrefix } from "@/lib/utils";
 
 type SignedUpload = {
   bucket: string;
@@ -108,9 +108,36 @@ export function DocumentForm({ communes, document }: { communes: Commune[]; docu
   const [selectedCommuneIds, setSelectedCommuneIds] = useState<string[]>(
     document?.communeIds?.length ? document.communeIds : document?.communeId ? [document.communeId] : []
   );
+  const [communeQuery, setCommuneQuery] = useState("");
 
   const canAttachCommunes = selectedDocumentType !== "tai_lieu_cap_tinh";
   const primaryCommuneId = canAttachCommunes ? selectedCommuneIds[0] || "" : "";
+  const selectedCommuneSet = useMemo(() => new Set(selectedCommuneIds), [selectedCommuneIds]);
+  const selectedCommunes = useMemo(
+    () => communes.filter((commune) => selectedCommuneSet.has(commune.id)),
+    [communes, selectedCommuneSet]
+  );
+  const filteredCommunes = useMemo(() => {
+    const query = normalizeVietnamese(communeQuery.trim());
+
+    if (!query) {
+      return communes;
+    }
+
+    return communes.filter((commune) =>
+      normalizeVietnamese([typePrefix(commune.type), commune.name, commune.districtOld, commune.description].join(" ")).includes(query)
+    );
+  }, [communeQuery, communes]);
+
+  function toggleCommune(communeId: string) {
+    setSelectedCommuneIds((current) =>
+      current.includes(communeId) ? current.filter((id) => id !== communeId) : [...current, communeId]
+    );
+  }
+
+  function removeCommune(communeId: string) {
+    setSelectedCommuneIds((current) => current.filter((id) => id !== communeId));
+  }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     const form = formRef.current;
@@ -236,10 +263,113 @@ export function DocumentForm({ communes, document }: { communes: Commune[]; docu
       </div>
 
       {canAttachCommunes ? (
-        <label className="grid gap-2 text-sm font-semibold text-ink">
+        <>
+          <section className="grid gap-3 rounded border border-ink/10 bg-white p-4">
+            {selectedCommuneIds.map((communeId) => (
+              <input key={communeId} type="hidden" name="commune_ids" value={communeId} />
+            ))}
+
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <p className="text-sm font-semibold text-ink">Xã/phường liên quan</p>
+                <p className="mt-1 text-xs leading-5 text-ink/55">{typeHelpText(selectedDocumentType)}</p>
+              </div>
+              <span className="rounded bg-palm/10 px-2.5 py-1 text-xs font-semibold text-palm">
+                Đã chọn {selectedCommuneIds.length}
+              </span>
+            </div>
+
+            {selectedCommunes.length ? (
+              <div className="flex flex-wrap gap-2">
+                {selectedCommunes.map((commune) => (
+                  <span
+                    key={commune.id}
+                    className="inline-flex max-w-full items-center gap-2 rounded bg-paper px-2.5 py-1 text-xs font-semibold text-ink/70"
+                  >
+                    <span className="truncate">
+                      {typePrefix(commune.type)} {commune.name}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => removeCommune(commune.id)}
+                      className="grid h-5 w-5 shrink-0 place-items-center rounded text-ink/45 transition hover:bg-white hover:text-lacquer"
+                      aria-label={`Bỏ ${typePrefix(commune.type)} ${commune.name}`}
+                    >
+                      <X className="h-3.5 w-3.5" aria-hidden="true" />
+                    </button>
+                  </span>
+                ))}
+                <button
+                  type="button"
+                  onClick={() => setSelectedCommuneIds([])}
+                  className="rounded border border-ink/10 px-2.5 py-1 text-xs font-semibold text-lacquer transition hover:bg-lacquer/8"
+                >
+                  Bỏ chọn tất cả
+                </button>
+              </div>
+            ) : (
+              <div className="rounded bg-paper px-3 py-2 text-sm text-ink/58">
+                Chưa chọn xã/phường nào. Tài liệu vẫn lưu được, nhưng trang xã/phường sẽ không tự hiện tài liệu này.
+              </div>
+            )}
+
+            <label className="flex min-h-11 items-center gap-3 rounded border border-ink/10 bg-paper/80 px-3 text-ink/55">
+              <Search className="h-4 w-4" aria-hidden="true" />
+              <span className="sr-only">Tìm xã/phường</span>
+              <input
+                value={communeQuery}
+                onChange={(event) => setCommuneQuery(event.target.value)}
+                className="min-w-0 flex-1 bg-transparent text-sm text-ink outline-none placeholder:text-ink/45"
+                placeholder="Tìm nhanh theo tên xã, phường, đơn vị cũ..."
+              />
+              {communeQuery ? (
+                <button
+                  type="button"
+                  onClick={() => setCommuneQuery("")}
+                  className="grid h-7 w-7 place-items-center rounded text-ink/45 transition hover:bg-white hover:text-lacquer"
+                  aria-label="Xóa từ khóa tìm kiếm"
+                >
+                  <X className="h-4 w-4" aria-hidden="true" />
+                </button>
+              ) : null}
+            </label>
+
+            <div className="max-h-80 overflow-y-auto rounded border border-ink/10">
+              {filteredCommunes.length ? (
+                <div className="grid divide-y divide-ink/8">
+                  {filteredCommunes.map((commune) => {
+                    const checked = selectedCommuneSet.has(commune.id);
+
+                    return (
+                      <label
+                        key={commune.id}
+                        className="flex cursor-pointer items-start gap-3 px-3 py-3 text-sm transition hover:bg-paper"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={checked}
+                          onChange={() => toggleCommune(commune.id)}
+                          className="mt-1 h-4 w-4 rounded border-ink/20 text-palm accent-palm"
+                        />
+                        <span className="min-w-0">
+                          <span className="block font-semibold text-ink">
+                            {typePrefix(commune.type)} {commune.name}
+                          </span>
+                          <span className="mt-0.5 line-clamp-1 block text-xs text-ink/50">{commune.districtOld}</span>
+                        </span>
+                      </label>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="px-3 py-8 text-center text-sm text-ink/55">Không tìm thấy xã/phường phù hợp.</div>
+              )}
+            </div>
+          </section>
+
+          <label className="hidden">
           Xã/phường liên quan
           <select
-            name="commune_ids"
             multiple
             size={8}
             value={selectedCommuneIds}
@@ -256,6 +386,7 @@ export function DocumentForm({ communes, document }: { communes: Commune[]; docu
           </select>
           <span className="text-xs font-normal leading-5 text-ink/55">{typeHelpText(selectedDocumentType)}</span>
         </label>
+        </>
       ) : (
         <div className="rounded border border-ink/10 bg-paper p-4 text-sm leading-6 text-ink/65">
           <p className="font-semibold text-ink">Phạm vi tài liệu</p>
