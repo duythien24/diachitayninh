@@ -6,6 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "cache:thuvien-covers": "node scripts/cache-thuvien-covers.js",
     "lint": "eslint ."
   },
   "dependencies": {

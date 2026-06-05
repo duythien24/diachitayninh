@@ -158,7 +158,30 @@ Sau mỗi lần push/deploy:
 7. Thử cập nhật một xã/phường test.
 8. Kiểm tra Vercel logs nếu có lỗi server-side.
 
-## 10. Hướng Nâng Cấp Sau Này
+## 10. Cache Ảnh Bìa Từ Kho Thư Viện Tỉnh
+
+Các tài liệu nhập từ `thuvien.tayninh.gov.vn` có thể có ảnh bìa dạng link động. Để ảnh hiển thị ổn định trên Vercel, nên cache ảnh bìa về thư mục public của dự án.
+
+Chạy lệnh:
+
+```bash
+npm run cache:thuvien-covers
+```
+
+Lệnh này sẽ:
+
+1. Tìm các tài liệu có `cover_image_url` đang trỏ về `thuvien.tayninh.gov.vn`.
+2. Tải ảnh bìa về `public/thuvien-covers`.
+3. Cập nhật lại `cover_image_url` trong Supabase thành đường dẫn nội bộ dạng `/thuvien-covers/ten-file.jpg`.
+4. Ghi report vào `tmp/thuvien-cover-cache-report.json`.
+
+Sau khi chạy xong cần:
+
+1. Chạy `npm run build`.
+2. Commit thư mục `public/thuvien-covers`.
+3. Push lên GitHub để Vercel deploy ảnh mới.
+
+## 11. Hướng Nâng Cấp Sau Này
 
 Chưa cần OCR/AI search ngay. Khi dữ liệu PDF nhiều hơn, nên làm theo thứ tự:
 
@@ -167,7 +190,7 @@ Chưa cần OCR/AI search ngay. Khi dữ liệu PDF nhiều hơn, nên làm theo
 3. Tạo full-text search index cho nội dung OCR.
 4. Chỉ sau đó mới thêm AI search hoặc semantic search.
 
-## 11. Checklist Sau Khi Nâng Schema
+## 12. Checklist Sau Khi Nâng Schema
 
 Chạy checklist này mỗi khi cập nhật SQL hoặc deploy code mới có thay đổi Supabase.
 
@@ -187,7 +210,7 @@ Chạy checklist này mỗi khi cập nhật SQL hoặc deploy code mới có th
 
 Nếu `/admin/system` báo lỗi thiếu cột, ưu tiên sửa Supabase trước khi sửa giao diện.
 
-## 12. Checklist Kiểm Thử Nhanh Trước Khi Bàn Giao
+## 13. Checklist Kiểm Thử Nhanh Trước Khi Bàn Giao
 
 1. Trang chủ hiển thị đủ 3 kho: địa chí, báo chí, cấp tỉnh.
 2. Header hiển thị đúng trạng thái đăng nhập và menu tài khoản.
