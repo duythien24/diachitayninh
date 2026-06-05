@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "cache:thuvien-covers": "node scripts/cache-thuvien-covers.js",
+    "clean:document-descriptions": "node scripts/clean-document-descriptions.js",
     "lint": "eslint ."
   },
   "dependencies": {

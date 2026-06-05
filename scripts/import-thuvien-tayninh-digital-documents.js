@@ -196,16 +196,19 @@ function documentTypeFor(communeMatches) {
   return communeMatches.length > 0 ? "dia_chi" : "tai_lieu_cap_tinh";
 }
 
-function descriptionFor(document, sourceUrl) {
-  const parts = [
-    stripHtml(document.DESCRIPTION),
-    document.SUBJECT ? `Chủ đề: ${document.SUBJECT}.` : "",
-    document.COVERAGE ? `Dung lượng ghi nhận từ nguồn: ${document.COVERAGE}.` : "",
-    `Nguồn metadata: ${sourceUrl}`
-  ].filter(Boolean);
-  return parts.join(" ");
-}
+function descriptionFor(document) {
+  const originalDescription = stripHtml(document.DESCRIPTION);
 
+  if (originalDescription) {
+    return originalDescription;
+  }
+
+  if (document.SUBJECT) {
+    return `T? li?u thu?c ch? ?? ${document.SUBJECT}.`;
+  }
+
+  return "T? li?u s? h?a t? kho T?i li?u s? c?a Th? vi?n t?nh T?y Ninh.";
+}
 async function fetchSourceDocuments() {
   if (fs.existsSync(sourceFile)) {
     return JSON.parse(fs.readFileSync(sourceFile, "utf8"));
@@ -347,7 +350,7 @@ async function main() {
         keywords: keywords(document),
         author: document.CREATOR || null,
         publisher: document.PUBLISHER || null,
-        description: descriptionFor(document, sourceUrl),
+        description: descriptionFor(document),
         source: "Thư viện tỉnh Tây Ninh - Tài liệu số",
         preview_file_url: readerUrl,
         cover_image_url: coverUrl,

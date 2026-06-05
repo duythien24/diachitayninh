@@ -163,6 +163,22 @@ function mapLinkedCommunes(row: DocumentRow) {
   return legacyCommuneRow ? [mapCommune(legacyCommuneRow)] : [];
 }
 
+function cleanDocumentDescription(description?: string | null) {
+  const cleaned = (description || "")
+    .replace(/\s*Nguồn metadata:\s*https?:\/\/\S+/gi, "")
+    .replace(/\s*Dung lượng ghi nhận từ nguồn:\s*[^.]+\.?/gi, "")
+    .replace(/\s*https?:\/\/\S+/gi, "")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  const subjectOnly = cleaned.match(/^Chủ đề:\s*(.+?)\.?$/i);
+  if (subjectOnly?.[1]) {
+    return `Tư liệu thuộc chủ đề ${subjectOnly[1].trim().replace(/\.$/, "")}.`;
+  }
+
+  return cleaned;
+}
+
 function mapDocument(row: DocumentRow): Document {
   const communes = mapLinkedCommunes(row);
   const commune = communes[0];
@@ -180,7 +196,7 @@ function mapDocument(row: DocumentRow): Document {
     keywords: row.keywords || [],
     author: row.author || undefined,
     publisher: row.publisher || undefined,
-    description: row.description || "",
+    description: cleanDocumentDescription(row.description),
     source: row.source || "Thư viện tỉnh Tây Ninh",
     previewFileUrl: row.preview_file_url,
     coverImageUrl: row.cover_image_url || fallbackCover,
