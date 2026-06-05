@@ -10,13 +10,18 @@ import {
   Files,
   Landmark,
   Library,
+  MapPinned,
   Newspaper,
+  Route,
+  Sparkles,
   ScrollText
 } from "lucide-react";
 
+import { DocumentCoverImage } from "@/components/document-cover-image";
 import { DocumentCard } from "@/components/document-card";
 import { PageShell } from "@/components/page-shell";
 import { getCommunes, getDocuments } from "@/lib/repository";
+import { normalizeVietnamese } from "@/lib/utils";
 
 const heroImage = "/images/nui-ba-den-may-phu.jpg";
 
@@ -85,6 +90,47 @@ const topicLinks = [
   }
 ];
 
+const readingPaths = [
+  {
+    href: "/tai-lieu?q=nui%20ba%20den",
+    eyebrow: "Biểu tượng Tây Ninh",
+    title: "Núi Bà Đen và vùng đất linh thiêng",
+    description: "Bắt đầu từ cảnh quan, di tích và những tư liệu gắn với biểu tượng quen thuộc nhất của Tây Ninh.",
+    terms: ["nui ba den", "ba den", "danh lam", "di tich"],
+    icon: MapPinned
+  },
+  {
+    href: "/tai-lieu?q=can%20cu%20dia",
+    eyebrow: "Lịch sử kháng chiến",
+    title: "Căn cứ, chiến thắng và ký ức địa phương",
+    description: "Lần theo các tài liệu về căn cứ địa, lực lượng vũ trang, truyền thống cách mạng và những mốc son lịch sử.",
+    terms: ["can cu", "chien thang", "khang chien", "cach mang", "luc luong vu trang"],
+    icon: Route
+  },
+  {
+    href: "/tai-lieu?q=cao%20dai",
+    eyebrow: "Văn hóa bản địa",
+    title: "Cao Đài, làng nghề và đời sống văn hóa",
+    description: "Khám phá những lớp văn hóa, tín ngưỡng, sinh hoạt cộng đồng và ký ức đời sống trong tư liệu số.",
+    terms: ["cao dai", "van hoa", "am thuc", "lang nghe", "dan ca"],
+    icon: Sparkles
+  }
+];
+
+function documentSearchText(document: Awaited<ReturnType<typeof getDocuments>>[number]) {
+  return normalizeVietnamese(
+    [
+      document.title,
+      document.description,
+      document.source,
+      document.author || "",
+      document.publisher || "",
+      document.keywords?.join(" ") || "",
+      document.communes?.map((commune) => commune.name).join(" ") || ""
+    ].join(" ")
+  );
+}
+
 export default async function HomePage() {
   const [communes, documents] = await Promise.all([getCommunes(), getDocuments()]);
   const wardCount = communes.filter((commune) => commune.type === "phuong").length;
@@ -93,6 +139,14 @@ export default async function HomePage() {
   const baoTayNinhCount = documents.filter((document) => document.documentType === "bao_tay_ninh").length;
   const provincialCount = documents.filter((document) => document.documentType === "tai_lieu_cap_tinh").length;
   const latestDocuments = documents.slice(0, 3);
+  const documentsWithSearchText = documents.map((document) => ({ document, searchText: documentSearchText(document) }));
+  const pathsWithCounts = readingPaths.map((path) => ({
+    ...path,
+    count: documentsWithSearchText.filter((item) => path.terms.some((term) => item.searchText.includes(term))).length
+  }));
+  const featuredDocument =
+    documentsWithSearchText.find((item) => ["tay ninh 180", "tay ninh 30 nam", "dia chi tay ninh"].some((term) => item.searchText.includes(term)))
+      ?.document || latestDocuments[0];
 
   return (
     <>
@@ -194,6 +248,78 @@ export default async function HomePage() {
               </div>
             );
           })}
+        </section>
+
+        <section className="mt-14 overflow-hidden rounded border border-ink/10 bg-ink text-white shadow-soft">
+          <div className="grid lg:grid-cols-[0.95fr_1.05fr]">
+            <div className="p-6 sm:p-8 lg:p-10">
+              <p className="inline-flex items-center gap-2 rounded bg-white/10 px-3 py-1 text-sm font-semibold text-white/82">
+                <Sparkles className="h-4 w-4" aria-hidden="true" />
+                Hành trình đọc 15 phút
+              </p>
+              <h2 className="mt-5 text-3xl font-semibold leading-tight sm:text-4xl">
+                Không biết bắt đầu từ đâu? Hãy đi theo một câu chuyện.
+              </h2>
+              <p className="mt-4 max-w-2xl leading-7 text-white/72">
+                Các tuyến đọc gom tài liệu theo mạch khám phá quen thuộc với bạn đọc: biểu tượng địa phương, lịch sử kháng chiến,
+                văn hóa đời sống và ký ức cộng đồng.
+              </p>
+
+              <div className="mt-7 grid gap-3">
+                {pathsWithCounts.map((path) => {
+                  const Icon = path.icon;
+
+                  return (
+                    <Link
+                      key={path.href}
+                      href={path.href}
+                      className="group grid gap-4 rounded border border-white/12 bg-white/8 p-4 transition hover:border-brass/60 hover:bg-white/12 sm:grid-cols-[auto_1fr_auto] sm:items-center"
+                    >
+                      <span className="grid h-11 w-11 place-items-center rounded bg-brass text-ink">
+                        <Icon className="h-5 w-5" aria-hidden="true" />
+                      </span>
+                      <span>
+                        <span className="text-xs font-semibold uppercase tracking-wide text-brass">{path.eyebrow}</span>
+                        <span className="mt-1 block font-semibold text-white">{path.title}</span>
+                        <span className="mt-1 block text-sm leading-6 text-white/62">{path.description}</span>
+                      </span>
+                      <span className="flex items-center justify-between gap-3 text-sm font-semibold text-white/78 sm:block sm:text-right">
+                        <span className="rounded bg-white/10 px-2.5 py-1">{path.count} tài liệu</span>
+                        <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1 sm:ml-auto sm:mt-3" aria-hidden="true" />
+                      </span>
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+
+            {featuredDocument ? (
+              <div className="relative min-h-[420px] overflow-hidden bg-white/5">
+                <DocumentCoverImage src={featuredDocument.coverImageUrl} alt="" fill sizes="(min-width: 1024px) 50vw, 100vw" className="object-cover opacity-70" />
+                <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/42 to-transparent" />
+                <div className="absolute inset-x-0 bottom-0 p-6 sm:p-8">
+                  <p className="text-sm font-semibold uppercase tracking-wide text-brass">Tài liệu gợi ý</p>
+                  <h3 className="mt-2 max-w-xl text-2xl font-semibold leading-snug text-white">{featuredDocument.title}</h3>
+                  <p className="mt-3 line-clamp-3 max-w-xl text-sm leading-6 text-white/72">{featuredDocument.description}</p>
+                  <div className="mt-5 flex flex-wrap gap-3">
+                    <Link
+                      href={`/tai-lieu/${featuredDocument.slug}`}
+                      className="inline-flex min-h-11 items-center gap-2 rounded bg-brass px-4 py-3 text-sm font-semibold text-ink transition hover:bg-brass/90"
+                    >
+                      Xem chi tiết
+                      <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                    </Link>
+                    <Link
+                      href={`/doc/${featuredDocument.slug}`}
+                      className="inline-flex min-h-11 items-center gap-2 rounded border border-white/25 bg-white/10 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/18"
+                    >
+                      Đọc ngay
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            ) : null}
+          </div>
         </section>
 
         <section className="mt-14">
