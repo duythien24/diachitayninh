@@ -39,3 +39,13 @@ export function communeDescription(name: string, type: CommuneType) {
   const unitType = type === "phuong" ? "phường" : "xã";
   return `Kho tư liệu địa chí, báo chí địa phương và tài liệu liên quan đến ${unitType} ${name} trên địa bàn tỉnh Tây Ninh.`;
 }
+
+export function tinhThanhMapUrl(type: CommuneType, slug: string) {
+  if (slug === "vinh-chau") {
+    return "https://tinhthanhvn.com/bando/tay-ninh/x-vinh-chau";
+  }
+
+  const prefix = type === "phuong" ? "phuong" : "xa";
+  const sourceSlug = slug === "tan-thanh-2" ? "tan-thanh" : slug;
+  return `https://tinhthanhvn.com/bando/tay-ninh/${prefix}-${sourceSlug}`;
+}

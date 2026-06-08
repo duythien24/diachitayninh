@@ -2,14 +2,13 @@ import Link from "next/link";
 import Image from "next/image";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { ArrowLeft, ArrowRight, Building2, CalendarDays, FileText, Library, Newspaper, Tags } from "lucide-react";
+import { ArrowLeft, ArrowRight, Building2, CalendarDays, FileText, Library, MapPinned, Newspaper, Tags } from "lucide-react";
 
 import { DocumentCard } from "@/components/document-card";
 import { PageShell } from "@/components/page-shell";
-import { communeMergeInfoBySlug } from "@/lib/merge-info";
 import { getCommunes, getCommuneBySlug, getDocuments } from "@/lib/repository";
 import type { Commune, Document, DocumentType } from "@/lib/types";
-import { cn, typePrefix } from "@/lib/utils";
+import { cn, tinhThanhMapUrl, typePrefix } from "@/lib/utils";
 
 export async function generateStaticParams() {
   const communes = await getCommunes();
@@ -115,7 +114,7 @@ export default async function CommuneDetailPage({ params }: { params: Promise<{ 
   const allDocuments = await getDocuments();
   const relatedDocuments = documentsForCommune(allDocuments, commune.id);
   const communeSuggestions = suggestedCommunes(allDocuments, commune.id);
-  const mergeInfo = communeMergeInfoBySlug[commune.slug];
+  const mapUrl = tinhThanhMapUrl(commune.type, commune.slug);
   const keywords = topKeywords(relatedDocuments, commune.keywords || []);
   const featuredDocuments = latestDocuments(relatedDocuments);
   const stats = [
@@ -211,33 +210,16 @@ export default async function CommuneDetailPage({ params }: { params: Promise<{ 
 
           <div className="mt-6 rounded border border-ink/8 bg-paper p-4 text-sm leading-6 text-ink/70">
             <p className="font-semibold text-ink">Thông tin sắp xếp đơn vị hành chính</p>
-            {mergeInfo ? (
-              <>
-                <p className="mt-2">{mergeInfo.note}</p>
-                {mergeInfo.oldUnits?.length ? (
-                  <div className="mt-3">
-                    <p className="text-xs font-semibold uppercase tracking-wide text-lacquer">Đơn vị cũ hợp thành</p>
-                    <ul className="mt-2 space-y-1">
-                      {mergeInfo.oldUnits.map((unit) => (
-                        <li key={unit}>- {unit}</li>
-                      ))}
-                    </ul>
-                  </div>
-                ) : null}
-                <a
-                  href={mergeInfo.sourceUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="mt-3 inline-flex font-semibold text-palm hover:text-lacquer"
-                >
-                  Nguồn: {mergeInfo.sourceLabel}
-                </a>
-              </>
-            ) : (
-              <p className="mt-2">
-                Thông tin các xã/phường cũ hợp thành đơn vị này đang được thư viện tiếp tục rà soát và cập nhật.
-              </p>
-            )}
+            <p className="mt-2">{commune.districtOld}</p>
+            <a
+              href={mapUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="mt-4 inline-flex min-h-10 items-center gap-2 rounded bg-palm px-3 py-2 text-sm font-semibold text-white transition hover:bg-palm/90"
+            >
+              <MapPinned className="h-4 w-4" aria-hidden="true" />
+              {"Xem b\u1ea3n \u0111\u1ed3 h\u00e0nh ch\u00ednh"}
+            </a>
           </div>
         </div>
 

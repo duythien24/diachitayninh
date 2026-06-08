@@ -439,6 +439,18 @@ export async function searchDocuments(options: SearchDocumentsOptions = {}): Pro
     };
   }
 
+  if (query) {
+    const { data, error } = await fetchDocumentRows(supabase);
+
+    if (!error) {
+      const documents = data.map((row) => mapDocument(row as DocumentRow)).filter((document) => documentMatchesSearch(document, options));
+      return {
+        documents: documents.slice(offset, offset + limit),
+        hasMore: documents.length > offset + limit
+      };
+    }
+  }
+
   if (query || documentType !== "all" || options.communeId || options.year || options.author || options.publisher) {
     const { data: searchRows, error: searchError } = await supabase.rpc("search_documents", {
       search_query: query,

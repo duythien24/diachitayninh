@@ -1,4 +1,14 @@
 create extension if not exists "pgcrypto";
+create extension if not exists unaccent;
+
+create or replace function immutable_unaccent(value text)
+returns text
+language sql
+immutable
+parallel safe
+as $$
+  select public.unaccent('public.unaccent', coalesce(value, ''));
+$$;
 
 do $$
 begin
@@ -149,7 +159,7 @@ on documents
 using gin (
   to_tsvector(
     'simple',
-    documents_search_text(title, description, source, author, publisher, year, keywords)
+    immutable_unaccent(documents_search_text(title, description, source, author, publisher, year, keywords))
   )
 );
 create index if not exists documents_year_idx on documents(year);
@@ -187,7 +197,7 @@ as $$
       d.created_at,
       to_tsvector(
         'simple',
-        documents_search_text(d.title, d.description, d.source, d.author, d.publisher, d.year, d.keywords)
+        immutable_unaccent(documents_search_text(d.title, d.description, d.source, d.author, d.publisher, d.year, d.keywords))
       ) as search_vector
     from documents d
     where
@@ -216,16 +226,16 @@ as $$
     indexed_documents.id as document_id,
     case
       when prepared.query_text is null then 0::real
-      else ts_rank(indexed_documents.search_vector, websearch_to_tsquery('simple', prepared.query_text))
+      else ts_rank(indexed_documents.search_vector, websearch_to_tsquery('simple', immutable_unaccent(prepared.query_text)))
     end as rank
   from indexed_documents, prepared
   where
     prepared.query_text is null
-    or indexed_documents.search_vector @@ websearch_to_tsquery('simple', prepared.query_text)
+    or indexed_documents.search_vector @@ websearch_to_tsquery('simple', immutable_unaccent(prepared.query_text))
   order by
     case
       when prepared.query_text is not null
-      then ts_rank(indexed_documents.search_vector, websearch_to_tsquery('simple', prepared.query_text))
+      then ts_rank(indexed_documents.search_vector, websearch_to_tsquery('simple', immutable_unaccent(prepared.query_text)))
     end desc,
     indexed_documents.created_at desc
   limit (select max_rows from prepared)

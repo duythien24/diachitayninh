@@ -24,6 +24,7 @@ import { getCommunes, getDocuments } from "@/lib/repository";
 import { normalizeVietnamese } from "@/lib/utils";
 
 const heroImage = "/images/nui-ba-den-may-phu.jpg";
+const documentListPageSize = 24;
 
 const archiveCards = [
   {
@@ -100,7 +101,7 @@ const readingPaths = [
     icon: MapPinned
   },
   {
-    href: "/tai-lieu?q=can%20cu%20dia",
+    href: "/tai-lieu?q=lich%20su",
     eyebrow: "Lịch sử kháng chiến",
     title: "Căn cứ, chiến thắng và ký ức địa phương",
     description: "Lần theo các tài liệu về căn cứ địa, lực lượng vũ trang, truyền thống cách mạng và những mốc son lịch sử.",
@@ -131,6 +132,20 @@ function documentSearchText(document: Awaited<ReturnType<typeof getDocuments>>[n
   );
 }
 
+function searchQueryFromHref(href: string) {
+  const [, queryString = ""] = href.split("?");
+  return new URLSearchParams(queryString).get("q") || "";
+}
+
+function hrefWithEnoughResults(href: string, count: number) {
+  if (count <= documentListPageSize) {
+    return href;
+  }
+
+  const separator = href.includes("?") ? "&" : "?";
+  return `${href}${separator}page=${Math.ceil(count / documentListPageSize)}`;
+}
+
 export default async function HomePage() {
   const [communes, documents] = await Promise.all([getCommunes(), getDocuments()]);
   const wardCount = communes.filter((commune) => commune.type === "phuong").length;
@@ -140,10 +155,14 @@ export default async function HomePage() {
   const provincialCount = documents.filter((document) => document.documentType === "tai_lieu_cap_tinh").length;
   const latestDocuments = documents.slice(0, 3);
   const documentsWithSearchText = documents.map((document) => ({ document, searchText: documentSearchText(document) }));
-  const pathsWithCounts = readingPaths.map((path) => ({
-    ...path,
-    count: documentsWithSearchText.filter((item) => path.terms.some((term) => item.searchText.includes(term))).length
-  }));
+  const pathsWithCounts = readingPaths.map((path) => {
+    const count = documentsWithSearchText.filter((item) => item.searchText.includes(normalizeVietnamese(searchQueryFromHref(path.href)))).length;
+    return {
+      ...path,
+      href: hrefWithEnoughResults(path.href, count),
+      count
+    };
+  });
   const featuredDocument =
     documentsWithSearchText.find((item) => ["tay ninh 180", "tay ninh 30 nam", "dia chi tay ninh"].some((term) => item.searchText.includes(term)))
       ?.document || latestDocuments[0];

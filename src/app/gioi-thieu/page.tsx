@@ -64,7 +64,8 @@ const mapCards = [
   {
     title: "Tây Ninh sau sáp nhập",
     description: "Bản đồ tỉnh Tây Ninh mới sau khi hợp nhất Tây Ninh và Long An, gồm 96 xã/phường.",
-    image: "/images/maps/tay-ninh-moi-2025.jpg"
+    image: "/images/maps/tay-ninh-moi-2025.jpg",
+    href: "https://tinhthanhvn.com/province/tay-ninh/danh-sach-don-vi-hanh-chinh"
   }
 ];
 
@@ -131,7 +132,7 @@ export default function AboutProjectPage() {
 
           <div className="rounded border border-ink/10 bg-paper p-4">
             <a
-              href="/images/maps/tay-ninh-moi-2025.jpg"
+              href="https://tinhthanhvn.com/province/tay-ninh/danh-sach-don-vi-hanh-chinh"
               target="_blank"
               rel="noreferrer"
               className="group block"
@@ -149,7 +150,7 @@ export default function AboutProjectPage() {
               </div>
             </a>
             <p className="mt-3 text-xs leading-5 text-ink/55">
-              Bấm vào bản đồ để xem ảnh ở kích thước lớn hơn.
+              Bấm vào bản đồ để mở danh sách 96 xã/phường và bản đồ hành chính chi tiết.
             </p>
           </div>
         </div>
@@ -158,7 +159,7 @@ export default function AboutProjectPage() {
           {mapCards.map((map) => (
             <article key={map.title} className="flex h-full flex-col overflow-hidden rounded border border-ink/10 bg-white">
               <a
-                href={map.image}
+                href={map.href || map.image}
                 target="_blank"
                 rel="noreferrer"
                 className="group relative block aspect-[4/3] bg-paper"
@@ -172,14 +173,14 @@ export default function AboutProjectPage() {
                 className="object-contain p-3 transition duration-200 group-hover:scale-[1.03]"
               />
                 <span className="absolute bottom-3 right-3 rounded bg-ink/80 px-3 py-1.5 text-xs font-semibold text-white opacity-0 transition group-hover:opacity-100">
-                  Xem ảnh lớn
+                  {map.href ? "Mở bản đồ" : "Xem ảnh lớn"}
                 </span>
               </a>
               <div className="flex flex-1 flex-col p-4">
                 <h3 className="text-base font-semibold text-ink">{map.title}</h3>
                 <p className="mt-2 flex-1 text-sm leading-6 text-ink/68">{map.description}</p>
                 <p className="mt-4 text-xs font-semibold uppercase tracking-wide text-ink/45">
-                  Bấm vào ảnh để phóng lớn
+                  {map.href ? "Mở bản đồ hành chính" : "Bấm vào ảnh để phóng lớn"}
                 </p>
               </div>
             </article>
