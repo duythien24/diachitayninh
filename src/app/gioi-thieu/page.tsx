@@ -15,6 +15,8 @@ import {
 } from "lucide-react";
 
 import { PageShell, SectionHeader } from "@/components/page-shell";
+import { getCommunes } from "@/lib/repository";
+import { tinhThanhMapUrl, typePrefix } from "@/lib/utils";
 
 export const metadata: Metadata = {
   title: "Giới thiệu dự án",
@@ -47,10 +49,10 @@ const provinceStats = [
   { label: "Diện tích", value: "8.536,44 km²", icon: Ruler },
   { label: "Dân số", value: "3.254.170 người", icon: UsersRound },
   { label: "Đơn vị cấp xã", value: "96", detail: "14 phường, 82 xã", icon: Building2 },
-  { label: "Trung tâm hành chính", value: "Phường Tân Ninh", icon: MapPinned }
+  { label: "Trung tâm hành chính", value: "Phường Long An", icon: MapPinned }
 ];
 
-const mapCards = [
+const mapCards: Array<{ title: string; description: string; image: string; href?: string }> = [
   {
     title: "Tây Ninh trước sáp nhập",
     description: "Không gian hành chính của tỉnh Tây Ninh cũ, trước khi hợp nhất với tỉnh Long An.",
@@ -60,12 +62,6 @@ const mapCards = [
     title: "Long An trước sáp nhập",
     description: "Không gian hành chính của tỉnh Long An cũ, nay là một phần của tỉnh Tây Ninh mới.",
     image: "/images/maps/long-an-cu.jpg"
-  },
-  {
-    title: "Tây Ninh sau sáp nhập",
-    description: "Bản đồ tỉnh Tây Ninh mới sau khi hợp nhất Tây Ninh và Long An, gồm 96 xã/phường.",
-    image: "/images/maps/tay-ninh-moi-2025.jpg",
-    href: "https://tinhthanhvn.com/province/tay-ninh/danh-sach-don-vi-hanh-chinh"
   }
 ];
 
@@ -75,7 +71,9 @@ const contactLinks = [
   { label: "Facebook: Thư viện tỉnh Tây Ninh", href: "https://www.facebook.com/ThuvientinhTayNinh" }
 ];
 
-export default function AboutProjectPage() {
+export default async function AboutProjectPage() {
+  const communes = (await getCommunes()).sort((left, right) => left.type.localeCompare(right.type) || left.name.localeCompare(right.name, "vi"));
+
   return (
     <PageShell>
       <SectionHeader
@@ -106,8 +104,8 @@ export default function AboutProjectPage() {
             </div>
             <div className="mt-5 space-y-4 text-sm leading-7 text-ink/70">
               <p>
-                Theo TinhThanhVN, tỉnh Tây Ninh sau sáp nhập được hình thành từ tỉnh Tây Ninh và tỉnh Long An cũ.
-                Tỉnh mới có mã đơn vị hành chính 80, thuộc vùng Nam Bộ và có trung tâm hành chính tại phường Tân Ninh.
+                Tỉnh Tây Ninh sau sáp nhập được hình thành từ tỉnh Tây Ninh và tỉnh Long An cũ. Tỉnh mới có mã đơn vị hành chính 80,
+                thuộc vùng Nam Bộ và có trung tâm hành chính tại phường Long An.
               </p>
               <p>
                 Phần bản đồ bên dưới giúp người đọc hình dung nhanh hai không gian hành chính cũ và tỉnh Tây Ninh mới,
@@ -130,27 +128,30 @@ export default function AboutProjectPage() {
             </div>
           </div>
 
-          <div className="rounded border border-ink/10 bg-paper p-4">
+          <div className="rounded border border-ink/10 bg-ink p-6 text-white">
             <a
               href="https://tinhthanhvn.com/province/tay-ninh/danh-sach-don-vi-hanh-chinh"
               target="_blank"
               rel="noreferrer"
               className="group block"
-              aria-label="Mở bản đồ tỉnh Tây Ninh sau sáp nhập ở kích thước lớn"
+              aria-label="Mở danh sách 96 xã phường và bản đồ hành chính tỉnh Tây Ninh"
             >
-              <div className="relative aspect-[4/3] overflow-hidden rounded bg-white">
-                <Image
-                  src="/images/maps/tay-ninh-moi-2025.jpg"
-                  alt="Bản đồ tỉnh Tây Ninh sau sáp nhập"
-                  fill
-                  sizes="(max-width: 1024px) 100vw, 560px"
-                  className="object-contain p-3 transition duration-200 group-hover:scale-[1.02]"
-                  priority
-                />
+              <div className="flex min-h-[22rem] flex-col justify-between rounded border border-white/15 bg-white/8 p-5 transition group-hover:bg-white/12">
+                <div>
+                  <MapPinned className="h-8 w-8 text-gold" aria-hidden="true" />
+                  <p className="mt-5 text-sm font-semibold uppercase tracking-wide text-gold">Bản đồ hành chính tương tác</p>
+                  <h3 className="mt-3 text-3xl font-semibold leading-tight">Mở bản đồ 96 xã/phường</h3>
+                  <p className="mt-4 text-sm leading-7 text-white/72">
+                    Dùng bản đồ tương tác để phóng to, di chuyển và xem ranh giới từng đơn vị hành chính mới rõ hơn ảnh tĩnh.
+                  </p>
+                </div>
+                <span className="mt-6 inline-flex min-h-11 w-fit items-center rounded bg-gold px-4 py-2 text-sm font-semibold text-ink transition group-hover:bg-gold/90">
+                  Mở danh sách bản đồ
+                </span>
               </div>
             </a>
-            <p className="mt-3 text-xs leading-5 text-ink/55">
-              Bấm vào bản đồ để mở danh sách 96 xã/phường và bản đồ hành chính chi tiết.
+            <p className="mt-3 text-xs leading-5 text-white/55">
+              Bấm để mở trang bản đồ có thể zoom và chọn từng xã/phường.
             </p>
           </div>
         </div>
@@ -184,6 +185,44 @@ export default function AboutProjectPage() {
                 </p>
               </div>
             </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="mt-8 rounded border border-ink/10 bg-white p-6 shadow-sm">
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-wide text-lacquer">Bản đồ xã/phường</p>
+            <h2 className="mt-2 text-2xl font-semibold text-ink">Tra cứu bản đồ hành chính mới</h2>
+            <p className="mt-3 max-w-3xl text-sm leading-7 text-ink/68">
+              Chọn một xã/phường để mở bản đồ chi tiết, phóng to ranh giới và xem vị trí của đơn vị hành chính sau sáp nhập.
+            </p>
+          </div>
+          <a
+            href="https://tinhthanhvn.com/province/tay-ninh/danh-sach-don-vi-hanh-chinh"
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex min-h-11 items-center rounded bg-palm px-4 py-2 text-sm font-semibold text-white transition hover:bg-palm/90"
+          >
+            Mở toàn bộ bản đồ
+          </a>
+        </div>
+
+        <div className="mt-5 grid max-h-[30rem] gap-2 overflow-y-auto rounded border border-ink/10 bg-paper p-3 sm:grid-cols-2 lg:grid-cols-3">
+          {communes.map((commune) => (
+            <a
+              key={commune.id}
+              href={tinhThanhMapUrl(commune.type, commune.slug)}
+              target="_blank"
+              rel="noreferrer"
+              className="group flex min-h-14 items-center justify-between gap-3 rounded border border-ink/8 bg-white px-3 py-2 text-sm transition hover:border-palm/35 hover:shadow-sm"
+            >
+              <span>
+                <span className="block text-xs font-semibold uppercase tracking-wide text-lacquer">{typePrefix(commune.type)}</span>
+                <span className="mt-0.5 block font-semibold text-ink group-hover:text-palm">{commune.name}</span>
+              </span>
+              <MapPinned className="h-4 w-4 shrink-0 text-ink/35 group-hover:text-palm" aria-hidden="true" />
+            </a>
           ))}
         </div>
       </section>
