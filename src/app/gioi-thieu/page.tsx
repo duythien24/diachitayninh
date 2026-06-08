@@ -5,7 +5,6 @@ import {
   Archive,
   BookOpen,
   Building2,
-  ExternalLink,
   FileSearch,
   Library,
   Mail,
@@ -55,23 +54,17 @@ const mapCards = [
   {
     title: "Tây Ninh trước sáp nhập",
     description: "Không gian hành chính của tỉnh Tây Ninh cũ, trước khi hợp nhất với tỉnh Long An.",
-    image: "/images/maps/tay-ninh-cu.jpg",
-    source: "Địa Ốc Thông Thái",
-    href: "https://diaocthongthai.com/ban-do-tay-ninh/"
+    image: "/images/maps/tay-ninh-cu.jpg"
   },
   {
     title: "Long An trước sáp nhập",
     description: "Không gian hành chính của tỉnh Long An cũ, nay là một phần của tỉnh Tây Ninh mới.",
-    image: "/images/maps/long-an-cu.jpg",
-    source: "Địa Ốc Thông Thái",
-    href: "https://diaocthongthai.com/ban-do-long-an/"
+    image: "/images/maps/long-an-cu.jpg"
   },
   {
     title: "Tây Ninh sau sáp nhập",
     description: "Bản đồ tỉnh Tây Ninh mới sau khi hợp nhất Tây Ninh và Long An, gồm 96 xã/phường.",
-    image: "/images/maps/tay-ninh-moi-2025.png",
-    source: "TinhThanhVN",
-    href: "https://tinhthanhvn.com/province/tay-ninh"
+    image: "/images/maps/tay-ninh-moi-2025.jpg"
   }
 ];
 
@@ -137,18 +130,26 @@ export default function AboutProjectPage() {
           </div>
 
           <div className="rounded border border-ink/10 bg-paper p-4">
-            <div className="relative aspect-[4/3] overflow-hidden rounded bg-white">
-              <Image
-                src="/images/maps/tay-ninh-moi-2025.png"
-                alt="Bản đồ tỉnh Tây Ninh sau sáp nhập"
-                fill
-                sizes="(max-width: 1024px) 100vw, 560px"
-                className="object-contain p-3"
-                priority
-              />
-            </div>
+            <a
+              href="/images/maps/tay-ninh-moi-2025.jpg"
+              target="_blank"
+              rel="noreferrer"
+              className="group block"
+              aria-label="Mở bản đồ tỉnh Tây Ninh sau sáp nhập ở kích thước lớn"
+            >
+              <div className="relative aspect-[4/3] overflow-hidden rounded bg-white">
+                <Image
+                  src="/images/maps/tay-ninh-moi-2025.jpg"
+                  alt="Bản đồ tỉnh Tây Ninh sau sáp nhập"
+                  fill
+                  sizes="(max-width: 1024px) 100vw, 560px"
+                  className="object-contain p-3 transition duration-200 group-hover:scale-[1.02]"
+                  priority
+                />
+              </div>
+            </a>
             <p className="mt-3 text-xs leading-5 text-ink/55">
-              Số liệu tham khảo từ TinhThanhVN. Bản đồ trước sáp nhập tham khảo từ Địa Ốc Thông Thái.
+              Bấm vào bản đồ để xem ảnh ở kích thước lớn hơn.
             </p>
           </div>
         </div>
@@ -156,27 +157,30 @@ export default function AboutProjectPage() {
         <div className="mt-6 grid gap-4 md:grid-cols-3">
           {mapCards.map((map) => (
             <article key={map.title} className="flex h-full flex-col overflow-hidden rounded border border-ink/10 bg-white">
-              <div className="relative aspect-[4/3] bg-paper">
-                <Image
-                  src={map.image}
-                  alt={map.title}
-                  fill
-                  sizes="(max-width: 768px) 100vw, 380px"
-                  className="object-contain p-3"
-                />
-              </div>
+              <a
+                href={map.image}
+                target="_blank"
+                rel="noreferrer"
+                className="group relative block aspect-[4/3] bg-paper"
+                aria-label={`Mở ảnh lớn: ${map.title}`}
+              >
+              <Image
+                src={map.image}
+                alt={map.title}
+                fill
+                sizes="(max-width: 768px) 100vw, 380px"
+                className="object-contain p-3 transition duration-200 group-hover:scale-[1.03]"
+              />
+                <span className="absolute bottom-3 right-3 rounded bg-ink/80 px-3 py-1.5 text-xs font-semibold text-white opacity-0 transition group-hover:opacity-100">
+                  Xem ảnh lớn
+                </span>
+              </a>
               <div className="flex flex-1 flex-col p-4">
                 <h3 className="text-base font-semibold text-ink">{map.title}</h3>
                 <p className="mt-2 flex-1 text-sm leading-6 text-ink/68">{map.description}</p>
-                <a
-                  href={map.href}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="mt-4 inline-flex min-h-10 items-center gap-2 self-start rounded border border-ink/10 px-3 py-2 text-sm font-semibold text-ink transition hover:bg-paper"
-                >
-                  Nguồn: {map.source}
-                  <ExternalLink className="h-4 w-4" aria-hidden="true" />
-                </a>
+                <p className="mt-4 text-xs font-semibold uppercase tracking-wide text-ink/45">
+                  Bấm vào ảnh để phóng lớn
+                </p>
               </div>
             </article>
           ))}
