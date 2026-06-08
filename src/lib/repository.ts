@@ -455,24 +455,26 @@ export async function searchDocuments(options: SearchDocumentsOptions = {}): Pro
       const rankedRows = searchRows as SearchDocumentsRow[];
       const ids = rankedRows.map((row) => row.document_id).filter(Boolean);
 
-      if (!ids.length) {
+      if (!ids.length && !query) {
         return {
           documents: [],
           hasMore: false
         };
       }
 
-      const { data, error } = await fetchDocumentRowsByIds(supabase, ids);
+      if (ids.length) {
+        const { data, error } = await fetchDocumentRowsByIds(supabase, ids);
 
-      if (!error) {
-        const order = new Map(ids.map((id, index) => [id, index]));
-        const documents = data
-          .map((row) => mapDocument(row as DocumentRow))
-          .sort((a, b) => (order.get(a.id) ?? 0) - (order.get(b.id) ?? 0));
-        return {
-          documents: documents.slice(0, limit),
-          hasMore: documents.length > limit
-        };
+        if (!error) {
+          const order = new Map(ids.map((id, index) => [id, index]));
+          const documents = data
+            .map((row) => mapDocument(row as DocumentRow))
+            .sort((a, b) => (order.get(a.id) ?? 0) - (order.get(b.id) ?? 0));
+          return {
+            documents: documents.slice(0, limit),
+            hasMore: documents.length > limit
+          };
+        }
       }
     }
   }

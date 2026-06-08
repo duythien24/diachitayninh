@@ -92,7 +92,7 @@ const topicLinks = [
 
 const readingPaths = [
   {
-    href: "/tai-lieu?q=nui%20ba%20den",
+    href: "/tai-lieu?q=di%20tich",
     eyebrow: "Biểu tượng Tây Ninh",
     title: "Núi Bà Đen và vùng đất linh thiêng",
     description: "Bắt đầu từ cảnh quan, di tích và những tư liệu gắn với biểu tượng quen thuộc nhất của Tây Ninh.",
@@ -108,7 +108,7 @@ const readingPaths = [
     icon: Route
   },
   {
-    href: "/tai-lieu?q=cao%20dai",
+    href: "/tai-lieu?q=van%20hoa",
     eyebrow: "Văn hóa bản địa",
     title: "Cao Đài, làng nghề và đời sống văn hóa",
     description: "Khám phá những lớp văn hóa, tín ngưỡng, sinh hoạt cộng đồng và ký ức đời sống trong tư liệu số.",
