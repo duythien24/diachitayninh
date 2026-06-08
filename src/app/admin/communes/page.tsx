@@ -19,12 +19,20 @@ export default async function AdminCommunesPage({
   const [communes, documents, params] = await Promise.all([getAdminCommunes(), getAdminDocuments(), searchParams]);
   const isMock = usingMockData();
   const message = statusMessage(params.status);
-  const documentCountByCommune = new Map<string, number>();
+  const documentCountByCommune = new Map<
+    string,
+    { total: number; diaChi: number; baoTayNinh: number; provincial: number }
+  >();
 
   for (const document of documents) {
     const communeIds = document.communeIds?.length ? document.communeIds : document.communeId ? [document.communeId] : [];
     for (const communeId of communeIds) {
-      documentCountByCommune.set(communeId, (documentCountByCommune.get(communeId) || 0) + 1);
+      const current = documentCountByCommune.get(communeId) || { total: 0, diaChi: 0, baoTayNinh: 0, provincial: 0 };
+      current.total += 1;
+      if (document.documentType === "dia_chi") current.diaChi += 1;
+      if (document.documentType === "bao_tay_ninh") current.baoTayNinh += 1;
+      if (document.documentType === "tai_lieu_cap_tinh") current.provincial += 1;
+      documentCountByCommune.set(communeId, current);
     }
   }
 
@@ -33,7 +41,7 @@ export default async function AdminCommunesPage({
   ).length;
   const communeRows = communes.map((commune) => ({
     ...commune,
-    documentCount: documentCountByCommune.get(commune.id) || 0
+    documentCounts: documentCountByCommune.get(commune.id) || { total: 0, diaChi: 0, baoTayNinh: 0, provincial: 0 }
   }));
 
   return (

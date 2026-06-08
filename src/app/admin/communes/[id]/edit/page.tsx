@@ -1,12 +1,12 @@
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, ImagePlus, Save } from "lucide-react";
+import { ArrowLeft, ExternalLink, ImagePlus, MapPinned, Save } from "lucide-react";
 
 import { updateCommuneAction } from "@/app/admin/communes/actions";
 import { PageShell, SectionHeader } from "@/components/page-shell";
 import { getAdminCommuneById } from "@/lib/repository";
-import { typePrefix } from "@/lib/utils";
+import { tinhThanhMapUrl, typePrefix } from "@/lib/utils";
 
 export default async function EditCommunePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -17,6 +17,8 @@ export default async function EditCommunePage({ params }: { params: Promise<{ id
   }
 
   const action = updateCommuneAction.bind(null, commune.id);
+  const publicHref = `/xa-phuong/${commune.slug}`;
+  const mapHref = tinhThanhMapUrl(commune.type, commune.slug);
 
   return (
     <PageShell>
@@ -47,6 +49,20 @@ export default async function EditCommunePage({ params }: { params: Promise<{ id
                 className="resize-y rounded border border-ink/12 px-3 py-3 font-normal leading-6 text-ink outline-none transition focus:border-palm"
                 placeholder="Nhập mô tả riêng cho xã/phường..."
               />
+            </label>
+
+            <label className="grid gap-2 text-sm font-semibold text-ink">
+              Thông tin sáp nhập / đơn vị cũ hợp thành
+              <textarea
+                name="district_old"
+                rows={4}
+                defaultValue={commune.districtOld}
+                className="resize-y rounded border border-ink/12 px-3 py-3 font-normal leading-6 text-ink outline-none transition focus:border-palm"
+                placeholder="Ví dụ: Sáp nhập từ: Xã A, Xã B..."
+              />
+              <span className="text-xs font-normal text-ink/50">
+                Nội dung này hiển thị trong khối thông tin sắp xếp hành chính ở trang chi tiết xã/phường.
+              </span>
             </label>
 
             <div className="grid gap-5 md:grid-cols-2">
@@ -103,6 +119,7 @@ export default async function EditCommunePage({ params }: { params: Promise<{ id
             )}
           </div>
           <h2 className="mt-5 text-xl font-semibold text-ink">{commune.name}</h2>
+          <p className="mt-2 text-sm font-medium text-lacquer">{commune.districtOld}</p>
           <p className="mt-3 text-sm leading-6 text-ink/65">{commune.description}</p>
           {commune.keywords?.length ? (
             <div className="mt-4 flex flex-wrap gap-2">
@@ -113,6 +130,25 @@ export default async function EditCommunePage({ params }: { params: Promise<{ id
               ))}
             </div>
           ) : null}
+          <div className="mt-5 grid gap-2">
+            <Link
+              href={publicHref}
+              target="_blank"
+              className="inline-flex min-h-10 items-center justify-center gap-2 rounded bg-palm px-3 py-2 text-sm font-semibold text-white transition hover:bg-palm/90"
+            >
+              <ExternalLink className="h-4 w-4" aria-hidden="true" />
+              Xem trang công khai
+            </Link>
+            <a
+              href={mapHref}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex min-h-10 items-center justify-center gap-2 rounded border border-ink/12 px-3 py-2 text-sm font-semibold text-ink transition hover:bg-paper"
+            >
+              <MapPinned className="h-4 w-4" aria-hidden="true" />
+              Mở bản đồ hành chính
+            </a>
+          </div>
         </aside>
       </div>
     </PageShell>

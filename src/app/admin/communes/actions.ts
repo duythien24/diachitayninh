@@ -103,6 +103,7 @@ export async function updateCommuneAction(communeId: string, formData: FormData)
     : optionalTextValue(formData, "cover_image_url") || optionalTextValue(formData, "existing_cover_image_url");
 
   const communeData = {
+    district_old: optionalTextValue(formData, "district_old"),
     description: optionalTextValue(formData, "description"),
     cover_image_url: coverImageUrl,
     keywords: keywordsValue(formData),
@@ -130,6 +131,7 @@ export async function updateCommuneAction(communeId: string, formData: FormData)
     entityLabel: communeName,
     metadata: {
       slug,
+      districtOld: communeData.district_old,
       hasCoverImage: Boolean(coverImageUrl),
       keywords: communeData.keywords || []
     }
