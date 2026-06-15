@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Activity, BookOpenCheck, Eye, MapPinned, MousePointerClick, TrendingUp } from "lucide-react";
+import { Activity, BookOpenCheck, Download, Eye, MapPinned, MousePointerClick, TrendingUp } from "lucide-react";
 
 import type { DocumentAnalytics } from "@/lib/document-analytics";
 
@@ -26,9 +26,31 @@ export function DocumentAnalyticsPanel({ analytics }: { analytics: DocumentAnaly
 
   const maxDaily = Math.max(1, ...analytics.daily.map((item) => item.total));
   const totalInteractions = analytics.totalDetailViews + analytics.totalPdfOpens;
+  const today = new Date().toISOString().slice(0, 10);
+  const thirtyDaysAgo = new Date(Date.now() - 29 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
 
   return (
     <section className="mt-8 space-y-6">
+      <form
+        action="/admin/statistics/export"
+        method="get"
+        className="flex flex-col gap-3 rounded border border-ink/10 bg-white p-4 shadow-sm sm:flex-row sm:items-end"
+      >
+        <label className="grid gap-1.5 text-sm font-semibold text-ink">
+          Từ ngày
+          <input type="date" name="from" defaultValue={thirtyDaysAgo} max={today} className="min-h-10 rounded border border-ink/15 bg-paper px-3 font-normal" />
+        </label>
+        <label className="grid gap-1.5 text-sm font-semibold text-ink">
+          Đến ngày
+          <input type="date" name="to" defaultValue={today} max={today} className="min-h-10 rounded border border-ink/15 bg-paper px-3 font-normal" />
+        </label>
+        <button type="submit" className="inline-flex min-h-10 items-center justify-center gap-2 rounded bg-palm px-4 text-sm font-semibold text-white transition hover:bg-palm/90">
+          <Download className="h-4 w-4" aria-hidden="true" />
+          Xuất báo cáo CSV
+        </button>
+        <p className="text-xs leading-5 text-ink/50 sm:ml-auto sm:max-w-xs">Tệp mở trực tiếp bằng Excel, tổng hợp theo ngày và từng tài liệu.</p>
+      </form>
+
       <div className="grid gap-4 md:grid-cols-3">
         {[
           { label: "Lượt xem chi tiết", value: analytics.totalDetailViews, icon: Eye },

@@ -20,6 +20,7 @@ import {
 import { DocumentCoverImage } from "@/components/document-cover-image";
 import { DocumentCard } from "@/components/document-card";
 import { PageShell } from "@/components/page-shell";
+import { getPopularDocumentIds } from "@/lib/document-analytics";
 import { getCommunes, getDocuments } from "@/lib/repository";
 import { normalizeVietnamese } from "@/lib/utils";
 
@@ -148,12 +149,18 @@ function hrefWithEnoughResults(href: string, count: number) {
 
 export default async function HomePage() {
   const [communes, documents] = await Promise.all([getCommunes(), getDocuments()]);
+  const popularDocumentIds = await getPopularDocumentIds(3);
   const wardCount = communes.filter((commune) => commune.type === "phuong").length;
   const communeCount = communes.filter((commune) => commune.type === "xa").length;
   const diaChiCount = documents.filter((document) => document.documentType === "dia_chi").length;
   const baoTayNinhCount = documents.filter((document) => document.documentType === "bao_tay_ninh").length;
   const provincialCount = documents.filter((document) => document.documentType === "tai_lieu_cap_tinh").length;
   const latestDocuments = documents.slice(0, 3);
+  const documentById = new Map(documents.map((document) => [document.id, document]));
+  const popularDocuments = popularDocumentIds
+    .map((documentId) => documentById.get(documentId))
+    .filter((document): document is NonNullable<typeof document> => Boolean(document));
+  const highlightedDocuments = popularDocuments.length >= 2 ? popularDocuments : latestDocuments;
   const documentsWithSearchText = documents.map((document) => ({ document, searchText: documentSearchText(document) }));
   const pathsWithCounts = readingPaths.map((path) => {
     const count = documentsWithSearchText.filter((item) => item.searchText.includes(normalizeVietnamese(searchQueryFromHref(path.href)))).length;
@@ -164,8 +171,10 @@ export default async function HomePage() {
     };
   });
   const featuredDocument =
+    popularDocuments[0] ||
     documentsWithSearchText.find((item) => ["tay ninh 180", "tay ninh 30 nam", "dia chi tay ninh"].some((term) => item.searchText.includes(term)))
-      ?.document || latestDocuments[0];
+      ?.document ||
+    latestDocuments[0];
   const documentCountByCommuneId = new Map<string, number>();
 
   for (const document of documents) {
@@ -442,8 +451,12 @@ export default async function HomePage() {
             <div>
               <div className="mb-5 flex items-end justify-between gap-4">
                 <div>
-                  <p className="text-sm font-semibold uppercase tracking-wide text-lacquer">Tài liệu mới</p>
-                  <h2 className="mt-2 text-2xl font-semibold text-ink">Vừa được cập nhật</h2>
+                  <p className="text-sm font-semibold uppercase tracking-wide text-lacquer">
+                    {popularDocuments.length >= 2 ? "Được quan tâm" : "Tài liệu mới"}
+                  </p>
+                  <h2 className="mt-2 text-2xl font-semibold text-ink">
+                    {popularDocuments.length >= 2 ? "Bạn đọc đang xem nhiều" : "Vừa được cập nhật"}
+                  </h2>
                 </div>
                 <Link
                   href="/tai-lieu"
@@ -453,9 +466,9 @@ export default async function HomePage() {
                   <ArrowRight className="h-4 w-4" aria-hidden="true" />
                 </Link>
               </div>
-              {latestDocuments.length > 0 ? (
+              {highlightedDocuments.length > 0 ? (
                 <div className="grid gap-5 md:grid-cols-2">
-                  {latestDocuments.slice(0, 2).map((document) => (
+                  {highlightedDocuments.slice(0, 2).map((document) => (
                     <DocumentCard key={document.id} document={document} />
                   ))}
                 </div>

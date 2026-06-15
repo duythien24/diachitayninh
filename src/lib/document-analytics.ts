@@ -55,6 +55,32 @@ function isoDateDaysAgo(days: number) {
   return date.toISOString().slice(0, 10);
 }
 
+export async function getPopularDocumentIds(limit = 3, days = 90) {
+  noStore();
+
+  const supabase = getSupabaseAdminClient();
+  if (!supabase) return [];
+
+  const { data, error } = await supabase
+    .from("document_events")
+    .select("document_id,event_type")
+    .gte("occurred_on", isoDateDaysAgo(Math.max(0, days - 1)))
+    .limit(20000);
+
+  if (error || !data) return [];
+
+  const scores = new Map<string, number>();
+  for (const event of data as Pick<EventRow, "document_id" | "event_type">[]) {
+    const weight = event.event_type === "pdf_open" ? 2 : 1;
+    scores.set(event.document_id, (scores.get(event.document_id) || 0) + weight);
+  }
+
+  return Array.from(scores.entries())
+    .sort((left, right) => right[1] - left[1])
+    .slice(0, Math.max(1, limit))
+    .map(([documentId]) => documentId);
+}
+
 export async function getDocumentAnalytics(documents: Document[], communes: Commune[]): Promise<DocumentAnalytics> {
   noStore();
 
