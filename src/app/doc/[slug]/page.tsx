@@ -7,6 +7,7 @@ import { ContactPanel } from "@/components/contact-panel";
 import { DocumentEventTracker } from "@/components/document-event-tracker";
 import { isTayNinhLibraryUrl } from "@/components/document-cover-image";
 import { PageShell } from "@/components/page-shell";
+import { ReadingHistoryTracker } from "@/components/reading-history-tracker";
 import { getDocuments, getDocumentBySlug } from "@/lib/repository";
 import { documentTypeLabel, typePrefix } from "@/lib/utils";
 
@@ -46,6 +47,7 @@ export default async function PdfReaderPage({ params }: { params: Promise<{ slug
   return (
     <PageShell>
       <DocumentEventTracker documentId={document.id} eventType="pdf_open" />
+      <ReadingHistoryTracker documentId={document.id} />
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <Link href={`/tai-lieu/${document.slug}`} className="inline-flex items-center gap-2 text-sm font-semibold text-palm">

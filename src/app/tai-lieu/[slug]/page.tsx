@@ -4,10 +4,12 @@ import { notFound } from "next/navigation";
 import { ArrowLeft, Eye, LockKeyhole } from "lucide-react";
 
 import { ContactPanel } from "@/components/contact-panel";
+import { BookmarkButton } from "@/components/bookmark-button";
 import { DocumentEventTracker } from "@/components/document-event-tracker";
 import { DocumentCoverImage } from "@/components/document-cover-image";
 import { DocumentCard } from "@/components/document-card";
 import { PageShell } from "@/components/page-shell";
+import { ReadingHistoryTracker } from "@/components/reading-history-tracker";
 import { getDocuments, getDocumentBySlug } from "@/lib/repository";
 import type { Document } from "@/lib/types";
 import { documentTypeLabel, typePrefix } from "@/lib/utils";
@@ -81,6 +83,7 @@ export default async function DocumentDetailPage({ params }: { params: Promise<{
   return (
     <PageShell>
       <DocumentEventTracker documentId={document.id} eventType="detail_view" />
+      <ReadingHistoryTracker documentId={document.id} />
       <Link href="/tai-lieu" className="inline-flex items-center gap-2 text-sm font-semibold text-palm">
         <ArrowLeft className="h-4 w-4" aria-hidden="true" />
         Quay lại kho tài liệu
@@ -157,6 +160,7 @@ export default async function DocumentDetailPage({ params }: { params: Promise<{
           ) : null}
 
           <div className="mt-6 flex flex-wrap gap-3">
+            <BookmarkButton documentId={document.id} showLabel />
             <Link
               href={`/doc/${document.slug}`}
               className="inline-flex min-h-11 items-center gap-2 rounded bg-palm px-4 py-3 text-sm font-semibold text-white transition hover:bg-palm/90"

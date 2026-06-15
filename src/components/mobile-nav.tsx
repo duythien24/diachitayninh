@@ -5,6 +5,7 @@ import { useState } from "react";
 import { Building2, CircleHelp, FileText, HardDrive, Info, KeyRound, LogIn, LogOut, Menu, ShieldCheck, X } from "lucide-react";
 
 import type { AccountSession } from "@/components/account-menu";
+import { ReadingShelfLink } from "@/components/reading-shelf-link";
 
 const navLinks = [
   { href: "/gioi-thieu", label: "Giới thiệu", icon: Info },
@@ -44,6 +45,7 @@ export function MobileNav({ account }: { account: AccountSession | null }) {
                 </Link>
               );
             })}
+            <ReadingShelfLink mobile onNavigate={() => setIsOpen(false)} />
 
             {account ? (
               <div className="bg-paper/60">

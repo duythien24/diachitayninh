@@ -4,6 +4,7 @@ import { Building2, FileText, Info } from "lucide-react";
 
 import { AccountMenu } from "@/components/account-menu";
 import { MobileNav } from "@/components/mobile-nav";
+import { ReadingShelfLink } from "@/components/reading-shelf-link";
 import { adminRoleLabel, getCurrentAdmin } from "@/lib/admin-users";
 
 const nav = [
@@ -55,6 +56,7 @@ export async function SiteHeader() {
               </Link>
             );
           })}
+          <ReadingShelfLink />
           <AccountMenu account={account} />
         </nav>
         <MobileNav account={account} />

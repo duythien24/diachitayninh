@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArrowRight, Eye, Files, Library } from "lucide-react";
 
 import { DocumentCoverImage } from "@/components/document-cover-image";
+import { BookmarkButton } from "@/components/bookmark-button";
 import { getCommuneById } from "@/lib/data";
 import type { Document } from "@/lib/types";
 import { documentTypeShortLabel, typePrefix } from "@/lib/utils";
@@ -31,7 +32,10 @@ export function DocumentCard({ document }: { document: Document }) {
       </div>
 
       <div className="flex flex-1 flex-col p-5">
-        <p className="text-sm text-ink/55">{document.year}</p>
+        <div className="flex min-h-10 items-center justify-between gap-3">
+          <p className="text-sm text-ink/55">{document.year}</p>
+          <BookmarkButton documentId={document.id} className="h-10 w-10 px-0" />
+        </div>
         <h2 className="mt-1 line-clamp-2 min-h-[3.05rem] text-lg font-semibold leading-snug text-ink">{document.title}</h2>
         <p className="mt-4 line-clamp-3 min-h-[4.5rem] text-sm leading-6 text-ink/68">{document.description}</p>
 
