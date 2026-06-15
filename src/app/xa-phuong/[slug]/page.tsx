@@ -2,10 +2,11 @@ import Link from "next/link";
 import Image from "next/image";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { ArrowLeft, ArrowRight, Building2, CalendarDays, FileText, Library, MapPinned, Newspaper, Tags } from "lucide-react";
+import { ArrowLeft, ArrowRight, BookMarked, Building2, CalendarDays, FileText, History, Library, MapPinned, Newspaper, Tags, TrendingUp } from "lucide-react";
 
 import { DocumentCard } from "@/components/document-card";
 import { PageShell } from "@/components/page-shell";
+import { getDocumentPopularityScores } from "@/lib/document-analytics";
 import { getCommunes, getCommuneBySlug, getDocuments } from "@/lib/repository";
 import type { Commune, Document, DocumentType } from "@/lib/types";
 import { cn, tinhThanhMapUrl, typePrefix } from "@/lib/utils";
@@ -76,6 +77,39 @@ function latestDocuments(documents: Document[]) {
   return [...documents].sort((left, right) => right.year - left.year || right.createdAt.localeCompare(left.createdAt)).slice(0, 6);
 }
 
+function readingTimeline(documents: Document[]) {
+  const groups = new Map<number, Document[]>();
+
+  for (const document of documents) {
+    const current = groups.get(document.year) || [];
+    current.push(document);
+    groups.set(document.year, current);
+  }
+
+  return Array.from(groups.entries())
+    .sort((left, right) => right[0] - left[0])
+    .slice(0, 8)
+    .map(([year, items]) => ({
+      year,
+      count: items.length,
+      document: [...items].sort((left, right) => right.createdAt.localeCompare(left.createdAt))[0]
+    }));
+}
+
+function mergeUniqueDocuments(primary: Document[], fallback: Document[], limit: number) {
+  const seen = new Set<string>();
+  const result: Document[] = [];
+
+  for (const document of [...primary, ...fallback]) {
+    if (seen.has(document.id)) continue;
+    seen.add(document.id);
+    result.push(document);
+    if (result.length >= limit) break;
+  }
+
+  return result;
+}
+
 function documentsOfType(documents: Document[], type: DocumentType) {
   return documents.filter((document) => document.documentType === type);
 }
@@ -113,10 +147,17 @@ export default async function CommuneDetailPage({ params }: { params: Promise<{ 
 
   const allDocuments = await getDocuments();
   const relatedDocuments = documentsForCommune(allDocuments, commune.id);
+  const popularity = await getDocumentPopularityScores(relatedDocuments.map((document) => document.id));
   const communeSuggestions = suggestedCommunes(allDocuments, commune.id);
   const mapUrl = tinhThanhMapUrl(commune.type, commune.slug);
   const keywords = topKeywords(relatedDocuments, commune.keywords || []);
-  const featuredDocuments = latestDocuments(relatedDocuments);
+  const recentDocuments = latestDocuments(relatedDocuments);
+  const popularDocuments = relatedDocuments
+    .filter((document) => (popularity[document.id]?.score || 0) > 0)
+    .sort((left, right) => (popularity[right.id]?.score || 0) - (popularity[left.id]?.score || 0));
+  const featuredDocuments = mergeUniqueDocuments(popularDocuments, recentDocuments, 6);
+  const timeline = readingTimeline(relatedDocuments);
+  const hasReadingData = popularDocuments.length > 0;
   const stats = [
     { label: "Tổng tài liệu", value: relatedDocuments.length, icon: FileText },
     { label: "Địa chí", value: documentTypeCount(relatedDocuments, "dia_chi"), icon: Library },
@@ -263,6 +304,92 @@ export default async function CommuneDetailPage({ params }: { params: Promise<{ 
           </div>
         </aside>
       </section>
+
+      {featuredDocuments.length ? (
+        <section className="mt-10 overflow-hidden rounded border border-ink/10 bg-ink text-white shadow-soft">
+          <div className="grid gap-0 lg:grid-cols-[0.72fr_1.28fr]">
+            <div className="p-6 sm:p-8">
+              <span className="inline-flex h-11 w-11 items-center justify-center rounded bg-brass text-ink">
+                {hasReadingData ? <TrendingUp className="h-5 w-5" aria-hidden="true" /> : <BookMarked className="h-5 w-5" aria-hidden="true" />}
+              </span>
+              <p className="mt-5 text-sm font-semibold uppercase tracking-wide text-brass">
+                {hasReadingData ? "Bạn đọc đang quan tâm" : "Gợi ý bắt đầu"}
+              </p>
+              <h2 className="mt-2 text-3xl font-semibold leading-tight">
+                {hasReadingData ? `Tư liệu nổi bật của ${commune.name}` : `Nên đọc gì trước về ${commune.name}?`}
+              </h2>
+              <p className="mt-4 leading-7 text-white/68">
+                {hasReadingData
+                  ? "Thứ tự được tổng hợp từ lượt xem chi tiết và lượt mở đọc trong 180 ngày gần nhất."
+                  : "Kho chưa có đủ lượt đọc để xếp hạng, vì vậy các tài liệu mới và có metadata đầy đủ được đưa lên trước."}
+              </p>
+              <Link
+                href={`/tai-lieu?xa=${commune.id}`}
+                className="mt-6 inline-flex min-h-11 items-center gap-2 rounded bg-brass px-4 py-3 text-sm font-semibold text-ink transition hover:bg-brass/90"
+              >
+                Mở toàn bộ kho địa phương
+                <ArrowRight className="h-4 w-4" aria-hidden="true" />
+              </Link>
+            </div>
+
+            <div className="grid border-t border-white/10 sm:grid-cols-2 lg:border-l lg:border-t-0">
+              {featuredDocuments.slice(0, 4).map((document, index) => {
+                const reading = popularity[document.id];
+                return (
+                  <Link
+                    key={document.id}
+                    href={`/tai-lieu/${document.slug}`}
+                    className="group flex min-h-44 flex-col border-b border-white/10 p-5 transition hover:bg-white/8 sm:[&:nth-child(odd)]:border-r"
+                  >
+                    <span className="flex items-center justify-between gap-3 text-xs font-semibold uppercase tracking-wide text-brass">
+                      <span>Gợi ý {index + 1}</span>
+                      <span>{document.year}</span>
+                    </span>
+                    <span className="mt-4 line-clamp-2 text-lg font-semibold leading-7 text-white group-hover:text-brass">{document.title}</span>
+                    <span className="mt-3 line-clamp-2 text-sm leading-6 text-white/60">{document.description}</span>
+                    <span className="mt-auto flex items-center justify-between gap-3 pt-5 text-sm font-semibold text-white/75">
+                      <span>{reading ? `${reading.detailViews + reading.pdfOpens} lượt quan tâm` : "Tài liệu mới"}</span>
+                      <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" aria-hidden="true" />
+                    </span>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+      ) : null}
+
+      {timeline.length ? (
+        <section className="mt-10 rounded border border-ink/10 bg-white p-5 shadow-sm sm:p-6">
+          <div className="flex flex-wrap items-end justify-between gap-3">
+            <div>
+              <div className="flex items-center gap-2 text-lacquer">
+                <History className="h-5 w-5" aria-hidden="true" />
+                <p className="text-sm font-semibold uppercase tracking-wide">Dòng thời gian tư liệu</p>
+              </div>
+              <h2 className="mt-2 text-2xl font-semibold text-ink">Các mốc năm đang có trong kho</h2>
+            </div>
+            <p className="text-sm text-ink/55">{yearRange(relatedDocuments)}</p>
+          </div>
+
+          <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            {timeline.map((item) => (
+              <Link
+                key={item.year}
+                href={`/tai-lieu?xa=${commune.id}&nam=${item.year}`}
+                className="group flex min-h-32 flex-col rounded border border-ink/10 bg-paper/65 p-4 transition hover:border-palm/30 hover:bg-paper"
+              >
+                <span className="flex items-center justify-between gap-3">
+                  <span className="text-2xl font-semibold text-ink">{item.year}</span>
+                  <span className="rounded bg-white px-2 py-1 text-xs font-semibold text-palm">{item.count} tài liệu</span>
+                </span>
+                <span className="mt-3 line-clamp-2 text-sm leading-6 text-ink/62">{item.document.title}</span>
+                <ArrowRight className="mt-auto h-4 w-4 self-end text-ink/35 transition group-hover:translate-x-1 group-hover:text-palm" aria-hidden="true" />
+              </Link>
+            ))}
+          </div>
+        </section>
+      ) : null}
 
       <section className="mt-10">
         <div className="mb-4 flex flex-wrap items-end justify-between gap-3">

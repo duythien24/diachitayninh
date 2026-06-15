@@ -81,6 +81,40 @@ export async function getPopularDocumentIds(limit = 3, days = 90) {
     .map(([documentId]) => documentId);
 }
 
+export type DocumentPopularity = {
+  detailViews: number;
+  pdfOpens: number;
+  score: number;
+};
+
+export async function getDocumentPopularityScores(documentIds: string[], days = 180) {
+  noStore();
+
+  const uniqueIds = Array.from(new Set(documentIds)).filter(Boolean);
+  const supabase = getSupabaseAdminClient();
+  if (!supabase || !uniqueIds.length) return {} as Record<string, DocumentPopularity>;
+
+  const { data, error } = await supabase
+    .from("document_events")
+    .select("document_id,event_type")
+    .in("document_id", uniqueIds)
+    .gte("occurred_on", isoDateDaysAgo(Math.max(0, days - 1)))
+    .limit(20000);
+
+  if (error || !data) return {} as Record<string, DocumentPopularity>;
+
+  const scores: Record<string, DocumentPopularity> = {};
+  for (const event of data as Pick<EventRow, "document_id" | "event_type">[]) {
+    const current = scores[event.document_id] || { detailViews: 0, pdfOpens: 0, score: 0 };
+    if (event.event_type === "detail_view") current.detailViews += 1;
+    else current.pdfOpens += 1;
+    current.score = current.detailViews + current.pdfOpens * 2;
+    scores[event.document_id] = current;
+  }
+
+  return scores;
+}
+
 export async function getDocumentAnalytics(documents: Document[], communes: Commune[]): Promise<DocumentAnalytics> {
   noStore();
 
