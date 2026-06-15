@@ -12,6 +12,8 @@ import {
 } from "lucide-react";
 
 import { PageShell, SectionHeader } from "@/components/page-shell";
+import { DocumentAnalyticsPanel } from "@/components/admin/document-analytics-panel";
+import { getDocumentAnalytics } from "@/lib/document-analytics";
 import { getAdminCommunes, getAdminDocuments, usingMockData } from "@/lib/repository";
 import type { Document, DocumentType } from "@/lib/types";
 import { documentTypeLabel, typePrefix } from "@/lib/utils";
@@ -113,6 +115,7 @@ function BarList({ items, total }: { items: StatItem[]; total: number }) {
 
 export default async function AdminStatisticsPage() {
   const [documents, communes] = await Promise.all([getAdminDocuments(), getAdminCommunes()]);
+  const analytics = await getDocumentAnalytics(documents, communes);
   const isMock = usingMockData();
   const totalDocuments = documents.length;
   const fullCount = documents.filter((document) => !document.isPreviewOnly).length;
@@ -146,6 +149,8 @@ export default async function AdminStatisticsPage() {
           Dữ liệu đang lấy từ mock. Sau khi cấu hình Supabase, thống kê sẽ phản ánh dữ liệu thật.
         </div>
       ) : null}
+
+      <DocumentAnalyticsPanel analytics={analytics} />
 
       <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         {[

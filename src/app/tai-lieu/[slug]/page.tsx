@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { ArrowLeft, Eye, LockKeyhole } from "lucide-react";
 
 import { ContactPanel } from "@/components/contact-panel";
+import { DocumentEventTracker } from "@/components/document-event-tracker";
 import { DocumentCoverImage } from "@/components/document-cover-image";
 import { DocumentCard } from "@/components/document-card";
 import { PageShell } from "@/components/page-shell";
@@ -79,6 +80,7 @@ export default async function DocumentDetailPage({ params }: { params: Promise<{
 
   return (
     <PageShell>
+      <DocumentEventTracker documentId={document.id} eventType="detail_view" />
       <Link href="/tai-lieu" className="inline-flex items-center gap-2 text-sm font-semibold text-palm">
         <ArrowLeft className="h-4 w-4" aria-hidden="true" />
         Quay lại kho tài liệu

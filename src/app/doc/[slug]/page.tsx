@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import { ArrowLeft, BookOpen, CalendarDays, ExternalLink, FileText, Library, LockKeyhole, Tags } from "lucide-react";
 
 import { ContactPanel } from "@/components/contact-panel";
+import { DocumentEventTracker } from "@/components/document-event-tracker";
 import { isTayNinhLibraryUrl } from "@/components/document-cover-image";
 import { PageShell } from "@/components/page-shell";
 import { getDocuments, getDocumentBySlug } from "@/lib/repository";
@@ -44,6 +45,7 @@ export default async function PdfReaderPage({ params }: { params: Promise<{ slug
 
   return (
     <PageShell>
+      <DocumentEventTracker documentId={document.id} eventType="pdf_open" />
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <Link href={`/tai-lieu/${document.slug}`} className="inline-flex items-center gap-2 text-sm font-semibold text-palm">
