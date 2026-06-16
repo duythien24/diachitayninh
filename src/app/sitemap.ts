@@ -15,6 +15,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: url("/"), lastModified: now, changeFrequency: "daily", priority: 1 },
     { url: url("/tai-lieu"), lastModified: now, changeFrequency: "daily", priority: 0.9 },
     { url: url("/xa-phuong"), lastModified: now, changeFrequency: "weekly", priority: 0.85 },
+    { url: url("/bo-suu-tap"), lastModified: now, changeFrequency: "weekly", priority: 0.84 },
     { url: url("/dong-thoi-gian"), lastModified: now, changeFrequency: "weekly", priority: 0.82 },
     { url: url("/gioi-thieu"), lastModified: now, changeFrequency: "monthly", priority: 0.7 }
   ];

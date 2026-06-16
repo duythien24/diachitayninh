@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import {
   ArrowRight,
+  BookMarked,
   BookOpen,
   Building2,
   CalendarDays,
@@ -331,6 +332,30 @@ export default async function HomePage() {
                 <ArrowRight className="h-4 w-4" aria-hidden="true" />
               </Link>
             </div>
+          </div>
+        </section>
+
+        <section className="mt-5 rounded border border-ink/10 bg-white p-6 shadow-sm">
+          <div className="grid gap-5 lg:grid-cols-[1fr_auto] lg:items-center">
+            <div className="flex gap-4">
+              <span className="grid h-12 w-12 shrink-0 place-items-center rounded bg-palm/12 text-palm">
+                <BookMarked className="h-6 w-6" aria-hidden="true" />
+              </span>
+              <div>
+                <p className="text-sm font-semibold uppercase tracking-wide text-lacquer">Bộ sưu tập chuyên đề</p>
+                <h2 className="mt-2 text-2xl font-semibold text-ink">Bắt đầu từ một câu chuyện, không phải một ô tìm kiếm</h2>
+                <p className="mt-2 max-w-3xl text-sm leading-7 text-ink/68">
+                  Các chuyên đề tự gom tài liệu theo mạch đọc như di tích, kháng chiến, Báo Tây Ninh, Long An cũ và văn hóa đời sống.
+                </p>
+              </div>
+            </div>
+            <Link
+              href="/bo-suu-tap"
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded bg-palm px-4 py-2 text-sm font-semibold text-white transition hover:bg-palm/90"
+            >
+              Mở bộ sưu tập
+              <ArrowRight className="h-4 w-4" aria-hidden="true" />
+            </Link>
           </div>
         </section>
 
