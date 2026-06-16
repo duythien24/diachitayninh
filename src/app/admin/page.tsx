@@ -10,6 +10,7 @@ import {
   FileText,
   HardDrive,
   Newspaper,
+  Pin,
   ServerCog,
   ShieldCheck,
   Users
@@ -45,6 +46,11 @@ const adminLinks = [
     href: "/admin/documents",
     label: "Quản lý tài liệu",
     icon: FileText
+  },
+  {
+    href: "/admin/featured",
+    label: "Tài liệu đề xuất",
+    icon: Pin
   },
   {
     href: "/admin/documents/new",

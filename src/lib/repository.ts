@@ -67,9 +67,24 @@ type SearchDocumentsRow = {
   rank: number | null;
 };
 
+type FeaturedDocumentRow = {
+  document_id: string;
+  position: number | null;
+  note: string | null;
+  is_active: boolean;
+  created_at: string;
+};
+
 export type DocumentSearchResult = {
   documents: Document[];
   hasMore: boolean;
+};
+
+export type FeaturedDocumentEntry = {
+  documentId: string;
+  position: number;
+  note?: string;
+  document?: Document;
 };
 
 export type DocumentFilterOptions = {
@@ -364,6 +379,79 @@ export async function getDocuments() {
   }
 
   return data.map((row) => mapDocument(row as DocumentRow));
+}
+
+function isMissingFeaturedDocumentsTable(message?: string) {
+  return Boolean(
+    message?.includes("featured_documents") &&
+      (message.includes("Could not find the table") || message.includes("does not exist") || message.includes("schema cache"))
+  );
+}
+
+async function fetchFeaturedDocumentEntries(limit?: number) {
+  const supabase = getSupabaseAdminClient();
+  if (!supabase) {
+    return [] as FeaturedDocumentEntry[];
+  }
+
+  let query = supabase
+    .from("featured_documents")
+    .select("document_id,position,note,is_active,created_at")
+    .eq("is_active", true)
+    .order("position", { ascending: true })
+    .order("created_at", { ascending: false });
+
+  if (limit) {
+    query = query.limit(limit);
+  }
+
+  const { data, error } = await query;
+
+  if (error || !data?.length) {
+    if (error && !isMissingFeaturedDocumentsTable(error.message)) {
+      console.error("Failed to fetch featured documents", error.message);
+    }
+    return [];
+  }
+
+  const rows = data as FeaturedDocumentRow[];
+  const documentIds = rows.map((row) => row.document_id).filter(Boolean);
+  const documentsResult = await fetchDocumentRowsByIds(supabase, documentIds);
+
+  if (documentsResult.error || !documentsResult.data?.length) {
+    return rows.map((row) => ({
+      documentId: row.document_id,
+      position: row.position || 1,
+      note: row.note || undefined,
+      document: undefined
+    }));
+  }
+
+  const documents = new Map(
+    documentsResult.data.map((row) => {
+      const document = mapDocument(row as DocumentRow);
+      return [document.id, document];
+    })
+  );
+
+  return rows.map((row) => ({
+    documentId: row.document_id,
+    position: row.position || 1,
+    note: row.note || undefined,
+    document: documents.get(row.document_id)
+  }));
+}
+
+export async function getFeaturedDocuments(limit = 6) {
+  noStore();
+
+  const entries = await fetchFeaturedDocumentEntries(limit);
+  return entries.map((entry) => entry.document).filter((document): document is Document => Boolean(document));
+}
+
+export async function getAdminFeaturedDocumentEntries() {
+  noStore();
+  return fetchFeaturedDocumentEntries();
 }
 
 function documentMatchesSearch(document: Document, options: SearchDocumentsOptions) {

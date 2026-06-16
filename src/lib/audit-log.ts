@@ -7,12 +7,15 @@ export type AuditAction =
   | "document.create"
   | "document.update"
   | "document.delete"
+  | "featured_document.add"
+  | "featured_document.update"
+  | "featured_document.remove"
   | "commune.update"
   | "account.create"
   | "account.password_change"
   | "account.delete";
 
-export type AuditEntityType = "document" | "commune" | "account";
+export type AuditEntityType = "document" | "commune" | "account" | "featured_document";
 
 export type AdminAuditLog = {
   id: string;

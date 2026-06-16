@@ -21,7 +21,7 @@ import { DocumentCoverImage } from "@/components/document-cover-image";
 import { DocumentCard } from "@/components/document-card";
 import { PageShell } from "@/components/page-shell";
 import { getPopularDocumentIds } from "@/lib/document-analytics";
-import { getCommunes, getDocuments } from "@/lib/repository";
+import { getCommunes, getDocuments, getFeaturedDocuments } from "@/lib/repository";
 import { normalizeVietnamese } from "@/lib/utils";
 
 const heroImage = "/images/nui-ba-den-may-phu.jpg";
@@ -148,7 +148,7 @@ function hrefWithEnoughResults(href: string, count: number) {
 }
 
 export default async function HomePage() {
-  const [communes, documents] = await Promise.all([getCommunes(), getDocuments()]);
+  const [communes, documents, featuredDocuments] = await Promise.all([getCommunes(), getDocuments(), getFeaturedDocuments()]);
   const popularDocumentIds = await getPopularDocumentIds(3);
   const wardCount = communes.filter((commune) => commune.type === "phuong").length;
   const communeCount = communes.filter((commune) => commune.type === "xa").length;
@@ -160,7 +160,8 @@ export default async function HomePage() {
   const popularDocuments = popularDocumentIds
     .map((documentId) => documentById.get(documentId))
     .filter((document): document is NonNullable<typeof document> => Boolean(document));
-  const highlightedDocuments = popularDocuments.length >= 2 ? popularDocuments : latestDocuments;
+  const highlightSource = featuredDocuments.length > 0 ? "featured" : popularDocuments.length >= 2 ? "popular" : "latest";
+  const highlightedDocuments = highlightSource === "featured" ? featuredDocuments : highlightSource === "popular" ? popularDocuments : latestDocuments;
   const documentsWithSearchText = documents.map((document) => ({ document, searchText: documentSearchText(document) }));
   const pathsWithCounts = readingPaths.map((path) => {
     const count = documentsWithSearchText.filter((item) => item.searchText.includes(normalizeVietnamese(searchQueryFromHref(path.href)))).length;
@@ -171,6 +172,7 @@ export default async function HomePage() {
     };
   });
   const featuredDocument =
+    featuredDocuments[0] ||
     popularDocuments[0] ||
     documentsWithSearchText.find((item) => ["tay ninh 180", "tay ninh 30 nam", "dia chi tay ninh"].some((term) => item.searchText.includes(term)))
       ?.document ||
@@ -452,10 +454,10 @@ export default async function HomePage() {
               <div className="mb-5 flex items-end justify-between gap-4">
                 <div>
                   <p className="text-sm font-semibold uppercase tracking-wide text-lacquer">
-                    {popularDocuments.length >= 2 ? "Được quan tâm" : "Tài liệu mới"}
+                    {highlightSource === "featured" ? "Thư viện đề xuất" : highlightSource === "popular" ? "Được quan tâm" : "Tài liệu mới"}
                   </p>
                   <h2 className="mt-2 text-2xl font-semibold text-ink">
-                    {popularDocuments.length >= 2 ? "Bạn đọc đang xem nhiều" : "Vừa được cập nhật"}
+                    {highlightSource === "featured" ? "Tài liệu nên đọc" : highlightSource === "popular" ? "Bạn đọc đang xem nhiều" : "Vừa được cập nhật"}
                   </h2>
                 </div>
                 <Link

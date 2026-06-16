@@ -287,6 +287,28 @@ create index if not exists document_events_document_idx on document_events(docum
 create index if not exists document_events_date_idx on document_events(occurred_on desc);
 alter table document_events enable row level security;
 
+create table if not exists featured_documents (
+  id uuid primary key default gen_random_uuid(),
+  document_id uuid not null references documents(id) on delete cascade,
+  position int not null default 1,
+  note text,
+  is_active boolean not null default true,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  unique(document_id)
+);
+
+create index if not exists featured_documents_active_idx
+  on featured_documents(is_active, position, created_at desc);
+
+drop trigger if exists featured_documents_set_updated_at on featured_documents;
+create trigger featured_documents_set_updated_at
+  before update on featured_documents
+  for each row
+  execute function set_updated_at();
+
+alter table featured_documents enable row level security;
+
 drop policy if exists "Public can read communes" on communes;
 create policy "Public can read communes"
   on communes for select
