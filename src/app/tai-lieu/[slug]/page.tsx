@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, Eye, LockKeyhole } from "lucide-react";
+import { ArrowLeft, ArrowRight, BookMarked, Eye, LockKeyhole } from "lucide-react";
 
 import { ContactPanel } from "@/components/contact-panel";
 import { BookmarkButton } from "@/components/bookmark-button";
@@ -10,6 +10,7 @@ import { DocumentCoverImage } from "@/components/document-cover-image";
 import { DocumentCard } from "@/components/document-card";
 import { PageShell } from "@/components/page-shell";
 import { ReadingHistoryTracker } from "@/components/reading-history-tracker";
+import { getCollectionsForDocument } from "@/lib/document-collections";
 import { getDocuments, getDocumentBySlug } from "@/lib/repository";
 import type { Document } from "@/lib/types";
 import { documentTypeLabel, typePrefix } from "@/lib/utils";
@@ -79,6 +80,7 @@ export default async function DocumentDetailPage({ params }: { params: Promise<{
   const isPreview = document.isPreviewOnly;
   const allDocuments = await getDocuments();
   const relatedDocuments = getRelatedDocuments(document, allDocuments);
+  const relatedCollections = getCollectionsForDocument(document).slice(0, 3);
 
   return (
     <PageShell>
@@ -196,6 +198,46 @@ export default async function DocumentDetailPage({ params }: { params: Promise<{
           </aside>
         )}
       </section>
+
+      {relatedCollections.length ? (
+        <section className="mt-10 rounded border border-ink/10 bg-white p-5 shadow-sm">
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div>
+              <p className="text-sm font-semibold uppercase tracking-wide text-lacquer">Chuyên đề liên quan</p>
+              <h2 className="mt-2 text-2xl font-semibold text-ink">Tài liệu này nằm trong những lối đọc nào?</h2>
+              <p className="mt-2 max-w-3xl text-sm leading-7 text-ink/68">
+                Mở một chuyên đề để đi tiếp sang các tài liệu có cùng mạch nội dung, thay vì chỉ đọc riêng từng tài liệu.
+              </p>
+            </div>
+            <Link
+              href="/bo-suu-tap"
+              className="inline-flex min-h-10 items-center gap-2 rounded border border-ink/12 px-3 py-2 text-sm font-semibold text-ink transition hover:bg-paper"
+            >
+              Tất cả bộ sưu tập
+              <ArrowRight className="h-4 w-4" aria-hidden="true" />
+            </Link>
+          </div>
+          <div className="mt-5 grid gap-3 md:grid-cols-3">
+            {relatedCollections.map((collection) => (
+              <Link
+                key={collection.slug}
+                href={collection.href}
+                className="group flex min-h-36 flex-col rounded border border-ink/10 bg-paper/70 p-4 transition hover:border-palm/35 hover:bg-white hover:shadow-sm"
+              >
+                <span className="flex items-start justify-between gap-3">
+                  <span className="grid h-10 w-10 place-items-center rounded bg-palm/10 text-palm">
+                    <BookMarked className="h-5 w-5" aria-hidden="true" />
+                  </span>
+                  <ArrowRight className="h-4 w-4 text-ink/35 transition group-hover:translate-x-1 group-hover:text-palm" aria-hidden="true" />
+                </span>
+                <span className="mt-4 text-xs font-semibold uppercase tracking-wide text-lacquer">{collection.eyebrow}</span>
+                <span className="mt-1 font-semibold leading-6 text-ink">{collection.title}</span>
+                <span className="mt-2 line-clamp-2 text-sm leading-6 text-ink/62">{collection.description}</span>
+              </Link>
+            ))}
+          </div>
+        </section>
+      ) : null}
 
       {relatedDocuments.length ? (
         <section className="mt-10">
