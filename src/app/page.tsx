@@ -15,6 +15,7 @@ import {
   MapPinned,
   Newspaper,
   Route,
+  Search,
   Sparkles,
   ScrollText
 } from "lucide-react";
@@ -219,7 +220,41 @@ export default async function HomePage() {
             <p className="mt-5 max-w-2xl text-lg leading-8 text-white/84">
               Kho tài liệu địa chí, báo chí địa phương và tài liệu địa phương trên địa bàn tỉnh Tây Ninh.
             </p>
-            <div className="mt-8 flex flex-wrap gap-3">
+            <form action="/tai-lieu" className="mt-7 flex max-w-2xl flex-col gap-3 rounded border border-white/20 bg-white/12 p-3 backdrop-blur sm:flex-row">
+              <label className="flex min-h-12 flex-1 items-center gap-3 rounded bg-white px-4 text-ink">
+                <Search className="h-4 w-4 shrink-0 text-palm" aria-hidden="true" />
+                <span className="sr-only">Tìm tài liệu</span>
+                <input
+                  name="q"
+                  className="min-w-0 flex-1 bg-transparent text-sm font-medium text-ink outline-none placeholder:text-ink/45"
+                  placeholder="Tìm tên xã, địa danh, tác giả, năm..."
+                />
+              </label>
+              <button
+                type="submit"
+                className="inline-flex min-h-12 items-center justify-center gap-2 rounded bg-brass px-4 text-sm font-semibold text-ink transition hover:bg-brass/90"
+              >
+                Tra cứu
+                <ArrowRight className="h-4 w-4" aria-hidden="true" />
+              </button>
+            </form>
+            <div className="mt-3 flex max-w-2xl flex-wrap gap-2 text-sm">
+              {[
+                { href: "/tai-lieu?q=nui%20ba%20den", label: "Núi Bà Đen" },
+                { href: "/tai-lieu?q=khang%20chien", label: "Kháng chiến" },
+                { href: "/tai-lieu?loai=bao_tay_ninh", label: "Báo Tây Ninh" },
+                { href: "/xa-phuong", label: "96 xã/phường" }
+              ].map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className="rounded border border-white/18 bg-white/10 px-3 py-1.5 font-medium text-white/86 transition hover:bg-white/18 hover:text-white"
+                >
+                  {item.label}
+                </Link>
+              ))}
+            </div>
+            <div className="mt-5 flex flex-wrap gap-3">
               <Link
                 href="/tai-lieu?loai=dia_chi"
                 className="inline-flex min-h-12 items-center gap-2 rounded bg-brass px-4 py-3 text-sm font-semibold text-ink transition hover:bg-brass/90"
