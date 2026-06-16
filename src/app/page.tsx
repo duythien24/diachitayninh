@@ -4,6 +4,7 @@ import {
   ArrowRight,
   BookOpen,
   Building2,
+  CalendarDays,
   Clock3,
   Compass,
   FileText,
@@ -155,6 +156,12 @@ export default async function HomePage() {
   const diaChiCount = documents.filter((document) => document.documentType === "dia_chi").length;
   const baoTayNinhCount = documents.filter((document) => document.documentType === "bao_tay_ninh").length;
   const provincialCount = documents.filter((document) => document.documentType === "tai_lieu_cap_tinh").length;
+  const timelineYears = documents
+    .map((document) => document.year)
+    .filter((year) => Number.isFinite(year))
+    .sort((left, right) => left - right);
+  const firstTimelineYear = timelineYears[0];
+  const lastTimelineYear = timelineYears[timelineYears.length - 1];
   const latestDocuments = documents.slice(0, 3);
   const documentById = new Map(documents.map((document) => [document.id, document]));
   const popularDocuments = popularDocumentIds
@@ -296,6 +303,35 @@ export default async function HomePage() {
               </div>
             );
           })}
+        </section>
+
+        <section className="mt-8 rounded border border-ink/10 bg-white p-6 shadow-sm">
+          <div className="grid gap-5 lg:grid-cols-[1fr_auto] lg:items-center">
+            <div className="flex gap-4">
+              <span className="grid h-12 w-12 shrink-0 place-items-center rounded bg-brass/18 text-lacquer">
+                <CalendarDays className="h-6 w-6" aria-hidden="true" />
+              </span>
+              <div>
+                <p className="text-sm font-semibold uppercase tracking-wide text-lacquer">Lối đọc mới</p>
+                <h2 className="mt-2 text-2xl font-semibold text-ink">Khám phá tư liệu theo dòng thời gian</h2>
+                <p className="mt-2 max-w-3xl text-sm leading-7 text-ink/68">
+                  Xem các tài liệu theo năm xuất bản, nhận ra giai đoạn nào có nhiều tư liệu và mở nhanh bộ lọc theo từng năm.
+                </p>
+              </div>
+            </div>
+            <div className="flex flex-wrap items-center gap-3 lg:justify-end">
+              <span className="rounded bg-paper px-3 py-2 text-sm font-semibold text-ink/70">
+                {firstTimelineYear && lastTimelineYear ? `${firstTimelineYear} - ${lastTimelineYear}` : "Đang cập nhật năm"}
+              </span>
+              <Link
+                href="/dong-thoi-gian"
+                className="inline-flex min-h-11 items-center gap-2 rounded bg-palm px-4 py-2 text-sm font-semibold text-white transition hover:bg-palm/90"
+              >
+                Mở dòng thời gian
+                <ArrowRight className="h-4 w-4" aria-hidden="true" />
+              </Link>
+            </div>
+          </div>
         </section>
 
         <section className="mt-14 overflow-hidden rounded border border-ink/10 bg-ink text-white shadow-soft">

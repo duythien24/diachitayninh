@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Building2, FileText, Info } from "lucide-react";
+import { Building2, CalendarDays, FileText, Info } from "lucide-react";
 
 import { AccountMenu } from "@/components/account-menu";
 import { MobileNav } from "@/components/mobile-nav";
@@ -9,6 +9,7 @@ import { adminRoleLabel, getCurrentAdmin } from "@/lib/admin-users";
 
 const nav = [
   { href: "/gioi-thieu", label: "Giới thiệu", icon: Info },
+  { href: "/dong-thoi-gian", label: "Dòng thời gian", icon: CalendarDays },
   { href: "/xa-phuong", label: "Xã/phường", icon: Building2 },
   { href: "/tai-lieu", label: "Tài liệu", icon: FileText }
 ];

@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { Building2, CircleHelp, FileText, HardDrive, Info, KeyRound, LogIn, LogOut, Menu, ShieldCheck, X } from "lucide-react";
+import { Building2, CalendarDays, CircleHelp, FileText, HardDrive, Info, KeyRound, LogIn, LogOut, Menu, ShieldCheck, X } from "lucide-react";
 
 import type { AccountSession } from "@/components/account-menu";
 import { ReadingShelfLink } from "@/components/reading-shelf-link";
 
 const navLinks = [
   { href: "/gioi-thieu", label: "Giới thiệu", icon: Info },
+  { href: "/dong-thoi-gian", label: "Dòng thời gian", icon: CalendarDays },
   { href: "/xa-phuong", label: "Xã/phường", icon: Building2 },
   { href: "/tai-lieu", label: "Tài liệu", icon: FileText }
 ];
