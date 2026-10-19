@@ -9,13 +9,14 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        ink: "#18231f",
-        paper: "#f7f2e8",
-        sand: "#ede4d3",
-        palm: "#1d5c4a",
-        river: "#2c5f82",
-        lacquer: "#9c3b26",
-        brass: "#c8963e"
+        // Tây Ninh palette: night indigo, Bà Đen mist, Cao Đài blue and turmeric, rubber-forest green, temple red
+        ink: "#16213a",
+        paper: "#eef1ee",
+        sand: "#dde4e0",
+        palm: "#1f4f8c",
+        river: "#2e7464",
+        lacquer: "#a8362a",
+        brass: "#e0a42c"
       },
       fontFamily: {
         sans: ["var(--font-sans)", "ui-sans-serif", "system-ui", "sans-serif"],
@@ -39,9 +40,9 @@ const config: Config = {
         float: "float 7s ease-in-out infinite"
       },
       boxShadow: {
-        sm: "0 1px 2px rgba(24, 35, 31, 0.05)",
-        soft: "0 12px 40px -12px rgba(24, 35, 31, 0.18)",
-        book: "0 1px 2px rgba(24, 35, 31, 0.2), 0 18px 36px -12px rgba(24, 35, 31, 0.45)"
+        sm: "0 1px 2px rgba(22, 33, 58, 0.06)",
+        soft: "0 12px 40px -12px rgba(22, 33, 58, 0.2)",
+        book: "0 1px 2px rgba(22, 33, 58, 0.2), 0 18px 36px -12px rgba(22, 33, 58, 0.45)"
       }
     }
   },
