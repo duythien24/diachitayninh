@@ -45,12 +45,13 @@ const archives = [
   }
 ] as const;
 
+// Terms checked against the live catalogue (Oct 2026) so each chip returns results.
 const quickSearches = [
-  { href: "/tai-lieu?q=nui%20ba%20den", label: "Núi Bà Đen" },
-  { href: "/tai-lieu?q=khang%20chien", label: "Kháng chiến" },
-  { href: "/tai-lieu?q=cao%20dai", label: "Cao Đài" },
-  { href: "/tai-lieu?q=di%20tich", label: "Di tích" },
-  { href: "/tai-lieu?q=lich%20su", label: "Lịch sử" }
+  { href: "/tai-lieu?q=kh%C3%A1ng%20chi%E1%BA%BFn", label: "Kháng chiến" },
+  { href: "/tai-lieu?q=di%20t%C3%ADch", label: "Di tích" },
+  { href: "/tai-lieu?q=%C4%91%E1%BA%A3ng%20b%E1%BB%99", label: "Lịch sử Đảng bộ" },
+  { href: "/tai-lieu?q=d%C3%A2n%20ca", label: "Dân ca" },
+  { href: "/tai-lieu?q=Long%20An", label: "Long An" }
 ];
 
 const readingPaths = [

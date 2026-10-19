@@ -265,7 +265,7 @@ export function DocumentList({
 
         <p className="mt-3 text-sm text-ink/55">
           {isPending
-            ? "Đang tìm trên Supabase..."
+            ? "Đang tìm..."
             : `Đang hiển thị ${documents.length}${hasMore ? "+" : ""} tài liệu`}
         </p>
 
@@ -309,8 +309,28 @@ export function DocumentList({
           ) : null}
         </>
       ) : (
-        <div className="mt-5 rounded border border-dashed border-ink/18 bg-white p-6 text-sm leading-6 text-ink/62">
-          Chưa có tài liệu phù hợp. Có thể đổi từ khóa, đổi bộ lọc hoặc thêm tài liệu mới trong khu quản trị.
+        <div className="mt-5 rounded-xl border border-dashed border-ink/18 bg-white p-6 sm:p-8">
+          <p className="font-serif text-xl font-semibold text-ink">Chưa có tài liệu khớp với tìm kiếm này</p>
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-ink/65">
+            Thử một từ khóa ngắn hơn hoặc bỏ bớt bộ lọc. Không cần gõ dấu: “khang chien” cũng tìm được “kháng chiến”. Nếu thư viện có sách bạn
+            cần nhưng chưa số hóa, hãy gọi (0272) 3837050.
+          </p>
+          <div className="mt-5 flex flex-wrap gap-2">
+            {[
+              { q: "kháng chiến", label: "Kháng chiến" },
+              { q: "di tích", label: "Di tích" },
+              { q: "văn hóa", label: "Văn hóa" },
+              { q: "đảng bộ", label: "Lịch sử Đảng bộ" }
+            ].map((item) => (
+              <Link
+                key={item.q}
+                href={`/tai-lieu?q=${encodeURIComponent(item.q)}`}
+                className="rounded-full border border-ink/15 px-3 py-1.5 text-sm font-medium text-ink transition hover:border-palm hover:text-palm"
+              >
+                {item.label}
+              </Link>
+            ))}
+          </div>
         </div>
       )}
     </section>

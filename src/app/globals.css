@@ -4,6 +4,8 @@
 
 :root {
   color-scheme: light;
+  --font-sans: "Be Vietnam Pro";
+  --font-serif: "Lora Variable";
 }
 
 * {
