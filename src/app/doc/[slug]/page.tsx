@@ -7,6 +7,7 @@ import { ContactPanel } from "@/components/contact-panel";
 import { DocumentEventTracker } from "@/components/document-event-tracker";
 import { isTayNinhLibraryUrl } from "@/components/document-cover-image";
 import { PageShell } from "@/components/page-shell";
+import { PdfViewer } from "@/components/pdf-viewer";
 import { ReadingHistoryTracker } from "@/components/reading-history-tracker";
 import { getDocuments, getDocumentBySlug } from "@/lib/repository";
 import { documentTypeLabel, typePrefix } from "@/lib/utils";
@@ -94,7 +95,7 @@ export default async function PdfReaderPage({ params }: { params: Promise<{ slug
               </div>
             </div>
           ) : (
-            <iframe src={document.previewFileUrl} title={document.title} className="h-[76vh] w-full bg-white" />
+            <PdfViewer url={document.previewFileUrl} title={document.title} />
           )}
         </section>
         <aside className="space-y-4">
