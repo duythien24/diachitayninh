@@ -119,7 +119,7 @@ export default async function AboutProjectPage() {
                 return (
                   <div key={stat.label} className="rounded border border-ink/10 bg-paper p-4">
                     <Icon className="h-5 w-5 text-lacquer" aria-hidden="true" />
-                    <p className="mt-3 text-xs font-semibold uppercase tracking-wide text-ink/55">{stat.label}</p>
+                    <p className="mt-3 text-xs font-semibold text-ink/55">{stat.label}</p>
                     <p className="mt-1 text-xl font-semibold text-ink">{stat.value}</p>
                     {stat.detail ? <p className="mt-1 text-sm text-ink/60">{stat.detail}</p> : null}
                   </div>
@@ -139,7 +139,7 @@ export default async function AboutProjectPage() {
               <div className="flex min-h-[22rem] flex-col justify-between rounded border border-white/15 bg-white/8 p-5 transition group-hover:bg-white/12">
                 <div>
                   <MapPinned className="h-8 w-8 text-gold" aria-hidden="true" />
-                  <p className="mt-5 text-sm font-semibold uppercase tracking-wide text-gold">Bản đồ hành chính tương tác</p>
+                  <p className="mt-5 text-sm font-semibold text-gold">Bản đồ hành chính tương tác</p>
                   <h3 className="mt-3 text-3xl font-semibold leading-tight">Mở bản đồ 96 xã/phường</h3>
                   <p className="mt-4 text-sm leading-7 text-white/72">
                     Dùng bản đồ tương tác để phóng to, di chuyển và xem ranh giới từng đơn vị hành chính mới rõ hơn ảnh tĩnh.
@@ -180,7 +180,7 @@ export default async function AboutProjectPage() {
               <div className="flex flex-1 flex-col p-4">
                 <h3 className="text-base font-semibold text-ink">{map.title}</h3>
                 <p className="mt-2 flex-1 text-sm leading-6 text-ink/68">{map.description}</p>
-                <p className="mt-4 text-xs font-semibold uppercase tracking-wide text-ink/45">
+                <p className="mt-4 text-xs font-semibold text-ink/45">
                   {map.href ? "Mở bản đồ hành chính" : "Bấm vào ảnh để phóng lớn"}
                 </p>
               </div>
@@ -192,7 +192,7 @@ export default async function AboutProjectPage() {
       <section className="mt-8 rounded border border-ink/10 bg-white p-6 shadow-sm">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-wide text-lacquer">Bản đồ xã/phường</p>
+            <p className="text-sm font-semibold text-lacquer">Bản đồ xã/phường</p>
             <h2 className="mt-2 text-2xl font-semibold text-ink">Tra cứu bản đồ hành chính mới</h2>
             <p className="mt-3 max-w-3xl text-sm leading-7 text-ink/68">
               Chọn một xã/phường để mở bản đồ chi tiết, phóng to ranh giới và xem vị trí của đơn vị hành chính sau sáp nhập.
@@ -218,7 +218,7 @@ export default async function AboutProjectPage() {
               className="group flex min-h-14 items-center justify-between gap-3 rounded border border-ink/8 bg-white px-3 py-2 text-sm transition hover:border-palm/35 hover:shadow-sm"
             >
               <span>
-                <span className="block text-xs font-semibold uppercase tracking-wide text-lacquer">{typePrefix(commune.type)}</span>
+                <span className="block text-xs font-semibold text-lacquer">{typePrefix(commune.type)}</span>
                 <span className="mt-0.5 block font-semibold text-ink group-hover:text-palm">{commune.name}</span>
               </span>
               <MapPinned className="h-4 w-4 shrink-0 text-ink/35 group-hover:text-palm" aria-hidden="true" />

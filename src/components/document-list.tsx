@@ -271,7 +271,7 @@ export function DocumentList({
 
         {activeFilters.length ? (
           <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-ink/8 pt-3">
-            <span className="text-xs font-semibold uppercase tracking-wide text-ink/45">Đang lọc</span>
+            <span className="text-xs font-semibold text-ink/45">Đang lọc</span>
             {activeFilters.map((item) => (
               <button
                 key={item.key}
