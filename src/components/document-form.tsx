@@ -1,11 +1,12 @@
 "use client";
 
-import { Save, Search, Upload, X } from "lucide-react";
+import { Plus, Save, Search, Upload, X } from "lucide-react";
 import { FormEvent, useMemo, useRef, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
 
 import { createDocumentAction, updateDocumentAction } from "@/app/admin/documents/actions";
 import type { Commune, Document, DocumentType } from "@/lib/types";
+import { getPdfPageCount, makePreviewPdf, previewWatermark, renderPdfCover } from "@/lib/pdf-tools";
 import { normalizeVietnamese, typePrefix } from "@/lib/utils";
 
 type SignedUpload = {
@@ -82,6 +83,10 @@ function keywordValue(document?: Document) {
   return document?.keywords?.join(", ") || "";
 }
 
+function canAttachCommunesFor(type: DocumentType) {
+  return type !== "tai_lieu_cap_tinh";
+}
+
 function typeHelpText(type: DocumentType) {
   if (type === "bao_tay_ninh") {
     return "Có thể chọn một hoặc nhiều xã/phường nếu số báo, bài báo hoặc chuyên đề có nội dung liên quan đến địa phương đó.";
@@ -92,6 +97,16 @@ function typeHelpText(type: DocumentType) {
   }
 
   return "Giữ Ctrl để chọn nhiều xã/phường nếu một tài liệu liên quan nhiều đơn vị.";
+}
+
+/** Communes whose name appears as whole words in the title, e.g. "Lịch sử xã Tân Chánh" → Tân Chánh. */
+function suggestCommunes(title: string, communes: Commune[]) {
+  const text = ` ${normalizeVietnamese(title).replace(/[^a-z0-9]+/g, " ")} `;
+  if (text.trim().length < 3) return [];
+  return communes.filter((commune) => {
+    const name = normalizeVietnamese(commune.name).replace(/[^a-z0-9]+/g, " ").trim();
+    return name.length >= 4 && text.includes(` ${name} `) && !text.includes(` tinh ${name} `);
+  });
 }
 
 export function DocumentForm({ communes, document }: { communes: Commune[]; document?: Document }) {
@@ -109,6 +124,43 @@ export function DocumentForm({ communes, document }: { communes: Commune[]; docu
     document?.communeIds?.length ? document.communeIds : document?.communeId ? [document.communeId] : []
   );
   const [communeQuery, setCommuneQuery] = useState("");
+  const [titleText, setTitleText] = useState(document?.title || "");
+  const [pdfInfo, setPdfInfo] = useState<{ pages: number; coverUrl?: string } | null>(null);
+  const generatedCoverRef = useRef<File | null>(null);
+  const pageCountRef = useRef<HTMLInputElement>(null);
+  const previewPagesRef = useRef<HTMLInputElement>(null);
+  const accessModeRef = useRef<HTMLSelectElement>(null);
+  const communeSuggestions = useMemo(
+    () => (canAttachCommunesFor(selectedDocumentType) ? suggestCommunes(titleText, communes).filter((commune) => !selectedCommuneIds.includes(commune.id)) : []),
+    [communes, selectedCommuneIds, selectedDocumentType, titleText]
+  );
+
+  async function handlePdfSelected(file: File | undefined) {
+    generatedCoverRef.current = null;
+    setPdfInfo(null);
+    if (!file) return;
+
+    try {
+      setUploadStatus("Đang đọc file PDF...");
+      const pages = await getPdfPageCount(file);
+      if (pageCountRef.current && !pageCountRef.current.value) pageCountRef.current.value = String(pages);
+
+      let coverUrl: string | undefined;
+      const hasCover = Boolean(coverInputRef.current?.files?.length || coverUrlRef.current?.value);
+      if (!hasCover) {
+        setUploadStatus("Đang tạo ảnh bìa từ trang đầu...");
+        const cover = await renderPdfCover(file);
+        generatedCoverRef.current = cover;
+        coverUrl = URL.createObjectURL(cover);
+      }
+
+      setPdfInfo({ pages, coverUrl });
+      setUploadStatus(null);
+    } catch (error) {
+      setUploadStatus(null);
+      setUploadError(error instanceof Error ? `Không đọc được PDF: ${error.message}` : "Không đọc được PDF.");
+    }
+  }
 
   const canAttachCommunes = selectedDocumentType !== "tai_lieu_cap_tinh";
   const primaryCommuneId = canAttachCommunes ? selectedCommuneIds[0] || "" : "";
@@ -146,8 +198,9 @@ export function DocumentForm({ communes, document }: { communes: Commune[]; docu
       return;
     }
 
-    const previewFile = previewInputRef.current?.files?.[0] || null;
-    const coverFile = coverInputRef.current?.files?.[0] || null;
+    const pickedPdf = previewInputRef.current?.files?.[0] || null;
+    const coverFile = coverInputRef.current?.files?.[0] || (coverUrlRef.current?.value ? null : generatedCoverRef.current);
+    const previewFile = pickedPdf;
 
     if (!previewFile && !coverFile) {
       return;
@@ -160,8 +213,16 @@ export function DocumentForm({ communes, document }: { communes: Commune[]; docu
 
     try {
       if (previewFile && previewUrlRef.current) {
-        setUploadStatus("Đang upload PDF lên Supabase Storage...");
-        previewUrlRef.current.value = await signedUpload(previewFile, "pdf");
+        let uploadFile = previewFile;
+        if (accessModeRef.current?.value === "preview") {
+          const pageLimit = Number(previewPagesRef.current?.value) || 10;
+          setUploadStatus(`Đang cắt ${pageLimit} trang đọc thử và đóng watermark...`);
+          const preview = await makePreviewPdf(previewFile, pageLimit);
+          uploadFile = preview.file;
+          if (previewPagesRef.current) previewPagesRef.current.value = String(preview.keptPages);
+        }
+        setUploadStatus("Đang tải PDF lên...");
+        previewUrlRef.current.value = await signedUpload(uploadFile, "pdf");
         if (previewInputRef.current) previewInputRef.current.value = "";
       }
 
@@ -205,6 +266,7 @@ export function DocumentForm({ communes, document }: { communes: Commune[]; docu
           <input
             name="title"
             defaultValue={document?.title}
+            onChange={(event) => setTitleText(event.target.value)}
             required
             className="rounded border border-ink/12 px-3 py-2.5 font-normal outline-none transition focus:border-palm"
             placeholder="Địa chí xã..."
@@ -253,6 +315,7 @@ export function DocumentForm({ communes, document }: { communes: Commune[]; docu
         <label className="grid gap-2 text-sm font-semibold text-ink">
           Số trang xem thử
           <input
+            ref={previewPagesRef}
             name="preview_page_count"
             defaultValue={document?.previewPageCount || 10}
             type="number"
@@ -273,6 +336,22 @@ export function DocumentForm({ communes, document }: { communes: Commune[]; docu
               <div>
                 <p className="text-sm font-semibold text-ink">Xã/phường liên quan</p>
                 <p className="mt-1 text-xs leading-5 text-ink/55">{typeHelpText(selectedDocumentType)}</p>
+                {communeSuggestions.length ? (
+                  <p className="mt-2 flex flex-wrap items-center gap-2 text-xs text-ink/60">
+                    Gợi ý theo tên tài liệu:
+                    {communeSuggestions.map((commune) => (
+                      <button
+                        key={commune.id}
+                        type="button"
+                        onClick={() => toggleCommune(commune.id)}
+                        className="inline-flex items-center gap-1 rounded-full border border-palm/30 bg-palm/8 px-2.5 py-1 font-semibold text-palm transition hover:bg-palm/15"
+                      >
+                        <Plus className="h-3 w-3" aria-hidden="true" />
+                        {typePrefix(commune.type)} {commune.name}
+                      </button>
+                    ))}
+                  </p>
+                ) : null}
               </div>
               <span className="rounded bg-palm/10 px-2.5 py-1 text-xs font-semibold text-palm">
                 Đã chọn {selectedCommuneIds.length}
@@ -436,6 +515,7 @@ export function DocumentForm({ communes, document }: { communes: Commune[]; docu
         <label className="grid gap-2 text-sm font-semibold text-ink">
           Số trang
           <input
+            ref={pageCountRef}
             name="page_count"
             defaultValue={document?.pageCount || ""}
             type="number"
@@ -469,9 +549,29 @@ export function DocumentForm({ communes, document }: { communes: Commune[]; docu
           <span className="flex flex-col gap-3 rounded border border-dashed border-ink/20 px-3 py-5 text-sm font-normal text-ink/55">
             <span className="flex items-center gap-3">
               <Upload className="h-4 w-4" aria-hidden="true" />
-              Chọn file PDF để upload lên Supabase Storage
+              Chọn file PDF gốc (bản scan đầy đủ cũng được)
             </span>
-            <input ref={previewInputRef} name="preview_file" type="file" accept="application/pdf" className="text-sm" />
+            <input
+              ref={previewInputRef}
+              name="preview_file"
+              type="file"
+              accept="application/pdf"
+              className="text-sm"
+              onChange={(event) => handlePdfSelected(event.target.files?.[0])}
+            />
+            {pdfInfo ? (
+              <span className="flex items-start gap-3 rounded bg-paper p-3 text-xs leading-5 text-ink/70">
+                {pdfInfo.coverUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={pdfInfo.coverUrl} alt="Ảnh bìa tạo từ trang đầu" className="h-24 w-auto rounded-sm shadow-sm" />
+                ) : null}
+                <span>
+                  File có <strong>{pdfInfo.pages} trang</strong>.{" "}
+                  {pdfInfo.coverUrl ? "Ảnh bìa bên cạnh được lấy từ trang đầu và sẽ tự tải lên nếu bạn không chọn ảnh khác. " : ""}
+                  Nếu chọn chế độ đọc thử, chỉ phần đầu (theo ô Số trang xem thử) được tải lên, có watermark “{previewWatermark}”.
+                </span>
+              </span>
+            ) : null}
             <input
               ref={previewUrlRef}
               name="preview_file_url"
@@ -503,6 +603,7 @@ export function DocumentForm({ communes, document }: { communes: Commune[]; docu
       <label className="grid gap-2 text-sm font-semibold text-ink md:max-w-sm">
         Chế độ đọc
         <select
+          ref={accessModeRef}
           name="access_mode"
           defaultValue={document ? (document.isPreviewOnly === false ? "full" : "preview") : "full"}
           className="rounded border border-ink/12 px-3 py-2.5 font-normal outline-none transition focus:border-palm"
