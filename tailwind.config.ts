@@ -9,15 +9,24 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        ink: "#1d2630",
-        paper: "#f8f5ef",
-        palm: "#1f6b57",
-        river: "#2f6f9f",
-        lacquer: "#a63d2a",
-        brass: "#c89742"
+        ink: "#18231f",
+        paper: "#f7f2e8",
+        sand: "#ede4d3",
+        palm: "#1d5c4a",
+        river: "#2c5f82",
+        lacquer: "#9c3b26",
+        brass: "#c8963e"
+      },
+      fontFamily: {
+        sans: ["var(--font-sans)", "ui-sans-serif", "system-ui", "sans-serif"],
+        serif: ["var(--font-serif)", "ui-serif", "Georgia", "serif"]
+      },
+      borderRadius: {
+        DEFAULT: "0.5rem"
       },
       boxShadow: {
-        soft: "0 18px 60px rgba(29, 38, 48, 0.12)"
+        sm: "0 1px 2px rgba(24, 35, 31, 0.05)",
+        soft: "0 12px 40px -12px rgba(24, 35, 31, 0.18)"
       }
     }
   },
