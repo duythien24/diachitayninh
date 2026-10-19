@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, BookOpen } from "lucide-react";
+import { BookOpen } from "lucide-react";
 
 import { DocumentCoverImage } from "@/components/document-cover-image";
 import { BookmarkButton } from "@/components/bookmark-button";
@@ -38,14 +38,9 @@ export function DocumentCard({ document }: { document: Document }) {
       </Link>
 
       <div className="flex flex-1 flex-col p-5">
-        <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-lacquer">
-          <span className="truncate">{documentTypeShortLabel(document.documentType)}</span>
-          {document.year ? (
-            <>
-              <span className="text-ink/25">•</span>
-              <span className="text-ink/50">{document.year}</span>
-            </>
-          ) : null}
+        <p className="truncate text-xs font-semibold text-lacquer">
+          {documentTypeShortLabel(document.documentType)}
+          {document.year ? <span className="font-normal text-ink/50">, năm {document.year}</span> : null}
         </p>
         <h2 className="mt-2 line-clamp-2 text-lg font-semibold leading-snug text-ink">
           <Link href={`/tai-lieu/${document.slug}`} className="transition hover:text-palm">
@@ -68,7 +63,6 @@ export function DocumentCard({ document }: { document: Document }) {
             className="inline-flex min-h-10 items-center justify-center gap-1.5 whitespace-nowrap rounded px-3 py-2 text-sm font-semibold text-ink/70 transition hover:bg-paper hover:text-ink"
           >
             Chi tiết
-            <ArrowRight className="h-4 w-4 shrink-0" aria-hidden="true" />
           </Link>
           <BookmarkButton documentId={document.id} className="h-10 w-10 px-0" />
         </div>

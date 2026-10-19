@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, ArrowUpRight, BookMarked, BookOpen, CalendarDays, Files, Newspaper, Search } from "lucide-react";
+import { BookMarked, BookOpen, CalendarDays, Files, Newspaper, Search } from "lucide-react";
 
 import { DocumentCoverImage } from "@/components/document-cover-image";
 import { DocumentCard } from "@/components/document-card";
@@ -106,17 +106,16 @@ function countLabel(count: number) {
   return count > 0 ? `${count} tài liệu` : "Đang bổ sung";
 }
 
-function SectionHeading({ eyebrow, title, action }: { eyebrow: string; title: string; action?: { href: string; label: string } }) {
+function SectionHeading({ title, description, action }: { title: string; description?: string; action?: { href: string; label: string } }) {
   return (
     <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-      <div>
-        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-lacquer">{eyebrow}</p>
-        <h2 className="mt-2 text-3xl font-semibold leading-tight text-ink sm:text-4xl">{title}</h2>
+      <div className="max-w-2xl">
+        <h2 className="text-3xl font-semibold leading-tight text-ink sm:text-4xl">{title}</h2>
+        {description ? <p className="mt-3 leading-7 text-ink/65">{description}</p> : null}
       </div>
       {action ? (
-        <Link href={action.href} className="group inline-flex items-center gap-2 text-sm font-semibold text-palm hover:text-ink">
+        <Link href={action.href} className="text-sm font-semibold text-palm underline decoration-palm/30 underline-offset-4 hover:decoration-palm">
           {action.label}
-          <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" aria-hidden="true" />
         </Link>
       ) : null}
     </div>
@@ -195,12 +194,8 @@ export default async function HomePage() {
         <div className="absolute inset-0 bg-gradient-to-t from-ink/80 via-transparent to-transparent" />
         <div className="relative mx-auto grid min-h-[580px] max-w-7xl items-end gap-12 px-4 pb-14 pt-24 sm:px-6 lg:min-h-[660px] lg:grid-cols-[1.25fr_0.75fr] lg:items-center lg:px-8">
           <div>
-            <p className="inline-flex animate-fade-up items-center gap-2 rounded-full border border-brass/40 bg-brass/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-brass backdrop-blur">
-              <span className="h-1.5 w-1.5 rounded-full bg-brass" aria-hidden="true" />
-              Thư viện tỉnh Tây Ninh
-            </p>
-            <h1 className="mt-5 max-w-3xl animate-fade-up text-5xl font-semibold leading-[1.05] [animation-delay:80ms] sm:text-6xl lg:text-7xl">
-              Địa chí số <span className="italic text-brass">Tây Ninh</span>
+            <h1 className="max-w-3xl animate-fade-up text-5xl font-semibold leading-[1.05] [animation-delay:80ms] sm:text-6xl lg:text-7xl">
+              Địa chí số Tây Ninh
             </h1>
             <p className="mt-5 max-w-xl animate-fade-up text-lg leading-8 text-white/85 [animation-delay:160ms]">
               Lật giở từng trang sử, địa danh và ký ức của 96 xã, phường qua kho tài liệu địa chí và Báo Tây Ninh đã được số hóa.
@@ -272,9 +267,9 @@ export default async function HomePage() {
 
       {/* Archives */}
       <section className="mx-auto max-w-7xl px-4 pt-16 sm:px-6 lg:px-8 lg:pt-20">
-        <SectionHeading eyebrow="Kho tư liệu" title="Bắt đầu từ một kho" />
+        <SectionHeading title="Ba kho tư liệu" />
         <div className="grid gap-5 md:grid-cols-3">
-          {archives.map((archive, index) => {
+          {archives.map((archive) => {
             const Icon = archive.icon;
             const count = countByType[archive.key];
             return (
@@ -292,16 +287,12 @@ export default async function HomePage() {
                   <span className={`grid h-12 w-12 place-items-center rounded-full ${archive.tone.icon}`}>
                     <Icon className="h-5 w-5" aria-hidden="true" />
                   </span>
-                  <span className="font-serif text-sm italic text-ink/35">0{index + 1}</span>
                 </span>
                 <span className="relative mt-6 font-serif text-2xl font-semibold text-ink">{archive.title}</span>
                 <span className="relative mt-3 flex-1 text-sm leading-6 text-ink/62">{archive.description}</span>
                 <span className="relative mt-6 flex items-center justify-between border-t border-ink/10 pt-4 text-sm font-semibold">
                   <span className={count > 0 ? "text-ink/70" : "text-ink/40"}>{countLabel(count)}</span>
-                  <span className={`inline-flex items-center gap-1.5 ${archive.tone.text}`}>
-                    Mở kho
-                    <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" aria-hidden="true" />
-                  </span>
+                  <span className={archive.tone.text}>Mở kho</span>
                 </span>
               </Link>
             );
@@ -312,7 +303,6 @@ export default async function HomePage() {
       {/* Highlighted documents */}
       <section className="mx-auto max-w-7xl px-4 pt-20 sm:px-6 lg:px-8">
         <SectionHeading
-          eyebrow={highlightSource === "featured" ? "Thư viện đề xuất" : highlightSource === "popular" ? "Được quan tâm" : "Mới cập nhật"}
           title={highlightSource === "featured" ? "Tài liệu nên đọc" : highlightSource === "popular" ? "Bạn đọc đang xem nhiều" : "Tài liệu vừa số hóa"}
           action={{ href: "/tai-lieu", label: "Xem tất cả tài liệu" }}
         />
@@ -333,22 +323,17 @@ export default async function HomePage() {
       <section className="mt-24 bg-ink text-white">
         <div className="mx-auto grid max-w-7xl gap-12 px-4 py-20 sm:px-6 lg:grid-cols-[1.1fr_0.9fr] lg:px-8">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-brass">Hành trình đọc</p>
-            <h2 className="mt-2 max-w-xl text-3xl font-semibold leading-tight sm:text-4xl">Chưa biết bắt đầu từ đâu? Hãy đi theo một câu chuyện.</h2>
+            <h2 className="max-w-xl text-3xl font-semibold leading-tight sm:text-4xl">Chưa biết bắt đầu từ đâu? Hãy đi theo một câu chuyện.</h2>
             <ol className="mt-10 divide-y divide-white/10 border-y border-white/10">
-              {pathsWithCounts.map((path, index) => (
+              {pathsWithCounts.map((path) => (
                 <li key={path.title}>
-                  <Link href={path.href} className="group grid grid-cols-[auto_1fr_auto] items-start gap-5 py-6">
-                    <span className="font-serif text-3xl font-semibold text-brass/80">{index + 1}</span>
+                  <Link href={path.href} className="group grid grid-cols-[1fr_auto] items-start gap-5 py-6">
                     <span>
-                      <span className="text-xs font-semibold uppercase tracking-[0.12em] text-white/50">{path.eyebrow}</span>
+                      <span className="text-sm text-brass">{path.eyebrow}</span>
                       <span className="mt-1 block font-serif text-xl font-semibold text-white transition group-hover:text-brass">{path.title}</span>
                       <span className="mt-2 block text-sm leading-6 text-white/60">{path.description}</span>
                     </span>
-                    <span className="flex flex-col items-end gap-3 pt-1 text-xs font-semibold text-white/55">
-                      <span className="whitespace-nowrap">{countLabel(path.count)}</span>
-                      <ArrowRight className="h-4 w-4 text-white/70 transition group-hover:translate-x-1 group-hover:text-brass" aria-hidden="true" />
-                    </span>
+                    <span className="whitespace-nowrap pt-1 text-sm text-white/55">{countLabel(path.count)}</span>
                   </Link>
                 </li>
               ))}
@@ -369,13 +354,10 @@ export default async function HomePage() {
               />
               <span className="absolute inset-0 bg-gradient-to-t from-ink via-ink/50 to-transparent" />
               <span className="relative p-7">
-                <span className="text-xs font-semibold uppercase tracking-[0.16em] text-brass">Tài liệu gợi ý</span>
+                <span className="text-sm text-brass">Tài liệu gợi ý</span>
                 <span className="mt-2 block font-serif text-2xl font-semibold leading-snug">{featuredDocument.title}</span>
                 <span className="mt-3 line-clamp-2 block text-sm leading-6 text-white/70">{featuredDocument.description}</span>
-                <span className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-white">
-                  Xem tài liệu
-                  <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" aria-hidden="true" />
-                </span>
+                <span className="mt-5 inline-block text-sm font-semibold text-white underline decoration-white/30 underline-offset-4">Xem tài liệu</span>
               </span>
             </Link>
           ) : null}
@@ -389,8 +371,7 @@ export default async function HomePage() {
             <Image src={mapImage} alt="Bản đồ tỉnh Tây Ninh" fill sizes="(min-width: 1024px) 45vw, 100vw" className="object-cover transition duration-700 group-hover:scale-[1.02]" />
           </Link>
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-lacquer">Theo địa phương</p>
-            <h2 className="mt-2 text-3xl font-semibold leading-tight text-ink sm:text-4xl">Tìm tư liệu về quê hương bạn</h2>
+            <h2 className="text-3xl font-semibold leading-tight text-ink sm:text-4xl">Tìm tư liệu về quê hương bạn</h2>
             <p className="mt-4 max-w-xl leading-7 text-ink/65">
               Chọn một trong {communes.length || 96} xã, phường để xem các tài liệu địa chí, bài báo và tư liệu liên quan đến vùng đất đó.
             </p>
@@ -400,15 +381,12 @@ export default async function HomePage() {
                   <li key={commune.id}>
                     <Link href={`/xa-phuong/${commune.slug}`} className="group flex items-center justify-between gap-4 py-4">
                       <span>
-                        <span className="text-xs font-semibold uppercase tracking-[0.12em] text-ink/45">
+                        <span className="text-sm text-ink/50">
                           {commune.type === "phuong" ? "Phường" : "Xã"}
                         </span>
                         <span className="block font-serif text-xl font-semibold text-ink transition group-hover:text-palm">{commune.name}</span>
                       </span>
-                      <span className="flex items-center gap-3 text-sm text-ink/55">
-                        {commune.documentCount} tài liệu
-                        <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1 group-hover:text-palm" aria-hidden="true" />
-                      </span>
+                      <span className="text-sm text-ink/55">{commune.documentCount} tài liệu</span>
                     </Link>
                   </li>
                 ))}
@@ -419,7 +397,6 @@ export default async function HomePage() {
               className="mt-8 inline-flex min-h-11 items-center gap-2 rounded-full bg-palm px-5 text-sm font-semibold text-white transition hover:bg-palm/90"
             >
               Xem tất cả xã, phường
-              <ArrowRight className="h-4 w-4" aria-hidden="true" />
             </Link>
           </div>
         </div>
@@ -427,7 +404,7 @@ export default async function HomePage() {
 
       {/* Other ways to explore */}
       <section className="mx-auto max-w-7xl px-4 pt-24 sm:px-6 lg:px-8">
-        <SectionHeading eyebrow="Cách khám phá khác" title="Đọc theo thời gian và chủ đề" />
+        <SectionHeading title="Đọc theo thời gian và chủ đề" />
         <div className="grid gap-6 md:grid-cols-2">
           <Link href="/dong-thoi-gian" className="group flex flex-col rounded-lg bg-sand p-8 transition hover:bg-sand/70">
             <CalendarDays className="h-6 w-6 text-lacquer" aria-hidden="true" />
@@ -443,7 +420,6 @@ export default async function HomePage() {
                     : `${firstTimelineYear} – ${lastTimelineYear}`
                   : "Đang cập nhật"}
               </span>
-              <ArrowUpRight className="h-5 w-5 text-palm transition group-hover:-translate-y-0.5 group-hover:translate-x-0.5" aria-hidden="true" />
             </span>
           </Link>
           <Link href="/bo-suu-tap" className="group flex flex-col rounded-lg bg-palm p-8 text-white transition hover:bg-palm/95">
@@ -454,7 +430,6 @@ export default async function HomePage() {
             </span>
             <span className="mt-6 flex items-center justify-between text-sm font-semibold">
               <span className="text-white/60">Mở bộ sưu tập</span>
-              <ArrowUpRight className="h-5 w-5 transition group-hover:-translate-y-0.5 group-hover:translate-x-0.5" aria-hidden="true" />
             </span>
           </Link>
         </div>

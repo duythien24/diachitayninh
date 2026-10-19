@@ -40,7 +40,7 @@ export async function SiteHeader() {
           </span>
           <span className="leading-none">
             <span className="block font-serif text-lg font-semibold">Địa chí số Tây Ninh</span>
-            <span className="mt-1 block text-[11px] font-medium uppercase tracking-[0.14em] text-ink/50">Thư viện tỉnh Tây Ninh</span>
+            <span className="mt-1 block text-xs text-ink/55">Thư viện tỉnh Tây Ninh</span>
           </span>
         </Link>
         <nav className="hidden items-center gap-1 lg:flex">

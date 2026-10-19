@@ -17,10 +17,9 @@ export function SectionHeader({
     <div className="bg-pattern relative overflow-hidden rounded-2xl border border-ink/8 bg-sand/70 px-6 py-10 sm:px-10 sm:py-12">
       <span className="absolute -right-16 -top-16 h-56 w-56 rounded-full bg-brass/15 blur-3xl" aria-hidden="true" />
       <span className="absolute -bottom-20 left-1/3 h-48 w-48 rounded-full bg-palm/10 blur-3xl" aria-hidden="true" />
-      <div className="relative max-w-3xl animate-fade-up">
+      <div className="relative max-w-3xl">
         {eyebrow ? (
-          <p className="mb-3 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-lacquer">
-            <span className="h-px w-6 bg-lacquer/60" aria-hidden="true" />
+          <p className="mb-3 text-sm font-semibold text-lacquer">
             {eyebrow}
           </p>
         ) : null}

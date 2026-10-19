@@ -10,7 +10,7 @@ const explore = [
   { href: "/bo-suu-tap", label: "Bộ sưu tập" }
 ];
 
-const headingClass = "text-xs font-semibold uppercase tracking-[0.14em] text-brass";
+const headingClass = "text-sm font-semibold text-brass";
 const linkClass = "inline-flex items-center gap-1.5 text-white/75 transition hover:text-white";
 
 export function SiteFooter() {
