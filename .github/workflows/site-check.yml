@@ -1,0 +1,44 @@
+name: Canh trang thật
+
+on:
+  schedule:
+    # 01:17 UTC = 08:17 giờ Việt Nam, hằng ngày. Mỗi lần chạy cũng giữ Supabase gói miễn phí không bị tạm dừng.
+    - cron: "17 1 * * *"
+  workflow_dispatch:
+
+permissions:
+  issues: write
+
+jobs:
+  health:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - id: check
+        run: node scripts/site-check.mjs health > check.md
+        continue-on-error: true
+      - name: Mở issue khi trang gặp sự cố
+        if: steps.check.outcome == 'failure'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const body = require("fs").readFileSync("check.md", "utf8");
+            const { data: open } = await github.rest.issues.listForRepo({ ...context.repo, state: "open", labels: "su-co-trang" });
+            if (open.length) {
+              await github.rest.issues.createComment({ ...context.repo, issue_number: open[0].number, body });
+            } else {
+              await github.rest.issues.create({ ...context.repo, title: "Trang Địa chí số đang gặp sự cố", body, labels: ["su-co-trang"] });
+            }
+      - name: Đóng issue khi trang đã ổn
+        if: steps.check.outcome == 'success'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data: open } = await github.rest.issues.listForRepo({ ...context.repo, state: "open", labels: "su-co-trang" });
+            for (const issue of open) {
+              await github.rest.issues.createComment({ ...context.repo, issue_number: issue.number, body: "Trang đã hoạt động bình thường trở lại." });
+              await github.rest.issues.update({ ...context.repo, issue_number: issue.number, state: "closed" });
+            }

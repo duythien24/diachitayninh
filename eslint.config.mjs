@@ -13,7 +13,14 @@ const eslintConfig = [
   {
     ignores: [".next/**", "node_modules/**", "next-env.d.ts"]
   },
-  ...compat.extends("next/core-web-vitals", "next/typescript")
+  ...compat.extends("next/core-web-vitals", "next/typescript"),
+  {
+    // Maintenance scripts run directly with Node as CommonJS.
+    files: ["scripts/**/*.js"],
+    rules: {
+      "@typescript-eslint/no-require-imports": "off"
+    }
+  }
 ];
 
 export default eslintConfig;
