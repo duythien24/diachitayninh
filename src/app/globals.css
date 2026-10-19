@@ -44,3 +44,18 @@ a {
   background: #c8963e;
   color: #18231f;
 }
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+.bg-pattern {
+  background-image: radial-gradient(rgba(24, 35, 31, 0.08) 1px, transparent 1px);
+  background-size: 18px 18px;
+}

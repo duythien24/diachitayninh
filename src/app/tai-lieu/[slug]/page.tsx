@@ -91,10 +91,13 @@ export default async function DocumentDetailPage({ params }: { params: Promise<{
         Quay lại kho tài liệu
       </Link>
 
-      <section className="mt-6 grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
-        <div className="rounded border border-ink/10 bg-white p-6 shadow-sm">
-          <div className="relative aspect-[16/8] overflow-hidden rounded bg-ink/5">
-            <DocumentCoverImage src={document.coverImageUrl} alt="" fill sizes="100vw" className="object-cover" />
+      <section className="mt-6 grid items-start gap-8 lg:grid-cols-[1.1fr_0.9fr]">
+        <div className="rounded-xl border border-ink/10 bg-white p-6 shadow-sm">
+          <div className="bg-pattern flex h-80 items-center justify-center overflow-hidden rounded-lg bg-sand sm:h-96">
+            <div className="relative aspect-[2/3] h-[86%] overflow-hidden rounded-sm bg-white shadow-book">
+              <DocumentCoverImage src={document.coverImageUrl} alt="" fill sizes="260px" className="object-cover" priority />
+              <span className="absolute inset-y-0 left-0 w-2.5 bg-gradient-to-r from-black/25 to-transparent" />
+            </div>
           </div>
           <div className="mt-6 flex flex-wrap gap-2 text-xs font-semibold">
             <span className="rounded bg-paper px-2.5 py-1 text-ink/70">{documentTypeLabel(document.documentType)}</span>
@@ -182,7 +185,7 @@ export default async function DocumentDetailPage({ params }: { params: Promise<{
         {isPreview ? (
           <ContactPanel />
         ) : (
-          <aside className="rounded border border-palm/20 bg-palm p-5 text-white shadow-soft">
+          <aside className="rounded-xl border border-palm/20 bg-palm p-6 text-white shadow-soft lg:sticky lg:top-24">
             <p className="text-sm font-semibold uppercase tracking-wide text-white/70">Bản đầy đủ</p>
             <h2 className="mt-2 text-2xl font-semibold">Được mở đọc toàn văn</h2>
             <p className="mt-3 text-sm leading-6 text-white/78">

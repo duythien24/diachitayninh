@@ -12,27 +12,36 @@ const heroImage = "/images/nui-ba-den-may-phu.jpg";
 const mapImage = "/images/maps/tay-ninh-moi-2025.jpg";
 const documentListPageSize = 24;
 
+const heroBooks = [
+  { src: "/thuvien-covers/dat-nuoc-con-nguoi-tay-ninh-17786-940442ab-36d1-4d14-9931-666c221a7a88.jpg", rotate: -9, position: "left-0" },
+  { src: "/thuvien-covers/dia-chi-tay-ninh-17791-972e8907-bfd1-4143-9669-49ea874a05eb.jpg", rotate: 0, position: "left-1/2 z-10 -ml-[88px]" },
+  { src: "/thuvien-covers/di-tich-lich-su-van-hoa-danh-lam-thang-canh-tinh-tay-ninh-19903-bff761a8-f379-44f5-9952-d8.jpg", rotate: 9, position: "right-0" }
+];
+
 const archives = [
   {
     key: "dia_chi",
     title: "Địa chí Tây Ninh",
     description: "Tài liệu địa chí của 96 xã, phường: lịch sử hình thành, địa danh, con người và văn hóa từng vùng đất.",
     href: "/tai-lieu?loai=dia_chi",
-    icon: BookOpen
+    icon: BookOpen,
+    tone: { bar: "bg-palm", icon: "bg-palm/10 text-palm", text: "text-palm", card: "hover:border-palm/30" }
   },
   {
     key: "bao_tay_ninh",
     title: "Báo Tây Ninh",
     description: "Các số báo, chuyên đề và bài viết địa phương đã được số hóa thành bản đọc trực tuyến.",
     href: "/tai-lieu?loai=bao_tay_ninh",
-    icon: Newspaper
+    icon: Newspaper,
+    tone: { bar: "bg-river", icon: "bg-river/10 text-river", text: "text-river", card: "hover:border-river/30" }
   },
   {
     key: "tai_lieu_cap_tinh",
     title: "Tài liệu cấp tỉnh",
     description: "Hồ sơ chuyên đề và tư liệu chung của tỉnh, không gắn riêng với một xã, phường nào.",
     href: "/tai-lieu?loai=tai_lieu_cap_tinh",
-    icon: Files
+    icon: Files,
+    tone: { bar: "bg-lacquer", icon: "bg-lacquer/10 text-lacquer", text: "text-lacquer", card: "hover:border-lacquer/30" }
   }
 ] as const;
 
@@ -181,65 +190,90 @@ export default async function HomePage() {
     <main>
       {/* Hero */}
       <section className="relative overflow-hidden bg-ink text-white">
-        <Image src={heroImage} alt="" fill priority sizes="100vw" className="object-cover object-center opacity-60" />
-        <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/55 to-ink/10" />
-        <div className="absolute inset-0 bg-gradient-to-r from-ink/70 to-transparent" />
-        <div className="relative mx-auto flex min-h-[560px] max-w-7xl flex-col justify-end px-4 pb-14 pt-28 sm:px-6 lg:min-h-[640px] lg:px-8">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brass">Thư viện tỉnh Tây Ninh</p>
-          <h1 className="mt-4 max-w-3xl text-5xl font-semibold leading-[1.05] sm:text-6xl lg:text-7xl">Địa chí số Tây Ninh</h1>
-          <p className="mt-5 max-w-xl text-lg leading-8 text-white/80">
-            Đọc và tra cứu tài liệu địa chí, Báo Tây Ninh và tư liệu địa phương của 96 xã, phường.
-          </p>
+        <Image src={heroImage} alt="" fill priority sizes="100vw" className="object-cover object-center opacity-80" />
+        <div className="absolute inset-0 bg-gradient-to-r from-ink/90 via-ink/60 to-ink/20" />
+        <div className="absolute inset-0 bg-gradient-to-t from-ink/80 via-transparent to-transparent" />
+        <div className="relative mx-auto grid min-h-[580px] max-w-7xl items-end gap-12 px-4 pb-14 pt-24 sm:px-6 lg:min-h-[660px] lg:grid-cols-[1.25fr_0.75fr] lg:items-center lg:px-8">
+          <div>
+            <p className="inline-flex animate-fade-up items-center gap-2 rounded-full border border-brass/40 bg-brass/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-brass backdrop-blur">
+              <span className="h-1.5 w-1.5 rounded-full bg-brass" aria-hidden="true" />
+              Thư viện tỉnh Tây Ninh
+            </p>
+            <h1 className="mt-5 max-w-3xl animate-fade-up text-5xl font-semibold leading-[1.05] [animation-delay:80ms] sm:text-6xl lg:text-7xl">
+              Địa chí số <span className="italic text-brass">Tây Ninh</span>
+            </h1>
+            <p className="mt-5 max-w-xl animate-fade-up text-lg leading-8 text-white/85 [animation-delay:160ms]">
+              Lật giở từng trang sử, địa danh và ký ức của 96 xã, phường qua kho tài liệu địa chí và Báo Tây Ninh đã được số hóa.
+            </p>
 
-          <form action="/tai-lieu" className="mt-8 flex max-w-2xl items-center gap-2 rounded-full bg-white p-1.5 pl-5 shadow-soft">
-            <Search className="h-5 w-5 shrink-0 text-ink/40" aria-hidden="true" />
-            <label className="sr-only" htmlFor="home-search">
-              Tìm tài liệu
-            </label>
-            <input
-              id="home-search"
-              name="q"
-              className="min-w-0 flex-1 bg-transparent py-2.5 text-base text-ink outline-none placeholder:text-ink/45"
-              placeholder="Tìm xã, địa danh, tác giả, năm..."
-            />
-            <button
-              type="submit"
-              className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-full bg-palm px-5 text-sm font-semibold text-white transition hover:bg-palm/90"
+            <form
+              action="/tai-lieu"
+              className="mt-8 flex max-w-2xl animate-fade-up items-center gap-2 rounded-full bg-white p-1.5 pl-5 shadow-soft ring-4 ring-white/10 [animation-delay:240ms]"
             >
-              Tra cứu
-            </button>
-          </form>
-          <div className="mt-4 flex max-w-2xl flex-wrap items-center gap-x-1 gap-y-2 text-sm">
-            <span className="mr-2 text-white/55">Gợi ý:</span>
-            {quickSearches.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="rounded-full border border-white/20 px-3 py-1 text-white/85 transition hover:border-white/50 hover:text-white"
+              <Search className="h-5 w-5 shrink-0 text-ink/40" aria-hidden="true" />
+              <label className="sr-only" htmlFor="home-search">
+                Tìm tài liệu
+              </label>
+              <input
+                id="home-search"
+                name="q"
+                className="min-w-0 flex-1 bg-transparent py-2.5 text-base text-ink outline-none placeholder:text-ink/45"
+                placeholder="Tìm xã, địa danh, tác giả, năm..."
+              />
+              <button
+                type="submit"
+                className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-full bg-palm px-5 text-sm font-semibold text-white transition hover:bg-palm/90"
               >
-                {item.label}
-              </Link>
-            ))}
+                Tra cứu
+              </button>
+            </form>
+            <div className="mt-4 flex max-w-2xl animate-fade-up flex-wrap items-center gap-x-1 gap-y-2 text-sm [animation-delay:300ms]">
+              <span className="mr-2 text-white/60">Gợi ý:</span>
+              {quickSearches.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className="rounded-full border border-white/20 bg-white/5 px-3 py-1 text-white/90 backdrop-blur transition hover:border-brass hover:bg-brass hover:text-ink"
+                >
+                  {item.label}
+                </Link>
+              ))}
+            </div>
+
+            {heroStats.length ? (
+              <dl className="mt-12 flex animate-fade-up flex-wrap gap-x-10 gap-y-4 border-t border-white/15 pt-6 [animation-delay:380ms]">
+                {heroStats.map((item) => (
+                  <div key={item.label} className="flex items-baseline gap-2">
+                    <dt className="sr-only">{item.label}</dt>
+                    <dd className="font-serif text-3xl font-semibold text-white">{item.value}</dd>
+                    <span className="text-sm text-white/65">{item.label}</span>
+                  </div>
+                ))}
+              </dl>
+            ) : null}
           </div>
 
-          {heroStats.length ? (
-            <dl className="mt-12 flex flex-wrap gap-x-10 gap-y-4 border-t border-white/15 pt-6">
-              {heroStats.map((item) => (
-                <div key={item.label} className="flex items-baseline gap-2">
-                  <dt className="sr-only">{item.label}</dt>
-                  <dd className="font-serif text-3xl font-semibold text-white">{item.value}</dd>
-                  <span className="text-sm text-white/65">{item.label}</span>
+          <div className="relative mx-auto hidden h-[400px] w-[360px] animate-fade-up [animation-delay:300ms] lg:block" aria-hidden="true">
+            <div className="absolute inset-x-6 bottom-6 h-10 rounded-[50%] bg-black/50 blur-2xl" />
+            {heroBooks.map((book, index) => (
+              <div
+                key={book.src}
+                className={`absolute top-1/2 w-[176px] ${book.position}`}
+                style={{ transform: `translateY(-50%) rotate(${book.rotate}deg)` }}
+              >
+                <div className={`relative aspect-[2/3] overflow-hidden rounded-sm border-[3px] border-white/90 bg-sand shadow-book ${index === 1 ? "animate-float" : ""}`}>
+                  <Image src={book.src} alt="" fill sizes="176px" className="object-cover" />
                 </div>
-              ))}
-            </dl>
-          ) : null}
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
       {/* Archives */}
       <section className="mx-auto max-w-7xl px-4 pt-16 sm:px-6 lg:px-8 lg:pt-20">
         <SectionHeading eyebrow="Kho tư liệu" title="Bắt đầu từ một kho" />
-        <div className="grid overflow-hidden rounded-lg border border-ink/10 bg-white md:grid-cols-3 md:divide-x md:divide-ink/10">
+        <div className="grid gap-5 md:grid-cols-3">
           {archives.map((archive, index) => {
             const Icon = archive.icon;
             const count = countByType[archive.key];
@@ -247,19 +281,24 @@ export default async function HomePage() {
               <Link
                 key={archive.key}
                 href={archive.href}
-                className="group flex flex-col border-t border-ink/10 p-7 transition first:border-t-0 hover:bg-paper/60 md:border-t-0 lg:p-8"
+                className={`group relative flex flex-col overflow-hidden rounded-xl border border-ink/10 bg-white p-7 transition duration-300 hover:-translate-y-1 hover:shadow-soft lg:p-8 ${archive.tone.card}`}
               >
-                <span className="flex items-center justify-between">
-                  <span className="grid h-11 w-11 place-items-center rounded-full bg-palm/10 text-palm">
+                <span className={`absolute inset-x-0 top-0 h-1 ${archive.tone.bar}`} aria-hidden="true" />
+                <Icon
+                  className={`absolute -right-6 -top-6 h-36 w-36 opacity-[0.06] transition duration-500 group-hover:rotate-6 group-hover:opacity-10 ${archive.tone.text}`}
+                  aria-hidden="true"
+                />
+                <span className="relative flex items-center justify-between">
+                  <span className={`grid h-12 w-12 place-items-center rounded-full ${archive.tone.icon}`}>
                     <Icon className="h-5 w-5" aria-hidden="true" />
                   </span>
-                  <span className="font-serif text-sm text-ink/35">0{index + 1}</span>
+                  <span className="font-serif text-sm italic text-ink/35">0{index + 1}</span>
                 </span>
-                <span className="mt-6 font-serif text-2xl font-semibold text-ink">{archive.title}</span>
-                <span className="mt-3 flex-1 text-sm leading-6 text-ink/62">{archive.description}</span>
-                <span className="mt-6 flex items-center justify-between text-sm font-semibold">
+                <span className="relative mt-6 font-serif text-2xl font-semibold text-ink">{archive.title}</span>
+                <span className="relative mt-3 flex-1 text-sm leading-6 text-ink/62">{archive.description}</span>
+                <span className="relative mt-6 flex items-center justify-between border-t border-ink/10 pt-4 text-sm font-semibold">
                   <span className={count > 0 ? "text-ink/70" : "text-ink/40"}>{countLabel(count)}</span>
-                  <span className="inline-flex items-center gap-1.5 text-palm">
+                  <span className={`inline-flex items-center gap-1.5 ${archive.tone.text}`}>
                     Mở kho
                     <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" aria-hidden="true" />
                   </span>

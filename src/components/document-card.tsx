@@ -20,14 +20,16 @@ export function DocumentCard({ document }: { document: Document }) {
 
   return (
     <article className="group flex h-full flex-col overflow-hidden rounded-lg border border-ink/10 bg-white transition hover:border-ink/20 hover:shadow-soft">
-      <Link href={`/tai-lieu/${document.slug}`} className="relative block aspect-[4/3] overflow-hidden bg-sand" tabIndex={-1} aria-hidden="true">
-        <DocumentCoverImage
-          src={document.coverImageUrl}
-          alt=""
-          fill
-          sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
-          className="object-cover transition duration-500 group-hover:scale-[1.03]"
-        />
+      <Link
+        href={`/tai-lieu/${document.slug}`}
+        className="bg-pattern relative flex aspect-[4/3] items-center justify-center overflow-hidden bg-sand"
+        tabIndex={-1}
+        aria-hidden="true"
+      >
+        <span className="relative aspect-[2/3] h-[82%] overflow-hidden rounded-sm bg-white shadow-book transition duration-500 group-hover:-translate-y-1.5 group-hover:-rotate-2">
+          <DocumentCoverImage src={document.coverImageUrl} alt="" fill sizes="200px" className="object-cover" />
+          <span className="absolute inset-y-0 left-0 w-2 bg-gradient-to-r from-black/25 to-transparent" />
+        </span>
         {document.isPreviewOnly ? (
           <span className="absolute right-3 top-3 rounded-full bg-ink/80 px-2.5 py-1 text-[11px] font-semibold text-white backdrop-blur">
             Bản đọc thử

@@ -24,9 +24,24 @@ const config: Config = {
       borderRadius: {
         DEFAULT: "0.5rem"
       },
+      keyframes: {
+        "fade-up": {
+          "0%": { opacity: "0", transform: "translateY(16px)" },
+          "100%": { opacity: "1", transform: "translateY(0)" }
+        },
+        float: {
+          "0%, 100%": { transform: "translateY(0)" },
+          "50%": { transform: "translateY(-8px)" }
+        }
+      },
+      animation: {
+        "fade-up": "fade-up 0.8s cubic-bezier(0.22, 1, 0.36, 1) both",
+        float: "float 7s ease-in-out infinite"
+      },
       boxShadow: {
         sm: "0 1px 2px rgba(24, 35, 31, 0.05)",
-        soft: "0 12px 40px -12px rgba(24, 35, 31, 0.18)"
+        soft: "0 12px 40px -12px rgba(24, 35, 31, 0.18)",
+        book: "0 1px 2px rgba(24, 35, 31, 0.2), 0 18px 36px -12px rgba(24, 35, 31, 0.45)"
       }
     }
   },
