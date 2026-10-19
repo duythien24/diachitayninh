@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { ArrowRight, Building2, CheckCircle2, Clock3, MapPinned, Search } from "lucide-react";
+import { ArrowRight, Search } from "lucide-react";
 
 import type { Commune, CommuneType } from "@/lib/types";
 import { cn, normalizeVietnamese, typePrefix } from "@/lib/utils";
@@ -24,12 +24,11 @@ export function CommuneList({ communes }: { communes: CommuneListItem[] }) {
 
   const summary = useMemo(() => {
     const hasDocuments = communes.filter((commune) => Boolean(commune.documentCount)).length;
-    return [
-      { label: "Tổng đơn vị", value: communes.length, icon: MapPinned },
-      { label: "Có tài liệu", value: hasDocuments, icon: CheckCircle2 },
-      { label: "Đang bổ sung", value: communes.length - hasDocuments, icon: Clock3 },
-      { label: "Phường", value: communes.filter((commune) => commune.type === "phuong").length, icon: Building2 }
-    ];
+    return {
+      total: communes.length,
+      hasDocuments,
+      wards: communes.filter((commune) => commune.type === "phuong").length
+    };
   }, [communes]);
 
   const filteredCommunes = useMemo(() => {
@@ -53,21 +52,10 @@ export function CommuneList({ communes }: { communes: CommuneListItem[] }) {
   return (
     <section className="mt-8">
       <div className="rounded border border-ink/10 bg-white p-3 shadow-sm">
-        <div className="mb-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          {summary.map((item, index) => {
-            const Icon = item.icon;
-            return (
-              <div key={item.label} className="rounded border border-ink/8 bg-paper/70 p-4">
-                <Icon
-                  className={cn("h-5 w-5", index === 1 ? "text-palm" : index === 2 ? "text-gold" : "text-lacquer")}
-                  aria-hidden="true"
-                />
-                <p className="mt-3 text-2xl font-semibold text-ink">{item.value}</p>
-                <p className="mt-1 text-sm text-ink/55">{item.label}</p>
-              </div>
-            );
-          })}
-        </div>
+        <p className="mb-4 px-1 text-sm leading-6 text-ink/65">
+          <span className="font-semibold text-ink">{summary.hasDocuments}</span> trên {summary.total} xã, phường đã có tư liệu ({summary.wards} phường,{" "}
+          {summary.total - summary.wards} xã). {summary.total - summary.hasDocuments} nơi còn lại đang được bổ sung.
+        </p>
 
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <label className="flex min-h-12 items-center gap-3 rounded border border-ink/10 bg-paper/80 px-4 text-ink/55 lg:w-[30rem]">
@@ -113,7 +101,7 @@ export function CommuneList({ communes }: { communes: CommuneListItem[] }) {
               <div className="flex items-start justify-between gap-4">
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
-                    <p className="text-xs font-semibold uppercase tracking-wide text-lacquer">{typePrefix(commune.type)}</p>
+                    <p className="text-xs font-semibold text-lacquer">{typePrefix(commune.type)}</p>
                     {commune.documentCount ? (
                       <span className="rounded bg-palm/10 px-2 py-0.5 text-xs font-semibold text-palm">
                         {commune.documentCount} tài liệu

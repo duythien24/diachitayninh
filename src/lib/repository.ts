@@ -11,6 +11,38 @@ import { getSupabaseAdminClient, getSupabasePublicClient, isSupabaseConfigured }
 import type { Commune, CommuneType, Document, DocumentType } from "@/lib/types";
 import { normalizeVietnamese } from "@/lib/utils";
 
+class DataUnavailableError extends Error {
+  constructor(context: string, cause: unknown) {
+    super(`Không tải được dữ liệu từ Supabase (${context})`);
+    this.name = "DataUnavailableError";
+    this.cause = cause;
+  }
+}
+
+/**
+ * Mock data is only for local previews without Supabase env. When Supabase is configured,
+ * a failed query must surface as an error (logged + error page), never as fake documents.
+ */
+function mockOrFail<T>(context: string, error: unknown, mock: T): T {
+  if (!isSupabaseConfigured) {
+    return mock;
+  }
+
+  console.error(`[repository] ${context} failed`, error);
+  throw new DataUnavailableError(context, error);
+}
+
+/** Retries a Supabase read once, since most failures seen are transient (cold start, network). */
+async function withRetry<R extends { error: unknown }>(run: () => PromiseLike<R>): Promise<R> {
+  const first = await run();
+  if (!first.error) {
+    return first;
+  }
+
+  await new Promise((resolve) => setTimeout(resolve, 400));
+  return run();
+}
+
 type CommuneRow = {
   id: string;
   name: string;
@@ -224,7 +256,7 @@ function mapDocument(row: DocumentRow): Document {
 }
 
 async function fetchDocumentRows(supabase: NonNullable<ReturnType<typeof getSupabaseAdminClient> | ReturnType<typeof getSupabasePublicClient>>) {
-  const full = await supabase.from("documents").select(documentSelect).order("created_at", { ascending: false });
+  const full = await withRetry(() => supabase.from("documents").select(documentSelect).order("created_at", { ascending: false }));
 
   if (!full.error) {
     return full;
@@ -280,10 +312,10 @@ export async function getCommunes() {
     return mockCommunes;
   }
 
-  const { data, error } = await fetchCommuneRows(supabase);
+  const { data, error } = await withRetry(() => fetchCommuneRows(supabase));
 
   if (error || !data?.length) {
-    return mockCommunes;
+    return mockOrFail("getCommunes", error || "no communes", mockCommunes);
   }
 
   return data.map((row) => mapCommune(row as CommuneRow));
@@ -297,10 +329,14 @@ export async function getCommuneBySlug(slug: string) {
     return mockCommunes.find((commune) => commune.slug === slug);
   }
 
-  const { data, error } = await fetchCommuneRowBySlug(supabase, slug);
+  const { data, error } = await withRetry(() => fetchCommuneRowBySlug(supabase, slug));
 
-  if (error || !data) {
-    return mockCommunes.find((commune) => commune.slug === slug);
+  if (error) {
+    return mockOrFail("getCommuneBySlug", error, mockCommunes.find((commune) => commune.slug === slug));
+  }
+
+  if (!data) {
+    return isSupabaseConfigured ? undefined : mockCommunes.find((commune) => commune.slug === slug);
   }
 
   return mapCommune(data as CommuneRow);
@@ -323,8 +359,12 @@ export async function getCommuneById(id?: string) {
     ? full
     : await supabase.from("communes").select(legacyCommuneSelect).eq("id", id).maybeSingle();
 
-  if (error || !data) {
-    return getMockCommuneById(id);
+  if (error) {
+    return mockOrFail("getCommuneById", error, getMockCommuneById(id));
+  }
+
+  if (!data) {
+    return isSupabaseConfigured ? undefined : getMockCommuneById(id);
   }
 
   return mapCommune(data as CommuneRow);
@@ -338,10 +378,10 @@ export async function getAdminCommunes() {
     return mockCommunes;
   }
 
-  const { data, error } = await fetchCommuneRows(supabase);
+  const { data, error } = await withRetry(() => fetchCommuneRows(supabase));
 
   if (error || !data?.length) {
-    return mockCommunes;
+    return mockOrFail("getAdminCommunes", error || "no communes", mockCommunes);
   }
 
   return data.map((row) => mapCommune(row as CommuneRow));
@@ -357,8 +397,12 @@ export async function getAdminCommuneById(id: string) {
 
   const { data, error } = await fetchCommuneRowById(supabase, id);
 
-  if (error || !data) {
-    return mockCommunes.find((commune) => commune.id === id);
+  if (error) {
+    return mockOrFail("getAdminCommuneById", error, mockCommunes.find((commune) => commune.id === id));
+  }
+
+  if (!data) {
+    return isSupabaseConfigured ? undefined : mockCommunes.find((commune) => commune.id === id);
   }
 
   return mapCommune(data as CommuneRow);
@@ -375,7 +419,7 @@ export async function getDocuments() {
   const { data, error } = await fetchDocumentRows(supabase);
 
   if (error) {
-    return mockDocuments.map(enrichMockDocument);
+    return mockOrFail("getDocuments", error, mockDocuments.map(enrichMockDocument));
   }
 
   return data.map((row) => mapDocument(row as DocumentRow));
@@ -583,10 +627,10 @@ export async function searchDocuments(options: SearchDocumentsOptions = {}): Pro
 
   if (error) {
     const documents = mockDocuments.map(enrichMockDocument).filter((document) => documentMatchesSearch(document, options));
-    return {
+    return mockOrFail("searchDocuments", error, {
       documents: documents.slice(0, limit),
       hasMore: documents.length > limit
-    };
+    });
   }
 
   const documents = data.map((row) => mapDocument(row as DocumentRow)).filter((document) => documentMatchesSearch(document, options));
@@ -604,7 +648,7 @@ export async function getDocumentFilterOptions(): Promise<DocumentFilterOptions>
     ? await supabase.from("documents").select("year,author,publisher").limit(1000)
     : { data: mockDocuments, error: null };
 
-  const data = rows.error || !rows.data ? mockDocuments : rows.data;
+  const data = rows.error || !rows.data ? mockOrFail("getDocumentFilterOptions", rows.error, mockDocuments) : rows.data;
   const years = new Set<number>();
   const authors = new Set<string>();
   const publishers = new Set<string>();
@@ -683,11 +727,15 @@ export async function getDocumentBySlug(slug: string) {
     return document ? enrichMockDocument(document) : undefined;
   }
 
-  const { data, error } = await fetchDocumentRowBySlug(supabase, slug);
+  const { data, error } = await withRetry(() => fetchDocumentRowBySlug(supabase, slug));
 
   if (error || !data) {
+    if (isSupabaseConfigured && !error) {
+      return undefined;
+    }
+
     const document = mockDocuments.find((item) => item.slug === slug);
-    return document ? enrichMockDocument(document) : undefined;
+    return mockOrFail("getDocumentBySlug", error, document ? enrichMockDocument(document) : undefined);
   }
 
   return mapDocument(data as DocumentRow);

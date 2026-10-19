@@ -19,7 +19,7 @@ export function MobileNav({ account }: { account: AccountSession | null }) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div className="md:hidden">
+    <div className="lg:hidden">
       <button
         type="button"
         onClick={() => setIsOpen((value) => !value)}
@@ -31,7 +31,7 @@ export function MobileNav({ account }: { account: AccountSession | null }) {
       </button>
 
       {isOpen ? (
-        <div className="absolute left-4 right-4 top-[4.5rem] z-50 overflow-hidden rounded border border-ink/10 bg-white shadow-soft">
+        <div className="absolute left-4 right-4 top-[4.25rem] z-50 overflow-hidden rounded border border-ink/10 bg-white shadow-soft">
           <nav className="divide-y divide-ink/8">
             {navLinks.map((item) => {
               const Icon = item.icon;

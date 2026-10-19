@@ -26,7 +26,7 @@ export function ReadingShelfLink({ mobile = false, onNavigate }: { mobile?: bool
       onClick={onNavigate}
       className={mobile
         ? "flex min-h-12 items-center gap-3 px-4 py-3 text-sm font-semibold text-ink transition hover:bg-paper"
-        : "inline-flex items-center gap-2 rounded px-3 py-2 text-sm font-medium text-ink/70 transition hover:bg-white hover:text-ink"}
+        : "inline-flex items-center gap-2 rounded px-3 py-2 text-sm font-medium text-ink/70 transition hover:bg-sand/70 hover:text-ink"}
     >
       <Bookmark className={mobile ? "h-4 w-4 text-ink/55" : "h-4 w-4"} aria-hidden="true" />
       Tủ sách

@@ -76,7 +76,7 @@ export default async function PdfReaderPage({ params }: { params: Promise<{ slug
           {usesLibraryViewer ? (
             <div className="flex min-h-[62vh] items-center justify-center bg-paper px-6 py-12">
               <div className="max-w-xl rounded border border-ink/10 bg-white p-6 text-center shadow-sm">
-                <p className="text-sm font-semibold uppercase tracking-wide text-lacquer">Trình đọc của Thư viện tỉnh Tây Ninh</p>
+                <p className="text-sm font-semibold text-lacquer">Trình đọc của Thư viện tỉnh Tây Ninh</p>
                 <h2 className="mt-3 text-2xl font-semibold text-ink">Mở tài liệu tại kho thư viện</h2>
                 <p className="mt-3 text-sm leading-6 text-ink/68">
                   Tài liệu này được phục vụ bằng trình đọc riêng của Thư viện tỉnh Tây Ninh. Để tránh lỗi trắng trang khi nhúng chéo website,
@@ -99,7 +99,7 @@ export default async function PdfReaderPage({ params }: { params: Promise<{ slug
         </section>
         <aside className="space-y-4">
           <section className="rounded border border-ink/10 bg-white p-5 shadow-soft">
-            <p className="text-sm font-semibold uppercase tracking-wide text-lacquer">Thông tin tài liệu</p>
+            <p className="text-sm font-semibold text-lacquer">Thông tin tài liệu</p>
             <dl className="mt-4 space-y-4 text-sm">
               <div className="flex gap-3">
                 <BookOpen className="mt-0.5 h-4 w-4 shrink-0 text-palm" aria-hidden="true" />
@@ -190,7 +190,7 @@ export default async function PdfReaderPage({ params }: { params: Promise<{ slug
             <ContactPanel />
           ) : (
             <section className="rounded border border-palm/20 bg-palm p-5 text-white shadow-soft">
-              <p className="text-sm font-semibold uppercase tracking-wide text-white/70">Bản đầy đủ</p>
+              <p className="text-sm font-semibold text-white/70">Bản đầy đủ</p>
               <h2 className="mt-2 text-2xl font-semibold">Đang đọc toàn văn</h2>
               <p className="mt-3 text-sm leading-6 text-white/78">
                 Tài liệu này được quản trị đánh dấu là bản đầy đủ, nên PDF online hiển thị toàn bộ nội dung đã upload.

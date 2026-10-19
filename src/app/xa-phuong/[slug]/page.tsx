@@ -211,7 +211,7 @@ export default async function CommuneDetailPage({ params }: { params: Promise<{ 
         <div className="rounded border border-ink/10 bg-white p-6 shadow-sm">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
-              <p className="text-sm font-semibold uppercase tracking-wide text-lacquer">{typePrefix(commune.type)}</p>
+              <p className="text-sm font-semibold text-lacquer">{typePrefix(commune.type)}</p>
               <h1 className="mt-3 text-4xl font-semibold text-ink">{commune.name}</h1>
               <p className="mt-4 text-sm text-ink/55">{commune.districtOld}</p>
             </div>
@@ -266,7 +266,7 @@ export default async function CommuneDetailPage({ params }: { params: Promise<{ 
 
         <aside className="space-y-4">
           <div className="rounded border border-ink/10 bg-white p-5 shadow-sm">
-            <p className="text-sm font-semibold uppercase tracking-wide text-lacquer">Tra cứu nhanh</p>
+            <p className="text-sm font-semibold text-lacquer">Tra cứu nhanh</p>
             <div className="mt-4 space-y-2">
               {quickLinks.map((item) => (
                 <Link
@@ -284,7 +284,7 @@ export default async function CommuneDetailPage({ params }: { params: Promise<{ 
           <div className="rounded border border-ink/10 bg-white p-5 shadow-sm">
             <div className="flex items-center gap-2">
               <Tags className="h-4 w-4 text-lacquer" aria-hidden="true" />
-              <p className="text-sm font-semibold uppercase tracking-wide text-lacquer">Từ khóa nổi bật</p>
+              <p className="text-sm font-semibold text-lacquer">Từ khóa nổi bật</p>
             </div>
             {keywords.length ? (
               <div className="mt-4 flex flex-wrap gap-2">
@@ -312,7 +312,7 @@ export default async function CommuneDetailPage({ params }: { params: Promise<{ 
               <span className="inline-flex h-11 w-11 items-center justify-center rounded bg-brass text-ink">
                 {hasReadingData ? <TrendingUp className="h-5 w-5" aria-hidden="true" /> : <BookMarked className="h-5 w-5" aria-hidden="true" />}
               </span>
-              <p className="mt-5 text-sm font-semibold uppercase tracking-wide text-brass">
+              <p className="mt-5 text-sm font-semibold text-brass">
                 {hasReadingData ? "Bạn đọc đang quan tâm" : "Gợi ý bắt đầu"}
               </p>
               <h2 className="mt-2 text-3xl font-semibold leading-tight">
@@ -341,7 +341,7 @@ export default async function CommuneDetailPage({ params }: { params: Promise<{ 
                     href={`/tai-lieu/${document.slug}`}
                     className="group flex min-h-44 flex-col border-b border-white/10 p-5 transition hover:bg-white/8 sm:[&:nth-child(odd)]:border-r"
                   >
-                    <span className="flex items-center justify-between gap-3 text-xs font-semibold uppercase tracking-wide text-brass">
+                    <span className="flex items-center justify-between gap-3 text-xs font-semibold text-brass">
                       <span>Gợi ý {index + 1}</span>
                       <span>{document.year}</span>
                     </span>
@@ -365,7 +365,7 @@ export default async function CommuneDetailPage({ params }: { params: Promise<{ 
             <div>
               <div className="flex items-center gap-2 text-lacquer">
                 <History className="h-5 w-5" aria-hidden="true" />
-                <p className="text-sm font-semibold uppercase tracking-wide">Dòng thời gian tư liệu</p>
+                <p className="text-sm font-semibold">Dòng thời gian tư liệu</p>
               </div>
               <h2 className="mt-2 text-2xl font-semibold text-ink">Các mốc năm đang có trong kho</h2>
             </div>
@@ -394,7 +394,7 @@ export default async function CommuneDetailPage({ params }: { params: Promise<{ 
       <section className="mt-10">
         <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-wide text-lacquer">Theo nhóm tư liệu</p>
+            <p className="text-sm font-semibold text-lacquer">Theo nhóm tư liệu</p>
             <h2 className="mt-2 text-2xl font-semibold text-ink">Cấu trúc tài liệu của {commune.name}</h2>
           </div>
           <Link
@@ -412,7 +412,7 @@ export default async function CommuneDetailPage({ params }: { params: Promise<{ 
               <article key={group.type} className="flex min-h-[17rem] flex-col rounded border border-ink/10 bg-white p-5 shadow-sm">
                 <div className="flex items-start justify-between gap-4">
                   <div>
-                    <p className="text-sm font-semibold uppercase tracking-wide text-lacquer">{group.count} tài liệu</p>
+                    <p className="text-sm font-semibold text-lacquer">{group.count} tài liệu</p>
                     <h3 className="mt-2 text-xl font-semibold text-ink">{group.title}</h3>
                   </div>
                   <span
@@ -471,7 +471,7 @@ export default async function CommuneDetailPage({ params }: { params: Promise<{ 
                 className="group flex min-h-24 items-center justify-between gap-4 rounded border border-ink/10 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-palm/30 hover:shadow-soft"
               >
                 <span>
-                  <span className="text-xs font-semibold uppercase tracking-wide text-lacquer">{typePrefix(suggestedCommune.type)}</span>
+                  <span className="text-xs font-semibold text-lacquer">{typePrefix(suggestedCommune.type)}</span>
                   <span className="mt-1 block font-semibold text-ink group-hover:text-palm">{suggestedCommune.name}</span>
                   <span className="mt-1 block text-sm text-ink/55">{count} tài liệu đang gắn</span>
                 </span>

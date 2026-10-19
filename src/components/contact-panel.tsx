@@ -2,8 +2,8 @@ import { Mail, PhoneCall } from "lucide-react";
 
 export function ContactPanel() {
   return (
-    <aside className="rounded border border-palm/20 bg-palm p-5 text-white shadow-soft">
-      <p className="text-sm font-semibold uppercase tracking-wide text-white/70">Bản đầy đủ</p>
+    <aside className="rounded-xl border border-palm/20 bg-palm p-6 text-white shadow-soft lg:sticky lg:top-24">
+      <p className="text-sm font-semibold text-white/70">Bản đầy đủ</p>
       <h2 className="mt-2 text-2xl font-semibold">Liên hệ thư viện</h2>
       <p className="mt-3 text-sm leading-6 text-white/78">
         Website chỉ công bố bản đọc thử. Bản toàn văn được phục vụ theo quy định lưu trữ và quyền khai thác tài liệu.

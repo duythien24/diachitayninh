@@ -83,7 +83,7 @@ export default async function CollectionsPage() {
             <Image src={firstCollection.image} alt="" fill sizes="(min-width: 1024px) 50vw, 100vw" className="object-cover opacity-68" />
             <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/42 to-transparent" />
             <div className="absolute inset-x-0 bottom-0 p-6 sm:p-8">
-              <p className="text-sm font-semibold uppercase tracking-wide text-brass">{firstCollection.eyebrow}</p>
+              <p className="text-sm font-semibold text-brass">{firstCollection.eyebrow}</p>
               <h3 className="mt-2 max-w-xl text-2xl font-semibold leading-snug text-white">{firstCollection.title}</h3>
               <p className="mt-3 max-w-xl text-sm leading-6 text-white/72">{firstCollection.description}</p>
               <Link
@@ -114,10 +114,10 @@ export default async function CollectionsPage() {
                 </span>
               </div>
               <div className="flex flex-1 flex-col p-5">
-                <p className="text-sm font-semibold uppercase tracking-wide text-lacquer">{collection.eyebrow}</p>
+                <p className="text-sm font-semibold text-lacquer">{collection.eyebrow}</p>
                 <h2 className="mt-2 text-xl font-semibold leading-snug text-ink">{collection.title}</h2>
                 <p className="mt-3 line-clamp-3 text-sm leading-6 text-ink/66">{collection.description}</p>
-                {collection.summary ? <p className="mt-4 text-xs font-semibold uppercase tracking-wide text-ink/48">{collection.summary}</p> : null}
+                {collection.summary ? <p className="mt-4 text-xs font-semibold text-ink/48">{collection.summary}</p> : null}
                 <div className="mt-auto flex flex-wrap gap-2 pt-5">
                   <Link
                     href={collection.href}
@@ -145,7 +145,7 @@ export default async function CollectionsPage() {
         <section className="mt-12">
           <div className="mb-5 flex flex-wrap items-end justify-between gap-4">
             <div>
-              <p className="text-sm font-semibold uppercase tracking-wide text-lacquer">Đọc thử từ bộ sưu tập</p>
+              <p className="text-sm font-semibold text-lacquer">Đọc thử từ bộ sưu tập</p>
               <h2 className="mt-2 text-3xl font-semibold text-ink">{firstCollection.title}</h2>
             </div>
             <Link
@@ -165,7 +165,7 @@ export default async function CollectionsPage() {
       ) : null}
 
       <section className="mt-12 rounded border border-ink/10 bg-white p-6 shadow-sm">
-        <p className="text-sm font-semibold uppercase tracking-wide text-lacquer">Gợi ý phát triển tiếp</p>
+        <p className="text-sm font-semibold text-lacquer">Gợi ý phát triển tiếp</p>
         <h2 className="mt-2 text-2xl font-semibold text-ink">Sau này có thể cho quản trị tự tạo bộ sưu tập</h2>
         <p className="mt-3 max-w-3xl text-sm leading-7 text-ink/68">
           Bản hiện tại dùng bộ sưu tập tự động theo từ khóa để triển khai nhanh. Khi kho tài liệu lớn hơn, có thể thêm bảng quản trị riêng để đặt

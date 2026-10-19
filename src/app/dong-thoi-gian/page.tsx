@@ -152,7 +152,7 @@ export default async function TimelinePage() {
             </div>
 
             <div className="border-t border-white/10 bg-white/5 p-6 sm:p-8 lg:border-l lg:border-t-0">
-              <p className="text-sm font-semibold uppercase tracking-wide text-brass">Gợi ý đọc nhanh</p>
+              <p className="text-sm font-semibold text-brass">Gợi ý đọc nhanh</p>
               <div className="mt-5 space-y-3">
                 {featuredDocuments.map((document) => (
                   <Link
@@ -160,7 +160,7 @@ export default async function TimelinePage() {
                     href={`/tai-lieu/${document.slug}`}
                     className="group block rounded border border-white/12 bg-white/8 p-4 transition hover:border-brass/60 hover:bg-white/12"
                   >
-                    <span className="text-xs font-semibold uppercase tracking-wide text-brass">{document.year}</span>
+                    <span className="text-xs font-semibold text-brass">{document.year}</span>
                     <span className="mt-1 block font-semibold leading-6 text-white">{document.title}</span>
                     <span className="mt-2 line-clamp-2 text-sm leading-6 text-white/62">{document.description}</span>
                   </Link>
@@ -174,7 +174,7 @@ export default async function TimelinePage() {
       <section className="mt-10">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-wide text-lacquer">Theo thập niên</p>
+            <p className="text-sm font-semibold text-lacquer">Theo thập niên</p>
             <h2 className="mt-2 text-3xl font-semibold text-ink">Mở từng lớp tư liệu</h2>
           </div>
           <Link
@@ -192,7 +192,7 @@ export default async function TimelinePage() {
               <article key={group.decade} className="rounded border border-ink/10 bg-white p-5 shadow-sm">
                 <div className="flex flex-wrap items-start justify-between gap-4">
                   <div>
-                    <p className="text-sm font-semibold uppercase tracking-wide text-lacquer">Thập niên</p>
+                    <p className="text-sm font-semibold text-lacquer">Thập niên</p>
                     <h3 className="mt-1 text-3xl font-semibold text-ink">{group.decade}s</h3>
                     <p className="mt-2 text-sm text-ink/60">{group.documents.length} tài liệu trong {group.years.length} năm</p>
                   </div>
@@ -246,7 +246,7 @@ export default async function TimelinePage() {
       ) : null}
 
       <section className="mt-10 rounded border border-ink/10 bg-white p-5 shadow-sm">
-        <p className="text-sm font-semibold uppercase tracking-wide text-lacquer">Gợi ý quản trị dữ liệu</p>
+        <p className="text-sm font-semibold text-lacquer">Gợi ý quản trị dữ liệu</p>
         <h2 className="mt-2 text-2xl font-semibold text-ink">Muốn dòng thời gian đẹp hơn?</h2>
         <p className="mt-3 max-w-3xl text-sm leading-7 text-ink/68">
           Khi thêm tài liệu mới, hãy điền đầy đủ năm xuất bản, tác giả, nhà xuất bản và từ khóa. Những thông tin này giúp trang dòng thời gian,

@@ -9,15 +9,40 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        ink: "#1d2630",
-        paper: "#f8f5ef",
-        palm: "#1f6b57",
-        river: "#2f6f9f",
-        lacquer: "#a63d2a",
-        brass: "#c89742"
+        // Tây Ninh palette: night indigo, Bà Đen mist, Cao Đài blue and turmeric, rubber-forest green, temple red
+        ink: "#16213a",
+        paper: "#eef1ee",
+        sand: "#dde4e0",
+        palm: "#1f4f8c",
+        river: "#2e7464",
+        lacquer: "#a8362a",
+        brass: "#e0a42c"
+      },
+      fontFamily: {
+        sans: ["var(--font-sans)", "ui-sans-serif", "system-ui", "sans-serif"],
+        serif: ["var(--font-serif)", "ui-serif", "Georgia", "serif"]
+      },
+      borderRadius: {
+        DEFAULT: "0.5rem"
+      },
+      keyframes: {
+        "fade-up": {
+          "0%": { opacity: "0", transform: "translateY(16px)" },
+          "100%": { opacity: "1", transform: "translateY(0)" }
+        },
+        float: {
+          "0%, 100%": { transform: "translateY(0)" },
+          "50%": { transform: "translateY(-8px)" }
+        }
+      },
+      animation: {
+        "fade-up": "fade-up 0.8s cubic-bezier(0.22, 1, 0.36, 1) both",
+        float: "float 7s ease-in-out infinite"
       },
       boxShadow: {
-        soft: "0 18px 60px rgba(29, 38, 48, 0.12)"
+        sm: "0 1px 2px rgba(22, 33, 58, 0.06)",
+        soft: "0 12px 40px -12px rgba(22, 33, 58, 0.2)",
+        book: "0 1px 2px rgba(22, 33, 58, 0.2), 0 18px 36px -12px rgba(22, 33, 58, 0.45)"
       }
     }
   },

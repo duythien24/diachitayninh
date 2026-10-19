@@ -91,10 +91,13 @@ export default async function DocumentDetailPage({ params }: { params: Promise<{
         Quay lại kho tài liệu
       </Link>
 
-      <section className="mt-6 grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
-        <div className="rounded border border-ink/10 bg-white p-6 shadow-sm">
-          <div className="relative aspect-[16/8] overflow-hidden rounded bg-ink/5">
-            <DocumentCoverImage src={document.coverImageUrl} alt="" fill sizes="100vw" className="object-cover" />
+      <section className="mt-6 grid items-start gap-8 lg:grid-cols-[1.1fr_0.9fr]">
+        <div className="rounded-xl border border-ink/10 bg-white p-6 shadow-sm">
+          <div className="bg-pattern flex h-80 items-center justify-center overflow-hidden rounded-lg bg-sand sm:h-96">
+            <div className="relative aspect-[2/3] h-[86%] overflow-hidden rounded-sm bg-white shadow-book">
+              <DocumentCoverImage src={document.coverImageUrl} alt="" fill sizes="260px" className="object-cover" priority />
+              <span className="absolute inset-y-0 left-0 w-2.5 bg-gradient-to-r from-black/25 to-transparent" />
+            </div>
           </div>
           <div className="mt-6 flex flex-wrap gap-2 text-xs font-semibold">
             <span className="rounded bg-paper px-2.5 py-1 text-ink/70">{documentTypeLabel(document.documentType)}</span>
@@ -182,8 +185,8 @@ export default async function DocumentDetailPage({ params }: { params: Promise<{
         {isPreview ? (
           <ContactPanel />
         ) : (
-          <aside className="rounded border border-palm/20 bg-palm p-5 text-white shadow-soft">
-            <p className="text-sm font-semibold uppercase tracking-wide text-white/70">Bản đầy đủ</p>
+          <aside className="rounded-xl border border-palm/20 bg-palm p-6 text-white shadow-soft lg:sticky lg:top-24">
+            <p className="text-sm font-semibold text-white/70">Bản đầy đủ</p>
             <h2 className="mt-2 text-2xl font-semibold">Được mở đọc toàn văn</h2>
             <p className="mt-3 text-sm leading-6 text-white/78">
               Tài liệu này được quản trị đánh dấu là bản đầy đủ, người đọc có thể mở PDF online để đọc hết nội dung.
@@ -203,7 +206,7 @@ export default async function DocumentDetailPage({ params }: { params: Promise<{
         <section className="mt-10 rounded border border-ink/10 bg-white p-5 shadow-sm">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
-              <p className="text-sm font-semibold uppercase tracking-wide text-lacquer">Chuyên đề liên quan</p>
+              <p className="text-sm font-semibold text-lacquer">Chuyên đề liên quan</p>
               <h2 className="mt-2 text-2xl font-semibold text-ink">Tài liệu này nằm trong những lối đọc nào?</h2>
               <p className="mt-2 max-w-3xl text-sm leading-7 text-ink/68">
                 Mở một chuyên đề để đi tiếp sang các tài liệu có cùng mạch nội dung, thay vì chỉ đọc riêng từng tài liệu.
@@ -230,7 +233,7 @@ export default async function DocumentDetailPage({ params }: { params: Promise<{
                   </span>
                   <ArrowRight className="h-4 w-4 text-ink/35 transition group-hover:translate-x-1 group-hover:text-palm" aria-hidden="true" />
                 </span>
-                <span className="mt-4 text-xs font-semibold uppercase tracking-wide text-lacquer">{collection.eyebrow}</span>
+                <span className="mt-4 text-xs font-semibold text-lacquer">{collection.eyebrow}</span>
                 <span className="mt-1 font-semibold leading-6 text-ink">{collection.title}</span>
                 <span className="mt-2 line-clamp-2 text-sm leading-6 text-ink/62">{collection.description}</span>
               </Link>
@@ -243,7 +246,7 @@ export default async function DocumentDetailPage({ params }: { params: Promise<{
         <section className="mt-10">
           <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
             <div>
-              <p className="text-sm font-semibold uppercase tracking-wide text-lacquer">Đọc tiếp</p>
+              <p className="text-sm font-semibold text-lacquer">Đọc tiếp</p>
               <h2 className="mt-2 text-2xl font-semibold text-ink">Tài liệu liên quan</h2>
             </div>
             <Link

@@ -58,7 +58,7 @@ export function AccountMenu({ account }: { account: AccountSession | null }) {
     return (
       <Link
         href="/admin/login"
-        className="inline-flex items-center gap-2 rounded px-3 py-2 text-sm font-medium text-ink/70 transition hover:bg-white hover:text-ink"
+        className="inline-flex items-center gap-2 rounded px-3 py-2 text-sm font-medium text-ink/70 transition hover:bg-sand/70 hover:text-ink"
       >
         <LogIn className="h-4 w-4" aria-hidden="true" />
         Đăng nhập
@@ -81,7 +81,7 @@ export function AccountMenu({ account }: { account: AccountSession | null }) {
       <button
         type="button"
         onClick={() => setIsOpen((value) => !value)}
-        className="inline-flex items-center gap-2 rounded px-3 py-2 text-sm font-medium text-ink/70 transition hover:bg-white hover:text-ink"
+        className="inline-flex items-center gap-2 rounded px-3 py-2 text-sm font-medium text-ink/70 transition hover:bg-sand/70 hover:text-ink"
         aria-expanded={isOpen}
         aria-haspopup="menu"
       >

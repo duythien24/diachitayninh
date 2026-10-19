@@ -1,98 +1,56 @@
 import Image from "next/image";
 import Link from "next/link";
-import {
-  ArrowRight,
-  BookMarked,
-  BookOpen,
-  Building2,
-  CalendarDays,
-  Clock3,
-  Compass,
-  FileText,
-  Files,
-  Landmark,
-  Library,
-  MapPinned,
-  Newspaper,
-  Route,
-  Search,
-  Sparkles,
-  ScrollText
-} from "lucide-react";
+import { BookMarked, BookOpen, CalendarDays, Files, Newspaper, Search } from "lucide-react";
 
 import { DocumentCoverImage } from "@/components/document-cover-image";
 import { DocumentCard } from "@/components/document-card";
-import { PageShell } from "@/components/page-shell";
 import { getPopularDocumentIds } from "@/lib/document-analytics";
 import { getCommunes, getDocuments, getFeaturedDocuments } from "@/lib/repository";
 import { normalizeVietnamese } from "@/lib/utils";
 
 const heroImage = "/images/nui-ba-den-may-phu.jpg";
+const mapImage = "/images/maps/tay-ninh-moi-2025.jpg";
 const documentListPageSize = 24;
 
-const archiveCards = [
-  {
-    eyebrow: "Kho địa chí",
-    title: "Địa chí Tây Ninh",
-    description:
-      "Tra cứu tài liệu địa chí theo 96 xã, phường; mở bản PDF đọc thử hoặc bản đầy đủ nếu đã được cấp quyền công bố.",
-    href: "/tai-lieu?loai=dia_chi",
-    primaryLabel: "Mở địa chí",
-    secondaryHref: "/xa-phuong",
-    secondaryLabel: "Chọn xã/phường",
-    icon: BookOpen,
-    color: "palm"
-  },
-  {
-    eyebrow: "Kho báo chí",
-    title: "Báo Tây Ninh",
-    description:
-      "Xem các số báo, chuyên đề và tuyển chọn bài viết địa phương đã được số hóa dưới dạng bản đọc trực tuyến.",
-    href: "/tai-lieu?loai=bao_tay_ninh",
-    primaryLabel: "Mở báo chí",
-    secondaryHref: "/tai-lieu?loai=bao_tay_ninh",
-    secondaryLabel: "Danh mục Báo Tây Ninh",
-    icon: Newspaper,
-    color: "river"
-  },
-  {
-    eyebrow: "Kho cấp tỉnh",
-    title: "Tài liệu cấp tỉnh",
-    description: "Lưu trữ tài liệu chung cấp tỉnh, hồ sơ chuyên đề và tư liệu không gắn riêng với xã/phường nào.",
-    href: "/tai-lieu?loai=tai_lieu_cap_tinh",
-    primaryLabel: "Mở cấp tỉnh",
-    secondaryHref: "/tai-lieu",
-    secondaryLabel: "Tất cả tài liệu",
-    icon: Files,
-    color: "brass"
-  }
+const heroBooks = [
+  { src: "/thuvien-covers/dat-nuoc-con-nguoi-tay-ninh-17786-940442ab-36d1-4d14-9931-666c221a7a88.jpg", rotate: -9, position: "left-0" },
+  { src: "/thuvien-covers/dia-chi-tay-ninh-17791-972e8907-bfd1-4143-9669-49ea874a05eb.jpg", rotate: 0, position: "left-1/2 z-10 -ml-[88px]" },
+  { src: "/thuvien-covers/di-tich-lich-su-van-hoa-danh-lam-thang-canh-tinh-tay-ninh-19903-bff761a8-f379-44f5-9952-d8.jpg", rotate: 9, position: "right-0" }
 ];
 
-const topicLinks = [
+const archives = [
   {
-    href: "/tai-lieu?q=di%20tich",
-    icon: Landmark,
-    title: "Di tích, địa danh và nhân vật",
-    description: "Tìm nhanh tư liệu về di tích, địa danh, danh nhân và những điểm ghi dấu lịch sử."
+    key: "dia_chi",
+    title: "Địa chí Tây Ninh",
+    description: "Tài liệu địa chí của 96 xã, phường: lịch sử hình thành, địa danh, con người và văn hóa từng vùng đất.",
+    href: "/tai-lieu?loai=dia_chi",
+    icon: BookOpen,
+    tone: { bar: "bg-palm", icon: "bg-palm/10 text-palm", text: "text-palm", card: "hover:border-palm/30" }
   },
   {
-    href: "/tai-lieu?q=lich%20su",
-    icon: Clock3,
-    title: "Lịch sử địa phương",
-    description: "Gợi mở tài liệu về quá trình hình thành, truyền thống và ký ức cộng đồng."
+    key: "bao_tay_ninh",
+    title: "Báo Tây Ninh",
+    description: "Các số báo, chuyên đề và bài viết địa phương đã được số hóa thành bản đọc trực tuyến.",
+    href: "/tai-lieu?loai=bao_tay_ninh",
+    icon: Newspaper,
+    tone: { bar: "bg-river", icon: "bg-river/10 text-river", text: "text-river", card: "hover:border-river/30" }
   },
   {
-    href: "/tai-lieu?q=van%20hoa",
-    icon: Compass,
-    title: "Văn hóa và đời sống",
-    description: "Khám phá tư liệu về cư dân, phong tục, sinh hoạt xã hội và đời sống văn hóa."
-  },
-  {
-    href: "/tai-lieu?q=bao%20chi",
-    icon: ScrollText,
-    title: "Dấu ấn qua báo chí",
-    description: "Đi vào các số báo để nhìn lại sự kiện, chuyên đề và nhịp sống địa phương."
+    key: "tai_lieu_cap_tinh",
+    title: "Tài liệu cấp tỉnh",
+    description: "Hồ sơ chuyên đề và tư liệu chung của tỉnh, không gắn riêng với một xã, phường nào.",
+    href: "/tai-lieu?loai=tai_lieu_cap_tinh",
+    icon: Files,
+    tone: { bar: "bg-lacquer", icon: "bg-lacquer/10 text-lacquer", text: "text-lacquer", card: "hover:border-lacquer/30" }
   }
+] as const;
+
+const quickSearches = [
+  { href: "/tai-lieu?q=nui%20ba%20den", label: "Núi Bà Đen" },
+  { href: "/tai-lieu?q=khang%20chien", label: "Kháng chiến" },
+  { href: "/tai-lieu?q=cao%20dai", label: "Cao Đài" },
+  { href: "/tai-lieu?q=di%20tich", label: "Di tích" },
+  { href: "/tai-lieu?q=lich%20su", label: "Lịch sử" }
 ];
 
 const readingPaths = [
@@ -100,25 +58,19 @@ const readingPaths = [
     href: "/tai-lieu?q=di%20tich",
     eyebrow: "Biểu tượng Tây Ninh",
     title: "Núi Bà Đen và vùng đất linh thiêng",
-    description: "Bắt đầu từ cảnh quan, di tích và những tư liệu gắn với biểu tượng quen thuộc nhất của Tây Ninh.",
-    terms: ["nui ba den", "ba den", "danh lam", "di tich"],
-    icon: MapPinned
+    description: "Cảnh quan, di tích và tư liệu gắn với biểu tượng quen thuộc nhất của Tây Ninh."
   },
   {
     href: "/tai-lieu?q=lich%20su",
     eyebrow: "Lịch sử kháng chiến",
     title: "Căn cứ, chiến thắng và ký ức địa phương",
-    description: "Lần theo các tài liệu về căn cứ địa, lực lượng vũ trang, truyền thống cách mạng và những mốc son lịch sử.",
-    terms: ["can cu", "chien thang", "khang chien", "cach mang", "luc luong vu trang"],
-    icon: Route
+    description: "Căn cứ địa, lực lượng vũ trang, truyền thống cách mạng và những mốc son lịch sử."
   },
   {
     href: "/tai-lieu?q=van%20hoa",
     eyebrow: "Văn hóa bản địa",
     title: "Cao Đài, làng nghề và đời sống văn hóa",
-    description: "Khám phá những lớp văn hóa, tín ngưỡng, sinh hoạt cộng đồng và ký ức đời sống trong tư liệu số.",
-    terms: ["cao dai", "van hoa", "am thuc", "lang nghe", "dan ca"],
-    icon: Sparkles
+    description: "Tín ngưỡng, sinh hoạt cộng đồng và ký ức đời sống trong tư liệu số."
   }
 ];
 
@@ -150,14 +102,36 @@ function hrefWithEnoughResults(href: string, count: number) {
   return `${href}${separator}page=${Math.ceil(count / documentListPageSize)}`;
 }
 
+function countLabel(count: number) {
+  return count > 0 ? `${count} tài liệu` : "Đang bổ sung";
+}
+
+function SectionHeading({ title, description, action }: { title: string; description?: string; action?: { href: string; label: string } }) {
+  return (
+    <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+      <div className="max-w-2xl">
+        <h2 className="text-3xl font-semibold leading-tight text-ink sm:text-4xl">{title}</h2>
+        {description ? <p className="mt-3 leading-7 text-ink/65">{description}</p> : null}
+      </div>
+      {action ? (
+        <Link href={action.href} className="text-sm font-semibold text-palm underline decoration-palm/30 underline-offset-4 hover:decoration-palm">
+          {action.label}
+        </Link>
+      ) : null}
+    </div>
+  );
+}
+
 export default async function HomePage() {
   const [communes, documents, featuredDocuments] = await Promise.all([getCommunes(), getDocuments(), getFeaturedDocuments()]);
   const popularDocumentIds = await getPopularDocumentIds(3);
   const wardCount = communes.filter((commune) => commune.type === "phuong").length;
   const communeCount = communes.filter((commune) => commune.type === "xa").length;
-  const diaChiCount = documents.filter((document) => document.documentType === "dia_chi").length;
-  const baoTayNinhCount = documents.filter((document) => document.documentType === "bao_tay_ninh").length;
-  const provincialCount = documents.filter((document) => document.documentType === "tai_lieu_cap_tinh").length;
+  const countByType = {
+    dia_chi: documents.filter((document) => document.documentType === "dia_chi").length,
+    bao_tay_ninh: documents.filter((document) => document.documentType === "bao_tay_ninh").length,
+    tai_lieu_cap_tinh: documents.filter((document) => document.documentType === "tai_lieu_cap_tinh").length
+  };
   const timelineYears = documents
     .map((document) => document.year)
     .filter((year) => Number.isFinite(year))
@@ -205,381 +179,261 @@ export default async function HomePage() {
     .sort((left, right) => right.documentCount - left.documentCount || left.name.localeCompare(right.name, "vi"))
     .slice(0, 6);
 
+  const heroStats = [
+    { value: documents.length, label: "tài liệu số" },
+    { value: communeCount, label: "xã" },
+    { value: wardCount, label: "phường" }
+  ].filter((item) => item.value > 0);
+
   return (
-    <>
-      <section className="relative min-h-[620px] overflow-hidden bg-ink text-white">
-        <Image src={heroImage} alt="" fill priority sizes="100vw" className="object-cover opacity-70" />
-        <div className="absolute inset-0 bg-gradient-to-r from-ink via-ink/76 to-ink/28" />
-        <div className="relative mx-auto flex min-h-[620px] max-w-7xl flex-col justify-end px-4 pb-20 pt-24 sm:px-6 lg:px-8">
-          <div className="max-w-3xl">
-            <p className="mb-4 inline-flex items-center gap-2 rounded bg-white/12 px-3 py-1 text-sm font-semibold backdrop-blur">
-              <Library className="h-4 w-4" aria-hidden="true" />
-              Thư viện tỉnh Tây Ninh
+    <main>
+      {/* Hero */}
+      <section className="relative overflow-hidden bg-ink text-white">
+        <Image src={heroImage} alt="" fill priority sizes="100vw" className="object-cover object-center opacity-80" />
+        <div className="absolute inset-0 bg-gradient-to-r from-ink/90 via-ink/60 to-ink/20" />
+        <div className="absolute inset-0 bg-gradient-to-t from-ink/80 via-transparent to-transparent" />
+        <div className="relative mx-auto grid min-h-[580px] max-w-7xl items-end gap-12 px-4 pb-14 pt-24 sm:px-6 lg:min-h-[660px] lg:grid-cols-[1.25fr_0.75fr] lg:items-center lg:px-8">
+          <div>
+            <h1 className="max-w-3xl animate-fade-up text-5xl font-semibold leading-[1.05] [animation-delay:80ms] sm:text-6xl lg:text-7xl">
+              Địa chí số Tây Ninh
+            </h1>
+            <p className="mt-5 max-w-xl animate-fade-up text-lg leading-8 text-white/85 [animation-delay:160ms]">
+              Lật giở từng trang sử, địa danh và ký ức của 96 xã, phường qua kho tài liệu địa chí và Báo Tây Ninh đã được số hóa.
             </p>
-            <h1 className="text-4xl font-semibold leading-tight sm:text-6xl">Địa chí số Tây Ninh</h1>
-            <p className="mt-5 max-w-2xl text-lg leading-8 text-white/84">
-              Kho tài liệu địa chí, báo chí địa phương và tài liệu địa phương trên địa bàn tỉnh Tây Ninh.
-            </p>
-            <form action="/tai-lieu" className="mt-7 flex max-w-2xl flex-col gap-3 rounded border border-white/20 bg-white/12 p-3 backdrop-blur sm:flex-row">
-              <label className="flex min-h-12 flex-1 items-center gap-3 rounded bg-white px-4 text-ink">
-                <Search className="h-4 w-4 shrink-0 text-palm" aria-hidden="true" />
-                <span className="sr-only">Tìm tài liệu</span>
-                <input
-                  name="q"
-                  className="min-w-0 flex-1 bg-transparent text-sm font-medium text-ink outline-none placeholder:text-ink/45"
-                  placeholder="Tìm tên xã, địa danh, tác giả, năm..."
-                />
+
+            <form
+              action="/tai-lieu"
+              className="mt-8 flex max-w-2xl animate-fade-up items-center gap-2 rounded-full bg-white p-1.5 pl-5 shadow-soft ring-4 ring-white/10 [animation-delay:240ms]"
+            >
+              <Search className="h-5 w-5 shrink-0 text-ink/40" aria-hidden="true" />
+              <label className="sr-only" htmlFor="home-search">
+                Tìm tài liệu
               </label>
+              <input
+                id="home-search"
+                name="q"
+                className="min-w-0 flex-1 bg-transparent py-2.5 text-base text-ink outline-none placeholder:text-ink/45"
+                placeholder="Tìm xã, địa danh, tác giả, năm..."
+              />
               <button
                 type="submit"
-                className="inline-flex min-h-12 items-center justify-center gap-2 rounded bg-brass px-4 text-sm font-semibold text-ink transition hover:bg-brass/90"
+                className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-full bg-palm px-5 text-sm font-semibold text-white transition hover:bg-palm/90"
               >
                 Tra cứu
-                <ArrowRight className="h-4 w-4" aria-hidden="true" />
               </button>
             </form>
-            <div className="mt-3 flex max-w-2xl flex-wrap gap-2 text-sm">
-              {[
-                { href: "/tai-lieu?q=nui%20ba%20den", label: "Núi Bà Đen" },
-                { href: "/tai-lieu?q=khang%20chien", label: "Kháng chiến" },
-                { href: "/tai-lieu?loai=bao_tay_ninh", label: "Báo Tây Ninh" },
-                { href: "/xa-phuong", label: "96 xã/phường" }
-              ].map((item) => (
+            <div className="mt-4 flex max-w-2xl animate-fade-up flex-wrap items-center gap-x-1 gap-y-2 text-sm [animation-delay:300ms]">
+              <span className="mr-2 text-white/60">Gợi ý:</span>
+              {quickSearches.map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className="rounded border border-white/18 bg-white/10 px-3 py-1.5 font-medium text-white/86 transition hover:bg-white/18 hover:text-white"
+                  className="rounded-full border border-white/20 bg-white/5 px-3 py-1 text-white/90 backdrop-blur transition hover:border-brass hover:bg-brass hover:text-ink"
                 >
                   {item.label}
                 </Link>
               ))}
             </div>
-            <div className="mt-5 flex flex-wrap gap-3">
-              <Link
-                href="/tai-lieu?loai=dia_chi"
-                className="inline-flex min-h-12 items-center gap-2 rounded bg-brass px-4 py-3 text-sm font-semibold text-ink transition hover:bg-brass/90"
+
+            {heroStats.length ? (
+              <dl className="mt-12 flex animate-fade-up flex-wrap gap-x-10 gap-y-4 border-t border-white/15 pt-6 [animation-delay:380ms]">
+                {heroStats.map((item) => (
+                  <div key={item.label} className="flex items-baseline gap-2">
+                    <dt className="sr-only">{item.label}</dt>
+                    <dd className="font-serif text-3xl font-semibold text-white">{item.value}</dd>
+                    <span className="text-sm text-white/65">{item.label}</span>
+                  </div>
+                ))}
+              </dl>
+            ) : null}
+          </div>
+
+          <div className="relative mx-auto hidden h-[400px] w-[360px] animate-fade-up [animation-delay:300ms] lg:block" aria-hidden="true">
+            <div className="absolute inset-x-6 bottom-6 h-10 rounded-[50%] bg-black/50 blur-2xl" />
+            {heroBooks.map((book, index) => (
+              <div
+                key={book.src}
+                className={`absolute top-1/2 w-[176px] ${book.position}`}
+                style={{ transform: `translateY(-50%) rotate(${book.rotate}deg)` }}
               >
-                <BookOpen className="h-4 w-4" aria-hidden="true" />
-                Địa chí Tây Ninh
-              </Link>
-              <Link
-                href="/tai-lieu?loai=bao_tay_ninh"
-                className="inline-flex min-h-12 items-center gap-2 rounded border border-white/25 bg-white/10 px-4 py-3 text-sm font-semibold text-white backdrop-blur transition hover:bg-white/18"
-              >
-                <Newspaper className="h-4 w-4" aria-hidden="true" />
-                Báo Tây Ninh
-              </Link>
-              <Link
-                href="/tai-lieu?loai=tai_lieu_cap_tinh"
-                className="inline-flex min-h-12 items-center gap-2 rounded border border-white/25 bg-white/10 px-4 py-3 text-sm font-semibold text-white backdrop-blur transition hover:bg-white/18"
-              >
-                <Files className="h-4 w-4" aria-hidden="true" />
-                Tài liệu cấp tỉnh
-              </Link>
-            </div>
+                <div className={`relative aspect-[2/3] overflow-hidden rounded-sm border-[3px] border-white/90 bg-sand shadow-book ${index === 1 ? "animate-float" : ""}`}>
+                  <Image src={book.src} alt="" fill sizes="176px" className="object-cover" />
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
-      <PageShell>
-        <section className="grid items-stretch gap-5 lg:grid-cols-3">
-          {archiveCards.map((card) => {
-            const Icon = card.icon;
-            const colorClass =
-              card.color === "river" ? "bg-river hover:bg-river/90" : card.color === "brass" ? "bg-brass hover:bg-brass/90" : "bg-palm hover:bg-palm/90";
-            const iconClass = card.color === "river" ? "bg-river" : card.color === "brass" ? "bg-brass" : "bg-palm";
-
+      {/* Archives */}
+      <section className="mx-auto max-w-7xl px-4 pt-16 sm:px-6 lg:px-8 lg:pt-20">
+        <SectionHeading title="Ba kho tư liệu" />
+        <div className="grid gap-5 md:grid-cols-3">
+          {archives.map((archive) => {
+            const Icon = archive.icon;
+            const count = countByType[archive.key];
             return (
-              <article key={card.title} className="flex h-full min-h-[340px] flex-col rounded border border-ink/10 bg-white p-6 shadow-soft">
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <p className="text-sm font-semibold uppercase tracking-wide text-lacquer">{card.eyebrow}</p>
-                    <h2 className="mt-3 text-3xl font-semibold text-ink">{card.title}</h2>
-                  </div>
-                  <span className={`grid h-12 w-12 shrink-0 place-items-center rounded text-white ${iconClass}`}>
-                    <Icon className="h-6 w-6" aria-hidden="true" />
-                  </span>
-                </div>
-                <p className="mt-4 flex-1 leading-7 text-ink/68">{card.description}</p>
-                <div className="mt-6 grid gap-3 sm:grid-cols-2">
-                  <Link
-                    href={card.href}
-                    className={`inline-flex min-h-12 items-center justify-center gap-2 rounded px-4 text-center text-sm font-semibold text-white transition ${colorClass}`}
-                  >
-                    <Icon className="h-4 w-4" aria-hidden="true" />
-                    {card.primaryLabel}
-                  </Link>
-                  <Link
-                    href={card.secondaryHref}
-                    className="inline-flex min-h-12 items-center justify-center gap-2 rounded border border-ink/12 px-4 text-center text-sm font-semibold text-ink transition hover:bg-paper"
-                  >
-                    {card.secondaryLabel}
-                    <ArrowRight className="h-4 w-4" aria-hidden="true" />
-                  </Link>
-                </div>
-              </article>
-            );
-          })}
-        </section>
-
-        <section className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-          {[
-            { label: "Xã", value: communeCount, icon: Building2 },
-            { label: "Phường", value: wardCount, icon: Building2 },
-            { label: "Địa chí", value: diaChiCount, icon: BookOpen },
-            { label: "Báo Tây Ninh", value: baoTayNinhCount, icon: Newspaper },
-            { label: "Cấp tỉnh", value: provincialCount, icon: Files }
-          ].map((item) => {
-            const Icon = item.icon;
-            return (
-              <div key={item.label} className="rounded border border-ink/10 bg-white p-5 shadow-sm">
-                <Icon className="h-5 w-5 text-lacquer" aria-hidden="true" />
-                <p className="mt-4 text-3xl font-semibold text-ink">{item.value}</p>
-                <p className="mt-1 text-sm text-ink/60">{item.label}</p>
-              </div>
-            );
-          })}
-        </section>
-
-        <section className="mt-8 rounded border border-ink/10 bg-white p-6 shadow-sm">
-          <div className="grid gap-5 lg:grid-cols-[1fr_auto] lg:items-center">
-            <div className="flex gap-4">
-              <span className="grid h-12 w-12 shrink-0 place-items-center rounded bg-brass/18 text-lacquer">
-                <CalendarDays className="h-6 w-6" aria-hidden="true" />
-              </span>
-              <div>
-                <p className="text-sm font-semibold uppercase tracking-wide text-lacquer">Lối đọc mới</p>
-                <h2 className="mt-2 text-2xl font-semibold text-ink">Khám phá tư liệu theo dòng thời gian</h2>
-                <p className="mt-2 max-w-3xl text-sm leading-7 text-ink/68">
-                  Xem các tài liệu theo năm xuất bản, nhận ra giai đoạn nào có nhiều tư liệu và mở nhanh bộ lọc theo từng năm.
-                </p>
-              </div>
-            </div>
-            <div className="flex flex-wrap items-center gap-3 lg:justify-end">
-              <span className="rounded bg-paper px-3 py-2 text-sm font-semibold text-ink/70">
-                {firstTimelineYear && lastTimelineYear ? `${firstTimelineYear} - ${lastTimelineYear}` : "Đang cập nhật năm"}
-              </span>
               <Link
-                href="/dong-thoi-gian"
-                className="inline-flex min-h-11 items-center gap-2 rounded bg-palm px-4 py-2 text-sm font-semibold text-white transition hover:bg-palm/90"
+                key={archive.key}
+                href={archive.href}
+                className={`group relative flex flex-col overflow-hidden rounded-xl border border-ink/10 bg-white p-7 transition duration-300 hover:-translate-y-1 hover:shadow-soft lg:p-8 ${archive.tone.card}`}
               >
-                Mở dòng thời gian
-                <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                <span className={`absolute inset-x-0 top-0 h-1 ${archive.tone.bar}`} aria-hidden="true" />
+                <Icon
+                  className={`absolute -right-6 -top-6 h-36 w-36 opacity-[0.06] transition duration-500 group-hover:rotate-6 group-hover:opacity-10 ${archive.tone.text}`}
+                  aria-hidden="true"
+                />
+                <span className="relative flex items-center justify-between">
+                  <span className={`grid h-12 w-12 place-items-center rounded-full ${archive.tone.icon}`}>
+                    <Icon className="h-5 w-5" aria-hidden="true" />
+                  </span>
+                </span>
+                <span className="relative mt-6 font-serif text-2xl font-semibold text-ink">{archive.title}</span>
+                <span className="relative mt-3 flex-1 text-sm leading-6 text-ink/62">{archive.description}</span>
+                <span className="relative mt-6 flex items-center justify-between border-t border-ink/10 pt-4 text-sm font-semibold">
+                  <span className={count > 0 ? "text-ink/70" : "text-ink/40"}>{countLabel(count)}</span>
+                  <span className={archive.tone.text}>Mở kho</span>
+                </span>
               </Link>
-            </div>
-          </div>
-        </section>
+            );
+          })}
+        </div>
+      </section>
 
-        <section className="mt-5 rounded border border-ink/10 bg-white p-6 shadow-sm">
-          <div className="grid gap-5 lg:grid-cols-[1fr_auto] lg:items-center">
-            <div className="flex gap-4">
-              <span className="grid h-12 w-12 shrink-0 place-items-center rounded bg-palm/12 text-palm">
-                <BookMarked className="h-6 w-6" aria-hidden="true" />
-              </span>
-              <div>
-                <p className="text-sm font-semibold uppercase tracking-wide text-lacquer">Bộ sưu tập chuyên đề</p>
-                <h2 className="mt-2 text-2xl font-semibold text-ink">Bắt đầu từ một câu chuyện, không phải một ô tìm kiếm</h2>
-                <p className="mt-2 max-w-3xl text-sm leading-7 text-ink/68">
-                  Các chuyên đề tự gom tài liệu theo mạch đọc như di tích, kháng chiến, Báo Tây Ninh, Long An cũ và văn hóa đời sống.
-                </p>
-              </div>
-            </div>
+      {/* Highlighted documents */}
+      <section className="mx-auto max-w-7xl px-4 pt-20 sm:px-6 lg:px-8">
+        <SectionHeading
+          title={highlightSource === "featured" ? "Tài liệu nên đọc" : highlightSource === "popular" ? "Bạn đọc đang xem nhiều" : "Tài liệu vừa số hóa"}
+          action={{ href: "/tai-lieu", label: "Xem tất cả tài liệu" }}
+        />
+        {highlightedDocuments.length > 0 ? (
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {highlightedDocuments.slice(0, 3).map((document) => (
+              <DocumentCard key={document.id} document={document} />
+            ))}
+          </div>
+        ) : (
+          <p className="rounded-lg border border-dashed border-ink/20 p-8 text-center text-sm text-ink/60">
+            Chưa có tài liệu. Vào khu quản trị để thêm bản PDF đầu tiên.
+          </p>
+        )}
+      </section>
+
+      {/* Reading paths */}
+      <section className="mt-24 bg-ink text-white">
+        <div className="mx-auto grid max-w-7xl gap-12 px-4 py-20 sm:px-6 lg:grid-cols-[1.1fr_0.9fr] lg:px-8">
+          <div>
+            <h2 className="max-w-xl text-3xl font-semibold leading-tight sm:text-4xl">Chưa biết bắt đầu từ đâu? Hãy đi theo một câu chuyện.</h2>
+            <ol className="mt-10 divide-y divide-white/10 border-y border-white/10">
+              {pathsWithCounts.map((path) => (
+                <li key={path.title}>
+                  <Link href={path.href} className="group grid grid-cols-[1fr_auto] items-start gap-5 py-6">
+                    <span>
+                      <span className="text-sm text-brass">{path.eyebrow}</span>
+                      <span className="mt-1 block font-serif text-xl font-semibold text-white transition group-hover:text-brass">{path.title}</span>
+                      <span className="mt-2 block text-sm leading-6 text-white/60">{path.description}</span>
+                    </span>
+                    <span className="whitespace-nowrap pt-1 text-sm text-white/55">{countLabel(path.count)}</span>
+                  </Link>
+                </li>
+              ))}
+            </ol>
+          </div>
+
+          {featuredDocument ? (
             <Link
-              href="/bo-suu-tap"
-              className="inline-flex min-h-11 items-center justify-center gap-2 rounded bg-palm px-4 py-2 text-sm font-semibold text-white transition hover:bg-palm/90"
+              href={`/tai-lieu/${featuredDocument.slug}`}
+              className="group relative flex min-h-[460px] flex-col justify-end overflow-hidden rounded-lg bg-white/5"
             >
-              Mở bộ sưu tập
-              <ArrowRight className="h-4 w-4" aria-hidden="true" />
+              <DocumentCoverImage
+                src={featuredDocument.coverImageUrl}
+                alt=""
+                fill
+                sizes="(min-width: 1024px) 40vw, 100vw"
+                className="object-cover opacity-75 transition duration-700 group-hover:scale-[1.03]"
+              />
+              <span className="absolute inset-0 bg-gradient-to-t from-ink via-ink/50 to-transparent" />
+              <span className="relative p-7">
+                <span className="text-sm text-brass">Tài liệu gợi ý</span>
+                <span className="mt-2 block font-serif text-2xl font-semibold leading-snug">{featuredDocument.title}</span>
+                <span className="mt-3 line-clamp-2 block text-sm leading-6 text-white/70">{featuredDocument.description}</span>
+                <span className="mt-5 inline-block text-sm font-semibold text-white underline decoration-white/30 underline-offset-4">Xem tài liệu</span>
+              </span>
+            </Link>
+          ) : null}
+        </div>
+      </section>
+
+      {/* Communes */}
+      <section className="mx-auto max-w-7xl px-4 pt-24 sm:px-6 lg:px-8">
+        <div className="grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
+          <Link href="/xa-phuong" className="group relative block aspect-[4/3] overflow-hidden rounded-lg border border-ink/10 bg-sand">
+            <Image src={mapImage} alt="Bản đồ tỉnh Tây Ninh" fill sizes="(min-width: 1024px) 45vw, 100vw" className="object-cover transition duration-700 group-hover:scale-[1.02]" />
+          </Link>
+          <div>
+            <h2 className="text-3xl font-semibold leading-tight text-ink sm:text-4xl">Tìm tư liệu về quê hương bạn</h2>
+            <p className="mt-4 max-w-xl leading-7 text-ink/65">
+              Chọn một trong {communes.length || 96} xã, phường để xem các tài liệu địa chí, bài báo và tư liệu liên quan đến vùng đất đó.
+            </p>
+            {featuredCommunes.length ? (
+              <ul className="mt-8 divide-y divide-ink/10 border-y border-ink/10">
+                {featuredCommunes.slice(0, 4).map((commune) => (
+                  <li key={commune.id}>
+                    <Link href={`/xa-phuong/${commune.slug}`} className="group flex items-center justify-between gap-4 py-4">
+                      <span>
+                        <span className="text-sm text-ink/50">
+                          {commune.type === "phuong" ? "Phường" : "Xã"}
+                        </span>
+                        <span className="block font-serif text-xl font-semibold text-ink transition group-hover:text-palm">{commune.name}</span>
+                      </span>
+                      <span className="text-sm text-ink/55">{commune.documentCount} tài liệu</span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            ) : null}
+            <Link
+              href="/xa-phuong"
+              className="mt-8 inline-flex min-h-11 items-center gap-2 rounded-full bg-palm px-5 text-sm font-semibold text-white transition hover:bg-palm/90"
+            >
+              Xem tất cả xã, phường
             </Link>
           </div>
-        </section>
+        </div>
+      </section>
 
-        <section className="mt-14 overflow-hidden rounded border border-ink/10 bg-ink text-white shadow-soft">
-          <div className="grid lg:grid-cols-[0.95fr_1.05fr]">
-            <div className="p-6 sm:p-8 lg:p-10">
-              <p className="inline-flex items-center gap-2 rounded bg-white/10 px-3 py-1 text-sm font-semibold text-white/82">
-                <Sparkles className="h-4 w-4" aria-hidden="true" />
-                Hành trình đọc 15 phút
-              </p>
-              <h2 className="mt-5 text-3xl font-semibold leading-tight sm:text-4xl">
-                Không biết bắt đầu từ đâu? Hãy đi theo một câu chuyện.
-              </h2>
-              <p className="mt-4 max-w-2xl leading-7 text-white/72">
-                Các tuyến đọc gom tài liệu theo mạch khám phá quen thuộc với bạn đọc: biểu tượng địa phương, lịch sử kháng chiến,
-                văn hóa đời sống và ký ức cộng đồng.
-              </p>
-
-              <div className="mt-7 grid gap-3">
-                {pathsWithCounts.map((path) => {
-                  const Icon = path.icon;
-
-                  return (
-                    <Link
-                      key={path.href}
-                      href={path.href}
-                      className="group grid gap-4 rounded border border-white/12 bg-white/8 p-4 transition hover:border-brass/60 hover:bg-white/12 sm:grid-cols-[auto_1fr_auto] sm:items-center"
-                    >
-                      <span className="grid h-11 w-11 place-items-center rounded bg-brass text-ink">
-                        <Icon className="h-5 w-5" aria-hidden="true" />
-                      </span>
-                      <span>
-                        <span className="text-xs font-semibold uppercase tracking-wide text-brass">{path.eyebrow}</span>
-                        <span className="mt-1 block font-semibold text-white">{path.title}</span>
-                        <span className="mt-1 block text-sm leading-6 text-white/62">{path.description}</span>
-                      </span>
-                      <span className="flex items-center justify-between gap-3 text-sm font-semibold text-white/78 sm:block sm:text-right">
-                        <span className="rounded bg-white/10 px-2.5 py-1">{path.count} tài liệu</span>
-                        <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1 sm:ml-auto sm:mt-3" aria-hidden="true" />
-                      </span>
-                    </Link>
-                  );
-                })}
-              </div>
-            </div>
-
-            {featuredDocument ? (
-              <div className="relative min-h-[420px] overflow-hidden bg-white/5">
-                <DocumentCoverImage src={featuredDocument.coverImageUrl} alt="" fill sizes="(min-width: 1024px) 50vw, 100vw" className="object-cover opacity-70" />
-                <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/42 to-transparent" />
-                <div className="absolute inset-x-0 bottom-0 p-6 sm:p-8">
-                  <p className="text-sm font-semibold uppercase tracking-wide text-brass">Tài liệu gợi ý</p>
-                  <h3 className="mt-2 max-w-xl text-2xl font-semibold leading-snug text-white">{featuredDocument.title}</h3>
-                  <p className="mt-3 line-clamp-3 max-w-xl text-sm leading-6 text-white/72">{featuredDocument.description}</p>
-                  <div className="mt-5 flex flex-wrap gap-3">
-                    <Link
-                      href={`/tai-lieu/${featuredDocument.slug}`}
-                      className="inline-flex min-h-11 items-center gap-2 rounded bg-brass px-4 py-3 text-sm font-semibold text-ink transition hover:bg-brass/90"
-                    >
-                      Xem chi tiết
-                      <ArrowRight className="h-4 w-4" aria-hidden="true" />
-                    </Link>
-                    <Link
-                      href={`/doc/${featuredDocument.slug}`}
-                      className="inline-flex min-h-11 items-center gap-2 rounded border border-white/25 bg-white/10 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/18"
-                    >
-                      Đọc ngay
-                    </Link>
-                  </div>
-                </div>
-              </div>
-            ) : null}
-          </div>
-        </section>
-
-        {featuredCommunes.length ? (
-          <section className="mt-14">
-            <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-              <div>
-                <p className="text-sm font-semibold uppercase tracking-wide text-lacquer">Địa phương nổi bật</p>
-                <h2 className="mt-2 text-3xl font-semibold text-ink">Nơi đang có nhiều tư liệu để khám phá</h2>
-                <p className="mt-3 max-w-2xl leading-7 text-ink/68">
-                  Bạn đọc có thể bắt đầu từ quê quán, nơi đang sống hoặc một địa danh quen thuộc để đi vào kho tư liệu theo cách gần gũi hơn.
-                </p>
-              </div>
-              <Link
-                href="/xa-phuong"
-                className="inline-flex min-h-11 items-center justify-center gap-2 rounded border border-ink/12 bg-white px-4 py-3 text-sm font-semibold text-ink transition hover:bg-paper"
-              >
-                Xem 96 xã/phường
-                <ArrowRight className="h-4 w-4" aria-hidden="true" />
-              </Link>
-            </div>
-
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {featuredCommunes.map((commune, index) => (
-                <Link
-                  key={commune.id}
-                  href={`/xa-phuong/${commune.slug}`}
-                  className="group flex min-h-44 flex-col rounded border border-ink/10 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-palm/30 hover:shadow-soft"
-                >
-                  <span className="flex items-start justify-between gap-4">
-                    <span className="grid h-11 w-11 place-items-center rounded bg-paper text-palm">
-                      <Building2 className="h-5 w-5" aria-hidden="true" />
-                    </span>
-                    <span className="rounded bg-brass/15 px-2.5 py-1 text-xs font-semibold text-lacquer">
-                      #{index + 1}
-                    </span>
-                  </span>
-                  <span className="mt-5 text-xs font-semibold uppercase tracking-wide text-lacquer">
-                    {commune.type === "phuong" ? "Phường" : "Xã"}
-                  </span>
-                  <span className="mt-1 text-xl font-semibold text-ink">{commune.name}</span>
-                  <span className="mt-3 line-clamp-2 text-sm leading-6 text-ink/62">{commune.description}</span>
-                  <span className="mt-auto flex items-center justify-between gap-3 pt-5 text-sm font-semibold text-palm">
-                    <span>{commune.documentCount} tài liệu liên quan</span>
-                    <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" aria-hidden="true" />
-                  </span>
-                </Link>
-              ))}
-            </div>
-          </section>
-        ) : null}
-
-        <section className="mt-14">
-          <div className="flex flex-col gap-8 lg:grid lg:grid-cols-[1fr_1.1fr] lg:items-start">
-            <div>
-              <p className="text-sm font-semibold uppercase tracking-wide text-lacquer">Gợi ý khám phá</p>
-              <h2 className="mt-3 text-3xl font-semibold text-ink">Mở lối đọc theo chủ đề</h2>
-              <p className="mt-4 max-w-2xl leading-7 text-ink/68">
-                Các lối đọc này tự mở kho tài liệu với từ khóa gợi ý, phù hợp khi người đọc muốn bắt đầu từ một mạch nội dung thay vì chọn danh mục.
-              </p>
-              <div className="mt-6 grid gap-4 sm:grid-cols-2">
-                {topicLinks.map((item) => {
-                  const Icon = item.icon;
-                  return (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      className="group flex h-full min-h-40 flex-col rounded border border-ink/10 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-palm/35 hover:shadow-soft"
-                    >
-                      <span className="flex items-start justify-between gap-4">
-                        <span className="grid h-10 w-10 shrink-0 place-items-center rounded bg-paper text-palm">
-                          <Icon className="h-5 w-5" aria-hidden="true" />
-                        </span>
-                        <ArrowRight className="h-4 w-4 shrink-0 text-ink/40 transition group-hover:translate-x-1 group-hover:text-palm" aria-hidden="true" />
-                      </span>
-                      <span className="mt-5 font-semibold leading-6 text-ink">{item.title}</span>
-                      <span className="mt-2 block text-sm leading-6 text-ink/62">{item.description}</span>
-                    </Link>
-                  );
-                })}
-              </div>
-            </div>
-
-            <div>
-              <div className="mb-5 flex items-end justify-between gap-4">
-                <div>
-                  <p className="text-sm font-semibold uppercase tracking-wide text-lacquer">
-                    {highlightSource === "featured" ? "Thư viện đề xuất" : highlightSource === "popular" ? "Được quan tâm" : "Tài liệu mới"}
-                  </p>
-                  <h2 className="mt-2 text-2xl font-semibold text-ink">
-                    {highlightSource === "featured" ? "Tài liệu nên đọc" : highlightSource === "popular" ? "Bạn đọc đang xem nhiều" : "Vừa được cập nhật"}
-                  </h2>
-                </div>
-                <Link
-                  href="/tai-lieu"
-                  className="inline-flex min-h-10 items-center gap-2 rounded border border-ink/12 bg-white px-3 py-2 text-sm font-semibold text-ink transition hover:bg-paper"
-                >
-                  Tất cả
-                  <ArrowRight className="h-4 w-4" aria-hidden="true" />
-                </Link>
-              </div>
-              {highlightedDocuments.length > 0 ? (
-                <div className="grid gap-5 md:grid-cols-2">
-                  {highlightedDocuments.slice(0, 2).map((document) => (
-                    <DocumentCard key={document.id} document={document} />
-                  ))}
-                </div>
-              ) : (
-                <div className="rounded border border-dashed border-ink/18 bg-white p-6 text-sm leading-6 text-ink/62">
-                  <FileText className="mb-3 h-5 w-5 text-lacquer" aria-hidden="true" />
-                  Chưa có tài liệu trên Supabase. Vào khu quản trị để thêm bản PDF đầu tiên.
-                </div>
-              )}
-            </div>
-          </div>
-        </section>
-      </PageShell>
-    </>
+      {/* Other ways to explore */}
+      <section className="mx-auto max-w-7xl px-4 pt-24 sm:px-6 lg:px-8">
+        <SectionHeading title="Đọc theo thời gian và chủ đề" />
+        <div className="grid gap-6 md:grid-cols-2">
+          <Link href="/dong-thoi-gian" className="group flex flex-col rounded-lg bg-sand p-8 transition hover:bg-sand/70">
+            <CalendarDays className="h-6 w-6 text-lacquer" aria-hidden="true" />
+            <span className="mt-6 font-serif text-2xl font-semibold text-ink">Dòng thời gian</span>
+            <span className="mt-3 flex-1 leading-7 text-ink/65">
+              Xem tài liệu theo năm xuất bản và mở nhanh bộ lọc theo từng giai đoạn.
+            </span>
+            <span className="mt-6 flex items-center justify-between text-sm font-semibold">
+              <span className="text-ink/50">
+                {firstTimelineYear && lastTimelineYear
+                  ? firstTimelineYear === lastTimelineYear
+                    ? `Năm ${firstTimelineYear}`
+                    : `${firstTimelineYear} – ${lastTimelineYear}`
+                  : "Đang cập nhật"}
+              </span>
+            </span>
+          </Link>
+          <Link href="/bo-suu-tap" className="group flex flex-col rounded-lg bg-palm p-8 text-white transition hover:bg-palm/95">
+            <BookMarked className="h-6 w-6 text-brass" aria-hidden="true" />
+            <span className="mt-6 font-serif text-2xl font-semibold">Bộ sưu tập chuyên đề</span>
+            <span className="mt-3 flex-1 leading-7 text-white/75">
+              Tài liệu được gom theo mạch đọc: di tích, kháng chiến, Báo Tây Ninh, Long An cũ và văn hóa đời sống.
+            </span>
+            <span className="mt-6 flex items-center justify-between text-sm font-semibold">
+              <span className="text-white/60">Mở bộ sưu tập</span>
+            </span>
+          </Link>
+        </div>
+      </section>
+    </main>
   );
 }
