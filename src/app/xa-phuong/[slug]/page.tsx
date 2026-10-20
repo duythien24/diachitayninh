@@ -9,7 +9,7 @@ import { PageShell } from "@/components/page-shell";
 import { getDocumentPopularityScores } from "@/lib/document-analytics";
 import { getCommunes, getCommuneBySlug, getDocuments } from "@/lib/repository";
 import type { Commune, Document, DocumentType } from "@/lib/types";
-import { cn, tinhThanhMapUrl, typePrefix } from "@/lib/utils";
+import { cn, normalizeVietnamese, tinhThanhMapUrl, typePrefix } from "@/lib/utils";
 
 export async function generateStaticParams() {
   const communes = await getCommunes();
@@ -150,7 +150,9 @@ export default async function CommuneDetailPage({ params }: { params: Promise<{ 
   const popularity = await getDocumentPopularityScores(relatedDocuments.map((document) => document.id));
   const communeSuggestions = suggestedCommunes(allDocuments, commune.id);
   const mapUrl = tinhThanhMapUrl(commune.type, commune.slug);
-  const keywords = topKeywords(relatedDocuments, commune.keywords || []);
+  // A keyword chip opens a search, so keep only keywords that find at least one document.
+  const searchTexts = allDocuments.map((document) => normalizeVietnamese([document.title, document.description, document.keywords?.join(" ") || "", document.communes?.map((item) => item.name).join(" ") || ""].join(" ")));
+  const keywords = topKeywords(relatedDocuments, commune.keywords || []).filter((keyword) => searchTexts.some((text) => text.includes(normalizeVietnamese(keyword))));
   const recentDocuments = latestDocuments(relatedDocuments);
   const popularDocuments = relatedDocuments
     .filter((document) => (popularity[document.id]?.score || 0) > 0)

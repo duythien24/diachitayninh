@@ -18,8 +18,8 @@ html {
 
 body {
   margin: 0;
-  background: #eef1ee;
-  color: #16213a;
+  background: #fbf4e6;
+  color: #2a1810;
   font-family: var(--font-sans), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   -webkit-font-smoothing: antialiased;
 }
@@ -38,13 +38,13 @@ a {
 }
 
 :focus-visible {
-  outline: 2px solid #e0a42c;
+  outline: 2px solid #d4a94c;
   outline-offset: 2px;
 }
 
 ::selection {
-  background: #e0a42c;
-  color: #16213a;
+  background: #d4a94c;
+  color: #2a1810;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -58,6 +58,17 @@ a {
 }
 
 .bg-pattern {
-  background-image: radial-gradient(rgba(22, 33, 58, 0.07) 1px, transparent 1px);
+  background-image: radial-gradient(rgba(154, 106, 28, 0.12) 1px, transparent 1px);
   background-size: 18px 18px;
+}
+
+/* Fine gold lattice for red bands, after traditional window screens (hoa văn chữ Vạn style grid). */
+.bg-lattice {
+  background-color: #8e1b1b;
+  background-image:
+    linear-gradient(rgba(212, 169, 76, 0.09) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(212, 169, 76, 0.09) 1px, transparent 1px),
+    radial-gradient(rgba(212, 169, 76, 0.16) 1.5px, transparent 1.5px);
+  background-size: 28px 28px, 28px 28px, 28px 28px;
+  background-position: 0 0, 0 0, 14px 14px;
 }

@@ -15,10 +15,10 @@ const linkClass = "inline-flex items-center gap-1.5 text-white/75 transition hov
 
 export function SiteFooter() {
   return (
-    <footer className="mt-20 bg-ink text-white">
+    <footer className="mt-20 border-t-4 border-brass/70 bg-maroon text-white">
       <div className="mx-auto grid max-w-7xl gap-10 px-4 py-14 sm:px-6 md:grid-cols-2 lg:grid-cols-[1.3fr_1fr_1fr_1fr] lg:px-8">
         <div>
-          <p className="font-serif text-2xl font-semibold">Địa chí số Tây Ninh</p>
+          <p className="font-serif text-2xl font-semibold uppercase tracking-wide text-[#f6e3b0]">Địa chí số Tây Ninh</p>
           <p className="mt-3 max-w-sm text-sm leading-6 text-white/60">
             Kho đọc trực tuyến tài liệu địa chí, Báo Tây Ninh và tư liệu địa phương do Thư viện tỉnh Tây Ninh số hóa.
           </p>

@@ -19,7 +19,7 @@ export function MobileNav({ account }: { account: AccountSession | null }) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div className="lg:hidden">
+    <div className="xl:hidden">
       <button
         type="button"
         onClick={() => setIsOpen((value) => !value)}

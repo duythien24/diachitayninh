@@ -9,16 +9,18 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // Tây Ninh palette: night indigo, Bà Đen mist, Cao Đài blue and turmeric, rubber-forest green, temple red
-        ink: "#16213a",
-        paper: "#eef1ee",
-        sand: "#dde4e0",
-        palm: "#1f4f8c",
-        river: "#2e7464",
-        lacquer: "#a8362a",
-        brass: "#e0a42c",
+        // Heritage palette (after diachivietnam.vn): lacquer red, ivory paper, gold leaf, dark-brown ink.
+        // Names are historical: "palm" is the primary (red) and "lacquer" the small-label gold-brown.
+        ink: "#2a1810",
+        paper: "#fbf4e6",
+        sand: "#f1e3c4",
+        palm: "#8e1b1b",
+        maroon: "#6b1212",
+        river: "#2f5d3a",
+        lacquer: "#9a6a1c",
+        brass: "#d4a94c",
         // Older pages and admin screens use these names; without them their accents rendered colourless.
-        gold: "#e0a42c",
+        gold: "#d4a94c",
         blue: "#2f6fae"
       },
       fontFamily: {
@@ -43,9 +45,9 @@ const config: Config = {
         float: "float 7s ease-in-out infinite"
       },
       boxShadow: {
-        sm: "0 1px 2px rgba(22, 33, 58, 0.06)",
-        soft: "0 12px 40px -12px rgba(22, 33, 58, 0.2)",
-        book: "0 1px 2px rgba(22, 33, 58, 0.2), 0 18px 36px -12px rgba(22, 33, 58, 0.45)"
+        sm: "0 1px 2px rgba(42, 24, 16, 0.06)",
+        soft: "0 12px 40px -12px rgba(42, 24, 16, 0.2)",
+        book: "0 1px 2px rgba(42, 24, 16, 0.2), 0 18px 36px -12px rgba(42, 24, 16, 0.45)"
       }
     }
   },
