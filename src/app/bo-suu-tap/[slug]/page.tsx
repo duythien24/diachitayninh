@@ -16,7 +16,9 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
   const collection = getCollectionBySlug(slug);
-  return collection ? { title: collection.title, description: collection.description } : { title: "Không tìm thấy bộ sưu tập" };
+  return collection
+    ? { title: collection.title, description: collection.description, alternates: { canonical: `/bo-suu-tap/${collection.slug}` } }
+    : { title: "Không tìm thấy bộ sưu tập" };
 }
 
 export default async function CollectionPage({

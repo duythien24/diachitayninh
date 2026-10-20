@@ -1,6 +1,13 @@
+import type { Metadata } from "next";
 import { CommuneList } from "@/components/commune-list";
 import { PageShell, SectionHeader } from "@/components/page-shell";
 import { getCommunes, getDocuments } from "@/lib/repository";
+
+export const metadata: Metadata = {
+  title: "96 xã, phường Tây Ninh",
+  description: "Tra cứu tài liệu địa chí, báo chí và tư liệu địa phương theo 96 xã, phường của tỉnh Tây Ninh sau sắp xếp năm 2025.",
+  alternates: { canonical: "/xa-phuong" }
+};
 
 export default async function CommunesPage() {
   const [communes, documents] = await Promise.all([getCommunes(), getDocuments()]);

@@ -7,6 +7,8 @@ import { ContactPanel } from "@/components/contact-panel";
 import { BookmarkButton } from "@/components/bookmark-button";
 import { DocumentEventTracker } from "@/components/document-event-tracker";
 import { DocumentCoverImage } from "@/components/document-cover-image";
+import { JsonLd } from "@/components/json-ld";
+import { siteUrl } from "@/lib/site-config";
 import { DocumentCard } from "@/components/document-card";
 import { PageShell } from "@/components/page-shell";
 import { ReadingHistoryTracker } from "@/components/reading-history-tracker";
@@ -31,8 +33,10 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   }
 
   return {
-    title: `${document.title} | Địa chí Tây Ninh`,
-    description: document.description || `Xem tài liệu ${document.title} tại Thư viện tỉnh Tây Ninh.`
+    title: document.title,
+    description: document.description || `Xem tài liệu ${document.title} tại Thư viện tỉnh Tây Ninh.`,
+    alternates: { canonical: `/tai-lieu/${document.slug}` },
+    openGraph: { type: "book", title: document.title, images: document.coverImageUrl ? [{ url: document.coverImageUrl }] : undefined }
   };
 }
 
@@ -84,6 +88,23 @@ export default async function DocumentDetailPage({ params }: { params: Promise<{
 
   return (
     <PageShell>
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "Book",
+          name: document.title,
+          description: document.description || undefined,
+          author: document.author ? { "@type": "Person", name: document.author } : undefined,
+          publisher: document.publisher ? { "@type": "Organization", name: document.publisher } : undefined,
+          datePublished: document.year ? String(document.year) : undefined,
+          numberOfPages: document.pageCount || undefined,
+          inLanguage: "vi",
+          image: document.coverImageUrl?.startsWith("http") ? document.coverImageUrl : `${siteUrl}${document.coverImageUrl}`,
+          url: `${siteUrl}/tai-lieu/${document.slug}`,
+          keywords: document.keywords?.join(", ") || undefined,
+          contentLocation: communes.length ? communes.map((item) => ({ "@type": "Place", name: `${typePrefix(item.type)} ${item.name}, Tây Ninh` })) : { "@type": "Place", name: "Tây Ninh" }
+        }}
+      />
       <DocumentEventTracker documentId={document.id} eventType="detail_view" />
       <ReadingHistoryTracker documentId={document.id} />
       <Link href="/tai-lieu" className="inline-flex items-center gap-2 text-sm font-semibold text-palm">

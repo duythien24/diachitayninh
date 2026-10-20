@@ -22,17 +22,16 @@ export const metadata: Metadata = {
     template: `%s | ${siteName}`
   },
   description: siteDescription,
-  alternates: {
-    canonical: "/"
-  },
   openGraph: {
     title: siteName,
     description: siteDescription,
     url: siteUrl,
     siteName,
     locale: "vi_VN",
-    type: "website"
-  }
+    type: "website",
+    images: [{ url: "/images/nui-ba-den-may-phu.jpg", alt: "Núi Bà Đen mây phủ" }]
+  },
+  twitter: { card: "summary_large_image" }
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

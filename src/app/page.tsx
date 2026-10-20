@@ -2,13 +2,19 @@ import Image from "next/image";
 import Link from "next/link";
 import { BookMarked, BookOpen, CalendarDays, Files, Newspaper, Search } from "lucide-react";
 
+import type { Metadata } from "next";
+
+import { JsonLd } from "@/components/json-ld";
 import { GoldFrame, HeritageHeading, Ornament } from "@/components/ornaments";
 import { DocumentCoverImage } from "@/components/document-cover-image";
 import { DocumentCard } from "@/components/document-card";
 import { getPopularDocumentIds } from "@/lib/document-analytics";
 import { documentsForCollection, getCollectionBySlug } from "@/lib/document-collections";
 import { getCommunes, getDocuments, getFeaturedDocuments } from "@/lib/repository";
+import { siteName, siteUrl } from "@/lib/site-config";
 import { normalizeVietnamese } from "@/lib/utils";
+
+export const metadata: Metadata = { alternates: { canonical: "/" } };
 
 const heroImage = "/images/nui-ba-den-may-phu.jpg";
 const mapImage = "/images/maps/tay-ninh-moi-2025.jpg";
@@ -169,6 +175,17 @@ export default async function HomePage() {
 
   return (
     <main>
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          name: siteName,
+          url: siteUrl,
+          inLanguage: "vi",
+          publisher: { "@type": "Library", name: "Thư viện tỉnh Tây Ninh", url: "https://thuvien.tayninh.gov.vn", telephone: "+84-272-3837050" },
+          potentialAction: { "@type": "SearchAction", target: `${siteUrl}/tai-lieu?q={search_term_string}`, "query-input": "required name=search_term_string" }
+        }}
+      />
       {/* Hero: lacquer-red banner with the mountain photo and the book fan */}
       <section className="relative overflow-hidden bg-maroon text-white">
         <Image src={heroImage} alt="" fill priority sizes="100vw" className="object-cover object-center opacity-40 grayscale" />

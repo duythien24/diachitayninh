@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { DocumentList } from "@/components/document-list";
 import { PageShell, SectionHeader } from "@/components/page-shell";
 import { getCommunes, getDocumentFilterOptions, searchDocuments } from "@/lib/repository";
@@ -44,6 +45,12 @@ function pageCopy(filter: DocumentType | "all") {
     description: "Tài liệu có thể gắn với xã/phường hoặc thuộc kho cấp tỉnh, tùy nội dung được chọn trong khu quản trị."
   };
 }
+
+export const metadata: Metadata = {
+  title: "Kho tài liệu",
+  description: "Tìm và đọc tài liệu địa chí, Báo Tây Ninh và tư liệu cấp tỉnh đã số hóa của Thư viện tỉnh Tây Ninh.",
+  alternates: { canonical: "/tai-lieu" }
+};
 
 export default async function DocumentsPage({
   searchParams

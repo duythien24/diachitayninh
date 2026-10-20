@@ -21,7 +21,8 @@ import { tinhThanhMapUrl, typePrefix } from "@/lib/utils";
 export const metadata: Metadata = {
   title: "Giới thiệu dự án",
   description:
-    "Giới thiệu mục tiêu, nguồn tài liệu, bản đồ trước và sau sáp nhập, chính sách khai thác tài liệu và thông tin liên hệ của Địa chí số Tây Ninh."
+    "Giới thiệu mục tiêu, nguồn tài liệu, bản đồ trước và sau sáp nhập, chính sách khai thác tài liệu và thông tin liên hệ của Địa chí số Tây Ninh.",
+  alternates: { canonical: "/gioi-thieu" }
 };
 
 const goals = [

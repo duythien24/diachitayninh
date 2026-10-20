@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 
+import { documentCollections } from "@/lib/document-collections";
 import { getCommunes, getDocuments } from "@/lib/repository";
 import { siteUrl } from "@/lib/site-config";
 
@@ -34,5 +35,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: document.isPreviewOnly ? 0.65 : 0.75
   }));
 
-  return [...staticRoutes, ...communeRoutes, ...documentRoutes];
+  const collectionRoutes: MetadataRoute.Sitemap = documentCollections.map((collection) => ({
+    url: url(`/bo-suu-tap/${collection.slug}`),
+    lastModified: now,
+    changeFrequency: "weekly",
+    priority: 0.8
+  }));
+
+  return [...staticRoutes, ...collectionRoutes, ...communeRoutes, ...documentRoutes];
 }

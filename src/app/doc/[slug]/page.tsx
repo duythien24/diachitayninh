@@ -29,7 +29,9 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
   return {
     title: `Đọc ${document.title}`,
-    description: document.description || `Đọc tài liệu ${document.title} tại Thư viện tỉnh Tây Ninh.`
+    description: document.description || `Đọc tài liệu ${document.title} tại Thư viện tỉnh Tây Ninh.`,
+    // The reader repeats the detail page; point search engines there.
+    alternates: { canonical: `/tai-lieu/${document.slug}` }
   };
 }
 

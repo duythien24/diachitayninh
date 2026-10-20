@@ -27,7 +27,8 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   }
 
   return {
-    title: `${typePrefix(commune.type)} ${commune.name} | Địa chí Tây Ninh`,
+    title: `${typePrefix(commune.type)} ${commune.name}`,
+    alternates: { canonical: `/xa-phuong/${commune.slug}` },
     description: commune.description
   };
 }

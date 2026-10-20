@@ -22,7 +22,8 @@ import { getDocuments } from "@/lib/repository";
 
 export const metadata: Metadata = {
   title: "Bộ sưu tập chuyên đề",
-  description: "Các lối đọc chuyên đề giúp bạn đọc khám phá tài liệu địa chí, báo chí và tư liệu địa phương Tây Ninh dễ hơn."
+  description: "Các lối đọc chuyên đề giúp bạn đọc khám phá tài liệu địa chí, báo chí và tư liệu địa phương Tây Ninh dễ hơn.",
+  alternates: { canonical: "/bo-suu-tap" }
 };
 
 const collectionIcons: Record<string, typeof BookOpen> = {

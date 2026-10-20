@@ -9,7 +9,8 @@ import type { Document, DocumentType } from "@/lib/types";
 
 export const metadata: Metadata = {
   title: "Dòng thời gian tư liệu",
-  description: "Khám phá tài liệu địa chí, báo chí và tư liệu cấp tỉnh Tây Ninh theo từng năm, từng giai đoạn lịch sử."
+  description: "Khám phá tài liệu địa chí, báo chí và tư liệu cấp tỉnh Tây Ninh theo từng năm, từng giai đoạn lịch sử.",
+  alternates: { canonical: "/dong-thoi-gian" }
 };
 
 type YearGroup = {
