@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { writeAuditLog } from "@/lib/audit-log";
@@ -319,7 +319,8 @@ export async function createDocumentAction(formData: FormData) {
     });
   }
 
-  revalidatePath("/");
+  revalidateTag("catalog");
+  revalidatePath("/", "layout");
   revalidatePath("/tai-lieu");
   revalidatePath("/admin/documents");
   revalidatePath("/admin/audit");
@@ -364,7 +365,8 @@ export async function updateDocumentAction(documentId: string, formData: FormDat
     }
   });
 
-  revalidatePath("/");
+  revalidateTag("catalog");
+  revalidatePath("/", "layout");
   revalidatePath("/tai-lieu");
   revalidatePath("/admin/documents");
   revalidatePath("/admin/audit");
@@ -405,7 +407,8 @@ export async function deleteDocumentAction(documentId: string, formData: FormDat
     }
   });
 
-  revalidatePath("/");
+  revalidateTag("catalog");
+  revalidatePath("/", "layout");
   revalidatePath("/tai-lieu");
   revalidatePath("/admin/documents");
   revalidatePath("/admin/audit");

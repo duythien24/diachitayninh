@@ -16,7 +16,10 @@ const config: Config = {
         palm: "#1f4f8c",
         river: "#2e7464",
         lacquer: "#a8362a",
-        brass: "#e0a42c"
+        brass: "#e0a42c",
+        // Older pages and admin screens use these names; without them their accents rendered colourless.
+        gold: "#e0a42c",
+        blue: "#2f6fae"
       },
       fontFamily: {
         sans: ["var(--font-sans)", "ui-sans-serif", "system-ui", "sans-serif"],

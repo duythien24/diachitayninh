@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { writeAuditLog } from "@/lib/audit-log";
@@ -137,7 +137,8 @@ export async function updateCommuneAction(communeId: string, formData: FormData)
     }
   });
 
-  revalidatePath("/");
+  revalidateTag("catalog");
+  revalidatePath("/", "layout");
   revalidatePath("/xa-phuong");
   if (slug) {
     revalidatePath(`/xa-phuong/${slug}`);

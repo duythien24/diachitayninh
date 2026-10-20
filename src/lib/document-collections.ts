@@ -7,12 +7,12 @@ export type DocumentCollectionDefinition = {
   title: string;
   description: string;
   image: string;
-  href: string;
   terms?: string[];
   documentType?: DocumentType;
 };
 
 export type DocumentCollection = DocumentCollectionDefinition & {
+  href: string;
   documents: Document[];
   count: number;
   summary: string;
@@ -25,7 +25,6 @@ export const documentCollections: DocumentCollectionDefinition[] = [
     title: "Núi Bà Đen, di tích và danh thắng",
     description: "Tập hợp tư liệu về Núi Bà Đen, di tích, địa danh và những biểu tượng quen thuộc của vùng đất Tây Ninh.",
     image: "/images/nui-ba-den-may-phu.jpg",
-    href: "/tai-lieu?q=nui%20ba%20den",
     terms: ["nui ba den", "ba den", "danh thang", "di tich", "dia danh", "toa thanh", "cao dai"]
   },
   {
@@ -34,7 +33,6 @@ export const documentCollections: DocumentCollectionDefinition[] = [
     title: "Căn cứ, kháng chiến và ký ức cách mạng",
     description: "Đi theo các tư liệu về căn cứ, lực lượng vũ trang, chiến thắng, truyền thống cách mạng và lịch sử Đảng bộ địa phương.",
     image: "/images/maps/tay-ninh-cu.jpg",
-    href: "/tai-lieu?q=khang%20chien",
     terms: ["khang chien", "can cu", "chien thang", "cach mang", "luc luong vu trang", "dang bo", "truyen thong"]
   },
   {
@@ -43,7 +41,6 @@ export const documentCollections: DocumentCollectionDefinition[] = [
     title: "Địa chí xã/phường",
     description: "Các tài liệu địa chí, lịch sử xã, phường, địa danh, di tích và tư liệu liên quan đến từng đơn vị hành chính.",
     image: "/images/maps/tay-ninh-moi-2025.jpg",
-    href: "/tai-lieu?loai=dia_chi",
     documentType: "dia_chi",
     terms: ["dia chi", "lich su xa", "phuong", "xa"]
   },
@@ -53,7 +50,6 @@ export const documentCollections: DocumentCollectionDefinition[] = [
     title: "Báo Tây Ninh và nhịp sống địa phương",
     description: "Mở các số báo, chuyên đề báo chí và bài viết địa phương đã được số hóa để nhìn lại sự kiện theo dòng thời sự.",
     image: "/images/maps/tay-ninh-moi-2025.jpg",
-    href: "/tai-lieu?loai=bao_tay_ninh",
     documentType: "bao_tay_ninh",
     terms: ["bao tay ninh", "bao chi", "thoi su", "chuyen de"]
   },
@@ -63,7 +59,6 @@ export const documentCollections: DocumentCollectionDefinition[] = [
     title: "Tư liệu Long An cũ trong tỉnh Tây Ninh mới",
     description: "Gợi mở tài liệu gắn với Long An cũ, các địa danh và vùng đất nay thuộc không gian tỉnh Tây Ninh sau sáp nhập.",
     image: "/images/maps/long-an-cu.jpg",
-    href: "/tai-lieu?q=long%20an",
     terms: ["long an", "tan an", "ben luc", "can duoc", "can giuoc", "duc hoa", "duc hue", "moc hoa", "kien tuong"]
   },
   {
@@ -72,7 +67,6 @@ export const documentCollections: DocumentCollectionDefinition[] = [
     title: "Văn hóa, tín ngưỡng và đời sống",
     description: "Khám phá tư liệu về sinh hoạt cộng đồng, tôn giáo, phong tục, làng nghề và những lớp ký ức đời sống.",
     image: "/images/nui-ba-den-may-phu.jpg",
-    href: "/tai-lieu?q=van%20hoa",
     terms: ["van hoa", "doi song", "cao dai", "tin nguong", "phong tuc", "lang nghe", "am thuc", "dan ca"]
   }
 ];
@@ -125,6 +119,7 @@ export function getCollectionsWithDocuments(documents: Document[]): DocumentColl
     const matchedDocuments = documentsForCollection(collection, documents);
     return {
       ...collection,
+      href: collectionHref(collection),
       documents: matchedDocuments,
       count: matchedDocuments.length,
       summary: collectionTypeSummary(matchedDocuments)
@@ -132,6 +127,17 @@ export function getCollectionsWithDocuments(documents: Document[]): DocumentColl
   });
 }
 
+/** Each collection has its own page listing exactly the documents it counts (a single search term could not). */
+export function collectionHref(collection: Pick<DocumentCollectionDefinition, "slug">) {
+  return `/bo-suu-tap/${collection.slug}`;
+}
+
+export function getCollectionBySlug(slug: string) {
+  return documentCollections.find((collection) => collection.slug === slug);
+}
+
 export function getCollectionsForDocument(document: Document) {
-  return documentCollections.filter((collection) => documentMatchesCollection(collection, document));
+  return documentCollections
+    .filter((collection) => documentMatchesCollection(collection, document))
+    .map((collection) => ({ ...collection, href: collectionHref(collection) }));
 }

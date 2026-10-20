@@ -1,6 +1,6 @@
 import "server-only";
 
-import { unstable_noStore as noStore } from "next/cache";
+import { unstable_cache, unstable_noStore as noStore } from "next/cache";
 
 import {
   communes as mockCommunes,
@@ -174,19 +174,6 @@ async function fetchCommuneRows(
   return supabase.from("communes").select(legacyCommuneSelect).order("type", { ascending: true }).order("name", { ascending: true });
 }
 
-async function fetchCommuneRowBySlug(
-  supabase: NonNullable<ReturnType<typeof getSupabaseAdminClient> | ReturnType<typeof getSupabasePublicClient>>,
-  slug: string
-) {
-  const full = await supabase.from("communes").select(communeSelect).eq("slug", slug).maybeSingle();
-
-  if (!full.error) {
-    return full;
-  }
-
-  return supabase.from("communes").select(legacyCommuneSelect).eq("slug", slug).maybeSingle();
-}
-
 async function fetchCommuneRowById(supabase: NonNullable<ReturnType<typeof getSupabaseAdminClient>>, id: string) {
   const full = await supabase.from("communes").select(communeSelect).eq("id", id).maybeSingle();
 
@@ -278,19 +265,6 @@ async function fetchDocumentRowsByIds(
   return supabase.from("documents").select(legacyDocumentSelect).in("id", ids);
 }
 
-async function fetchDocumentRowBySlug(
-  supabase: NonNullable<ReturnType<typeof getSupabaseAdminClient> | ReturnType<typeof getSupabasePublicClient>>,
-  slug: string
-) {
-  const full = await supabase.from("documents").select(documentSelect).eq("slug", slug).maybeSingle();
-
-  if (!full.error) {
-    return full;
-  }
-
-  return supabase.from("documents").select(legacyDocumentSelect).eq("slug", slug).maybeSingle();
-}
-
 async function fetchDocumentRowById(
   supabase: NonNullable<ReturnType<typeof getSupabaseAdminClient>>,
   id: string
@@ -304,42 +278,55 @@ async function fetchDocumentRowById(
   return supabase.from("documents").select(legacyDocumentSelect).eq("id", id).maybeSingle();
 }
 
-export async function getCommunes() {
-  noStore();
+/**
+ * The public site reads the whole catalogue (216+ documents, 96 communes) on most pages. Those reads are cached
+ * for 5 minutes under the "catalog" tag, and admin saves call revalidateTag("catalog") so edits show at once.
+ * A failed read throws inside the cache function, so failures are never cached.
+ */
+export const catalogCacheTag = "catalog";
+const catalogRevalidateSeconds = 300;
 
-  const supabase = getSupabasePublicClient();
-  if (!supabase) {
+const loadCommuneRows = unstable_cache(
+  async () => {
+    const supabase = getSupabasePublicClient();
+    if (!supabase) return null;
+    const { data, error } = await withRetry(() => fetchCommuneRows(supabase));
+    if (error || !data?.length) throw new DataUnavailableError("getCommunes", error || "no communes");
+    return data as CommuneRow[];
+  },
+  ["commune-rows"],
+  { revalidate: catalogRevalidateSeconds, tags: [catalogCacheTag] }
+);
+
+const loadDocumentRows = unstable_cache(
+  async () => {
+    const supabase = getSupabaseAdminClient() || getSupabasePublicClient();
+    if (!supabase) return null;
+    const { data, error } = await fetchDocumentRows(supabase);
+    if (error) throw new DataUnavailableError("getDocuments", error);
+    return data as DocumentRow[];
+  },
+  ["document-rows"],
+  { revalidate: catalogRevalidateSeconds, tags: [catalogCacheTag] }
+);
+
+export async function getCommunes() {
+
+  if (!getSupabasePublicClient()) {
     return mockCommunes;
   }
 
-  const { data, error } = await withRetry(() => fetchCommuneRows(supabase));
-
-  if (error || !data?.length) {
-    return mockOrFail("getCommunes", error || "no communes", mockCommunes);
+  try {
+    const rows = await loadCommuneRows();
+    return rows ? rows.map(mapCommune) : mockCommunes;
+  } catch (error) {
+    return mockOrFail("getCommunes", error, mockCommunes);
   }
-
-  return data.map((row) => mapCommune(row as CommuneRow));
 }
 
 export async function getCommuneBySlug(slug: string) {
-  noStore();
-
-  const supabase = getSupabasePublicClient();
-  if (!supabase) {
-    return mockCommunes.find((commune) => commune.slug === slug);
-  }
-
-  const { data, error } = await withRetry(() => fetchCommuneRowBySlug(supabase, slug));
-
-  if (error) {
-    return mockOrFail("getCommuneBySlug", error, mockCommunes.find((commune) => commune.slug === slug));
-  }
-
-  if (!data) {
-    return isSupabaseConfigured ? undefined : mockCommunes.find((commune) => commune.slug === slug);
-  }
-
-  return mapCommune(data as CommuneRow);
+  const communes = await getCommunes();
+  return communes.find((commune) => commune.slug === slug);
 }
 
 export async function getCommuneById(id?: string) {
@@ -409,20 +396,16 @@ export async function getAdminCommuneById(id: string) {
 }
 
 export async function getDocuments() {
-  noStore();
-
-  const supabase = getSupabaseAdminClient() || getSupabasePublicClient();
-  if (!supabase) {
+  if (!(getSupabaseAdminClient() || getSupabasePublicClient())) {
     return mockDocuments.map(enrichMockDocument);
   }
 
-  const { data, error } = await fetchDocumentRows(supabase);
-
-  if (error) {
+  try {
+    const rows = await loadDocumentRows();
+    return rows ? rows.map(mapDocument) : mockDocuments.map(enrichMockDocument);
+  } catch (error) {
     return mockOrFail("getDocuments", error, mockDocuments.map(enrichMockDocument));
   }
-
-  return data.map((row) => mapDocument(row as DocumentRow));
 }
 
 function isMissingFeaturedDocumentsTable(message?: string) {
@@ -719,26 +702,8 @@ export async function getDocumentsByCommune(communeId: string) {
 }
 
 export async function getDocumentBySlug(slug: string) {
-  noStore();
-
-  const supabase = getSupabaseAdminClient() || getSupabasePublicClient();
-  if (!supabase) {
-    const document = mockDocuments.find((item) => item.slug === slug);
-    return document ? enrichMockDocument(document) : undefined;
-  }
-
-  const { data, error } = await withRetry(() => fetchDocumentRowBySlug(supabase, slug));
-
-  if (error || !data) {
-    if (isSupabaseConfigured && !error) {
-      return undefined;
-    }
-
-    const document = mockDocuments.find((item) => item.slug === slug);
-    return mockOrFail("getDocumentBySlug", error, document ? enrichMockDocument(document) : undefined);
-  }
-
-  return mapDocument(data as DocumentRow);
+  const documents = await getDocuments();
+  return documents.find((document) => document.slug === slug);
 }
 
 export function usingMockData() {

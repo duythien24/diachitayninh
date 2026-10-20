@@ -5,12 +5,12 @@ import { BookMarked, BookOpen, CalendarDays, Files, Newspaper, Search } from "lu
 import { DocumentCoverImage } from "@/components/document-cover-image";
 import { DocumentCard } from "@/components/document-card";
 import { getPopularDocumentIds } from "@/lib/document-analytics";
+import { documentsForCollection, getCollectionBySlug } from "@/lib/document-collections";
 import { getCommunes, getDocuments, getFeaturedDocuments } from "@/lib/repository";
 import { normalizeVietnamese } from "@/lib/utils";
 
 const heroImage = "/images/nui-ba-den-may-phu.jpg";
 const mapImage = "/images/maps/tay-ninh-moi-2025.jpg";
-const documentListPageSize = 24;
 
 const heroBooks = [
   { src: "/thuvien-covers/dat-nuoc-con-nguoi-tay-ninh-17786-940442ab-36d1-4d14-9931-666c221a7a88.jpg", rotate: -9, position: "left-0" },
@@ -45,7 +45,7 @@ const archives = [
   }
 ] as const;
 
-// Terms checked against the live catalogue (Oct 2026) so each chip returns results.
+// Suggested searches; each is shown only while it matches at least one document.
 const quickSearches = [
   { href: "/tai-lieu?q=kh%C3%A1ng%20chi%E1%BA%BFn", label: "Kháng chiến" },
   { href: "/tai-lieu?q=di%20t%C3%ADch", label: "Di tích" },
@@ -56,19 +56,19 @@ const quickSearches = [
 
 const readingPaths = [
   {
-    href: "/tai-lieu?q=di%20tich",
+    collection: "nui-ba-den",
     eyebrow: "Biểu tượng Tây Ninh",
     title: "Núi Bà Đen và vùng đất linh thiêng",
     description: "Cảnh quan, di tích và tư liệu gắn với biểu tượng quen thuộc nhất của Tây Ninh."
   },
   {
-    href: "/tai-lieu?q=lich%20su",
+    collection: "lich-su-khang-chien",
     eyebrow: "Lịch sử kháng chiến",
     title: "Căn cứ, chiến thắng và ký ức địa phương",
     description: "Căn cứ địa, lực lượng vũ trang, truyền thống cách mạng và những mốc son lịch sử."
   },
   {
-    href: "/tai-lieu?q=van%20hoa",
+    collection: "van-hoa-doi-song",
     eyebrow: "Văn hóa bản địa",
     title: "Cao Đài, làng nghề và đời sống văn hóa",
     description: "Tín ngưỡng, sinh hoạt cộng đồng và ký ức đời sống trong tư liệu số."
@@ -87,20 +87,6 @@ function documentSearchText(document: Awaited<ReturnType<typeof getDocuments>>[n
       document.communes?.map((commune) => commune.name).join(" ") || ""
     ].join(" ")
   );
-}
-
-function searchQueryFromHref(href: string) {
-  const [, queryString = ""] = href.split("?");
-  return new URLSearchParams(queryString).get("q") || "";
-}
-
-function hrefWithEnoughResults(href: string, count: number) {
-  if (count <= documentListPageSize) {
-    return href;
-  }
-
-  const separator = href.includes("?") ? "&" : "?";
-  return `${href}${separator}page=${Math.ceil(count / documentListPageSize)}`;
 }
 
 function countLabel(count: number) {
@@ -147,12 +133,13 @@ export default async function HomePage() {
   const highlightSource = featuredDocuments.length > 0 ? "featured" : popularDocuments.length >= 2 ? "popular" : "latest";
   const highlightedDocuments = highlightSource === "featured" ? featuredDocuments : highlightSource === "popular" ? popularDocuments : latestDocuments;
   const documentsWithSearchText = documents.map((document) => ({ document, searchText: documentSearchText(document) }));
+  // Reading paths open the matching collection page, so the count shown is exactly what the reader gets.
   const pathsWithCounts = readingPaths.map((path) => {
-    const count = documentsWithSearchText.filter((item) => item.searchText.includes(normalizeVietnamese(searchQueryFromHref(path.href)))).length;
+    const collection = getCollectionBySlug(path.collection);
     return {
       ...path,
-      href: hrefWithEnoughResults(path.href, count),
-      count
+      href: `/bo-suu-tap/${path.collection}`,
+      count: collection ? documentsForCollection(collection, documents).length : 0
     };
   });
   const featuredDocument =
@@ -179,6 +166,11 @@ export default async function HomePage() {
     .filter((commune) => commune.documentCount > 0)
     .sort((left, right) => right.documentCount - left.documentCount || left.name.localeCompare(right.name, "vi"))
     .slice(0, 6);
+
+  const visibleQuickSearches = quickSearches.filter((item) => {
+    const term = normalizeVietnamese(new URLSearchParams(item.href.split("?")[1]).get("q") || "");
+    return documentsWithSearchText.some((entry) => entry.searchText.includes(term));
+  });
 
   const heroStats = [
     { value: documents.length, label: "tài liệu số" },
@@ -225,7 +217,7 @@ export default async function HomePage() {
             </form>
             <div className="mt-4 flex max-w-2xl animate-fade-up flex-wrap items-center gap-x-1 gap-y-2 text-sm [animation-delay:300ms]">
               <span className="mr-2 text-white/60">Gợi ý:</span>
-              {quickSearches.map((item) => (
+              {visibleQuickSearches.map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}

@@ -164,11 +164,12 @@ export default async function CommuneDetailPage({ params }: { params: Promise<{ 
     { label: "Báo Tây Ninh", value: documentTypeCount(relatedDocuments, "bao_tay_ninh"), icon: Newspaper },
     { label: "Giai đoạn tư liệu", value: yearRange(relatedDocuments), icon: CalendarDays }
   ];
+  // Only offer shortcuts that lead to at least one document.
   const quickLinks = [
-    { label: "Tất cả tài liệu của địa phương", href: `/tai-lieu?xa=${commune.id}` },
-    { label: "Chỉ xem tài liệu địa chí", href: `/tai-lieu?loai=dia_chi&xa=${commune.id}` },
-    { label: "Chỉ xem Báo Tây Ninh", href: `/tai-lieu?loai=bao_tay_ninh&xa=${commune.id}` }
-  ];
+    { label: "Tất cả tài liệu của địa phương", href: `/tai-lieu?xa=${commune.id}`, count: relatedDocuments.length },
+    { label: "Chỉ xem tài liệu địa chí", href: `/tai-lieu?loai=dia_chi&xa=${commune.id}`, count: documentTypeCount(relatedDocuments, "dia_chi") },
+    { label: "Chỉ xem Báo Tây Ninh", href: `/tai-lieu?loai=bao_tay_ninh&xa=${commune.id}`, count: documentTypeCount(relatedDocuments, "bao_tay_ninh") }
+  ].filter((item) => item.count > 0);
   const documentGroups = [
     {
       type: "dia_chi" as const,
@@ -268,13 +269,18 @@ export default async function CommuneDetailPage({ params }: { params: Promise<{ 
           <div className="rounded border border-ink/10 bg-white p-5 shadow-sm">
             <p className="text-sm font-semibold text-lacquer">Tra cứu nhanh</p>
             <div className="mt-4 space-y-2">
+              {quickLinks.length ? null : (
+                <p className="text-sm leading-6 text-ink/62">Địa phương này chưa có tài liệu. Thư viện đang bổ sung theo từng đợt.</p>
+              )}
               {quickLinks.map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}
                   className="flex min-h-11 items-center justify-between gap-3 rounded border border-ink/10 px-3 py-2 text-sm font-semibold text-ink transition hover:border-palm/30 hover:bg-paper"
                 >
-                  {item.label}
+                  <span>
+                    {item.label} <span className="font-normal text-ink/50">({item.count})</span>
+                  </span>
                   <FileText className="h-4 w-4 shrink-0 text-palm" aria-hidden="true" />
                 </Link>
               ))}
@@ -323,13 +329,15 @@ export default async function CommuneDetailPage({ params }: { params: Promise<{ 
                   ? "Thứ tự được tổng hợp từ lượt xem chi tiết và lượt mở đọc trong 180 ngày gần nhất."
                   : "Kho chưa có đủ lượt đọc để xếp hạng, vì vậy các tài liệu mới và có metadata đầy đủ được đưa lên trước."}
               </p>
-              <Link
-                href={`/tai-lieu?xa=${commune.id}`}
-                className="mt-6 inline-flex min-h-11 items-center gap-2 rounded bg-brass px-4 py-3 text-sm font-semibold text-ink transition hover:bg-brass/90"
-              >
-                Mở toàn bộ kho địa phương
-                <ArrowRight className="h-4 w-4" aria-hidden="true" />
-              </Link>
+              {relatedDocuments.length ? (
+                <Link
+                  href={`/tai-lieu?xa=${commune.id}`}
+                  className="mt-6 inline-flex min-h-11 items-center gap-2 rounded bg-brass px-4 py-3 text-sm font-semibold text-ink transition hover:bg-brass/90"
+                >
+                  Mở toàn bộ kho địa phương
+                  <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                </Link>
+              ) : null}
             </div>
 
             <div className="grid border-t border-white/10 sm:grid-cols-2 lg:border-l lg:border-t-0">
@@ -397,12 +405,14 @@ export default async function CommuneDetailPage({ params }: { params: Promise<{ 
             <p className="text-sm font-semibold text-lacquer">Theo nhóm tư liệu</p>
             <h2 className="mt-2 text-2xl font-semibold text-ink">Cấu trúc tài liệu của {commune.name}</h2>
           </div>
-          <Link
-            href={`/tai-lieu?xa=${commune.id}`}
-            className="inline-flex min-h-10 items-center rounded border border-ink/10 px-3 py-2 text-sm font-semibold text-ink transition hover:bg-white"
-          >
-            Xem tất cả
-          </Link>
+          {relatedDocuments.length ? (
+            <Link
+              href={`/tai-lieu?xa=${commune.id}`}
+              className="inline-flex min-h-10 items-center rounded border border-ink/10 px-3 py-2 text-sm font-semibold text-ink transition hover:bg-white"
+            >
+              Xem tất cả
+            </Link>
+          ) : null}
         </div>
 
         <div className="grid gap-5 lg:grid-cols-3">
@@ -445,12 +455,14 @@ export default async function CommuneDetailPage({ params }: { params: Promise<{ 
                   </p>
                 )}
 
-                <Link
-                  href={group.href}
-                  className="mt-auto inline-flex min-h-10 items-center justify-center rounded border border-ink/10 px-3 py-2 text-sm font-semibold text-ink transition hover:bg-paper"
-                >
-                  Mở nhóm tài liệu
-                </Link>
+                {group.count > 0 ? (
+                  <Link
+                    href={group.href}
+                    className="mt-auto inline-flex min-h-10 items-center justify-center rounded border border-ink/10 px-3 py-2 text-sm font-semibold text-ink transition hover:bg-paper"
+                  >
+                    Mở nhóm tài liệu
+                  </Link>
+                ) : null}
               </article>
             );
           })}
@@ -488,12 +500,14 @@ export default async function CommuneDetailPage({ params }: { params: Promise<{ 
             <FileText className="h-5 w-5 text-lacquer" aria-hidden="true" />
             <h2 className="text-2xl font-semibold text-ink">Tài liệu liên quan</h2>
           </div>
-          <Link
-            href={`/tai-lieu?xa=${commune.id}`}
-            className="inline-flex min-h-10 items-center rounded border border-ink/10 px-3 py-2 text-sm font-semibold text-ink transition hover:bg-white"
-          >
-            Xem toàn bộ trong kho tài liệu
-          </Link>
+          {relatedDocuments.length ? (
+            <Link
+              href={`/tai-lieu?xa=${commune.id}`}
+              className="inline-flex min-h-10 items-center rounded border border-ink/10 px-3 py-2 text-sm font-semibold text-ink transition hover:bg-white"
+            >
+              Xem toàn bộ trong kho tài liệu
+            </Link>
+          ) : null}
         </div>
 
         {featuredDocuments.length > 0 ? (
