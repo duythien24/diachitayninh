@@ -13,11 +13,15 @@ import { normalizeVietnamese } from "@/lib/utils";
 const heroImage = "/images/nui-ba-den-may-phu.jpg";
 const mapImage = "/images/maps/tay-ninh-moi-2025.jpg";
 
+// The two gazetteers stand side by side in front; two other local titles peek out behind them.
 const heroBooks = [
-  { src: "/thuvien-covers/dat-nuoc-con-nguoi-tay-ninh-17786-940442ab-36d1-4d14-9931-666c221a7a88.jpg", rotate: -9, position: "left-0" },
-  { src: "/thuvien-covers/dia-chi-tay-ninh-17791-972e8907-bfd1-4143-9669-49ea874a05eb.jpg", rotate: 0, position: "left-1/2 z-10 -ml-[88px]" },
-  { src: "/thuvien-covers/di-tich-lich-su-van-hoa-danh-lam-thang-canh-tinh-tay-ninh-19903-bff761a8-f379-44f5-9952-d8.jpg", rotate: 9, position: "right-0" }
+  { src: "/thuvien-covers/dat-nuoc-con-nguoi-tay-ninh-17786-940442ab-36d1-4d14-9931-666c221a7a88.jpg", rotate: -12, place: "left-0 w-[150px] opacity-90" },
+  { src: "/thuvien-covers/di-tich-lich-su-van-hoa-danh-lam-thang-canh-tinh-tay-ninh-19903-bff761a8-f379-44f5-9952-d8.jpg", rotate: 12, place: "right-0 w-[150px] opacity-90" },
+  { src: "/thuvien-covers/dia-chi-tay-ninh-17791-972e8907-bfd1-4143-9669-49ea874a05eb.jpg", rotate: -4, place: "left-[58px] z-10 w-[186px]", alt: "Địa chí Tây Ninh" },
+  { src: "/thuvien-covers/dia-chi-long-an-1989.jpg", rotate: 4, place: "right-[58px] z-20 w-[186px]", alt: "Địa chí Long An" }
 ];
+
+const tayNinhCover = "/thuvien-covers/dia-chi-tay-ninh-17791-972e8907-bfd1-4143-9669-49ea874a05eb.jpg";
 
 const archives = [
   {
@@ -220,16 +224,16 @@ export default async function HomePage() {
             ) : null}
           </div>
 
-          <div className="relative mx-auto hidden h-[400px] w-[360px] animate-fade-up [animation-delay:300ms] lg:block" aria-hidden="true">
+          <div className="relative mx-auto hidden h-[420px] w-[480px] animate-fade-up [animation-delay:300ms] xl:block" aria-hidden="true">
             <div className="absolute inset-x-6 bottom-6 h-10 rounded-[50%] bg-black/50 blur-2xl" />
-            {heroBooks.map((book, index) => (
+            {heroBooks.map((book) => (
               <div
                 key={book.src}
-                className={`absolute top-1/2 w-[176px] ${book.position}`}
+                className={`absolute top-1/2 ${book.place}`}
                 style={{ transform: `translateY(-50%) rotate(${book.rotate}deg)` }}
               >
-                <div className={`relative aspect-[2/3] overflow-hidden rounded-sm border-[3px] border-[#f6e3b0] bg-sand shadow-book ${index === 1 ? "animate-float" : ""}`}>
-                  <Image src={book.src} alt="" fill sizes="176px" className="object-cover" />
+                <div className="relative aspect-[2/3] overflow-hidden rounded-sm border-[3px] border-[#f6e3b0] bg-sand shadow-book">
+                  <Image src={book.src} alt="" fill sizes="190px" className="object-cover object-top" />
                 </div>
               </div>
             ))}
@@ -257,7 +261,7 @@ export default async function HomePage() {
         <GoldFrame>
           <div className="grid items-center gap-8 md:grid-cols-[220px_1fr]">
             <div className="relative mx-auto aspect-[2/3] w-44 overflow-hidden rounded-sm border-[3px] border-brass/60 shadow-book md:w-full">
-              <Image src={heroBooks[1].src} alt="Bìa sách Địa chí Tây Ninh" fill sizes="220px" className="object-cover" />
+              <Image src={tayNinhCover} alt="Bìa sách Địa chí Tây Ninh" fill sizes="220px" className="object-cover" />
             </div>
             <div>
               <h3 className="font-serif text-2xl font-semibold uppercase text-palm">Kho địa chí số của Thư viện tỉnh Tây Ninh</h3>
