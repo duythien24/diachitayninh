@@ -89,3 +89,111 @@ export async function renderPdfCover(file: File) {
   if (!blob) throw new Error("Không tạo được ảnh bìa từ PDF.");
   return new File([blob], file.name.replace(/\.pdf$/i, "") + "-bia.jpg", { type: "image/jpeg" });
 }
+
+/**
+ * Text from the first pages: the PDF's own text layer when it has one, otherwise OCR (Vietnamese) of the page images.
+ * Scanned books usually have no text layer, so OCR is the common path; it downloads the Vietnamese model on first use.
+ */
+export async function readFirstPagesText(file: File, pageLimit = 3, onProgress?: (message: string) => void) {
+  const pdfjs = await loadPdfJs();
+  const pdf = await pdfjs.getDocument({ data: new Uint8Array(await file.arrayBuffer()) }).promise;
+  const pages = Math.min(pageLimit, pdf.numPages);
+  const texts: string[] = [];
+
+  for (let number = 1; number <= pages; number++) {
+    const page = await pdf.getPage(number);
+    const content = await page.getTextContent();
+    texts.push(content.items.map((item) => ("str" in item ? item.str : "")).join(" "));
+  }
+
+  if (texts.join("").replace(/\s/g, "").length >= 40) {
+    await pdf.destroy();
+    return texts.join("\f");
+  }
+
+  onProgress?.("Trang đầu là ảnh scan, đang nhận dạng chữ (lần đầu cần tải bộ chữ tiếng Việt)...");
+  const { createWorker } = await import("tesseract.js");
+  const worker = await createWorker("vie");
+  const ocrTexts: string[] = [];
+
+  try {
+    for (let number = 1; number <= pages; number++) {
+      onProgress?.(`Đang nhận dạng chữ trang ${number}/${pages}...`);
+      const page = await pdf.getPage(number);
+      const base = page.getViewport({ scale: 1 });
+      const viewport = page.getViewport({ scale: Math.min(2.5, 1600 / base.width) });
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.round(viewport.width);
+      canvas.height = Math.round(viewport.height);
+      const context = canvas.getContext("2d");
+      if (!context) continue;
+      await page.render({ canvasContext: context, viewport }).promise;
+      const result = await worker.recognize(canvas);
+      ocrTexts.push(result.data.text);
+    }
+  } finally {
+    await worker.terminate();
+    await pdf.destroy();
+  }
+
+  return ocrTexts.join("\f");
+}
+
+export type GuessedDetails = { year?: number; publisher?: string; author?: string };
+
+/** "BÙI-QUANG-TUNG" → "Bùi Quang Tung": old prints hyphenate syllables and set names in capitals. */
+function tidyName(value: string) {
+  return value
+    .replace(/[-–]/g, " ")
+    .replace(/[^\p{L}\s.]/gu, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .toLocaleLowerCase("vi")
+    .replace(/(^|\s)(\p{L})/gu, (match) => match.toLocaleUpperCase("vi"));
+}
+
+const creditLine = /(kh[ảa]o|bi[êe]n|t[áa]c)[-\s]?(so[ạa]n|gi[ảa]|d[ịi]ch)|ch[ủu][-\s]?bi[êe]n/i;
+
+/**
+ * Best-effort guesses from title-page text (pages separated by form feeds); the admin always reviews them.
+ * Only page 1 is trusted for the year, because later pages quote historical dates.
+ */
+export function guessBookDetails(text: string): GuessedDetails {
+  const pages = text.split("\f");
+  const linesOf = (pageText: string) =>
+    pageText
+      .split(/\n+/)
+      .map((line) => line.replace(/\s+/g, " ").trim())
+      .filter((line) => line.length > 2);
+  const firstLines = linesOf(pages[0] || "");
+  const allLines = pages.flatMap(linesOf);
+  const thisYear = new Date().getFullYear();
+
+  const years = [...(pages[0] || "").matchAll(/\b(1[89]\d{2}|20\d{2})\b/g)]
+    .map((match) => Number(match[1]))
+    .filter((year) => year <= thisYear);
+
+  let publisher: string | undefined;
+  for (const line of allLines) {
+    const named = line.match(/(?:nh[àa][-\s]xu[ấa]t[-\s]b[ảa]n|NXB)\s*[:.]?\s*(.+)/i);
+    const by = line.match(/(?:^|\s)do\s+(.+?)\s+xu[ấa]t[-\s]b[ảa]n/i);
+    const found = named?.[1] || by?.[1];
+    if (found) {
+      publisher = tidyName(found.replace(/\s+(t[ạa]i|n[ăa]m)\s.*$/i, ""));
+      break;
+    }
+  }
+
+  let author: string | undefined;
+  for (const [index, line] of firstLines.entries()) {
+    if (!creditLine.test(line)) continue;
+    const inline = line.replace(creditLine, "").replace(/^[\s:.‹›-]+/, "").trim();
+    const candidate = inline.length > 4 ? inline : firstLines[index - 1];
+    if (candidate && candidate.length < 60) {
+      author = tidyName(candidate);
+      break;
+    }
+  }
+
+  return { year: years.length ? Math.max(...years) : undefined, publisher: publisher || undefined, author: author || undefined };
+}

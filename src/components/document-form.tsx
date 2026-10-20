@@ -1,12 +1,13 @@
 "use client";
 
-import { Plus, Save, Search, Upload, X } from "lucide-react";
+import { LibraryBig, FileText, Plus, Save, Search, Upload, X } from "lucide-react";
 import { FormEvent, useMemo, useRef, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
 
 import { createDocumentAction, updateDocumentAction } from "@/app/admin/documents/actions";
 import type { Commune, Document, DocumentType } from "@/lib/types";
-import { getPdfPageCount, makePreviewPdf, previewWatermark, renderPdfCover } from "@/lib/pdf-tools";
+import type { CatalogMatch } from "@/lib/library-catalog";
+import { getPdfPageCount, guessBookDetails, makePreviewPdf, previewWatermark, readFirstPagesText, renderPdfCover } from "@/lib/pdf-tools";
 import { normalizeVietnamese, typePrefix } from "@/lib/utils";
 
 type SignedUpload = {
@@ -134,6 +135,77 @@ export function DocumentForm({ communes, document }: { communes: Commune[]; docu
     () => (canAttachCommunesFor(selectedDocumentType) ? suggestCommunes(titleText, communes).filter((commune) => !selectedCommuneIds.includes(commune.id)) : []),
     [communes, selectedCommuneIds, selectedDocumentType, titleText]
   );
+
+  const [catalogMatches, setCatalogMatches] = useState<CatalogMatch[] | null>(null);
+  const [autofillBusy, setAutofillBusy] = useState<string | null>(null);
+  const [autofillNote, setAutofillNote] = useState<string | null>(null);
+  const [pdfText, setPdfText] = useState<string | null>(null);
+
+  /** Writes a value into a named field. With onlyIfEmpty, leaves what the admin already typed (the year's default counts as empty). */
+  function setField(name: string, value: string | number | undefined, onlyIfEmpty = false) {
+    const field = formRef.current?.elements.namedItem(name) as HTMLInputElement | HTMLTextAreaElement | null;
+    if (!field || value === undefined || value === "") return false;
+    const isDefaultYear = name === "year" && field.value === String(new Date().getFullYear()) && !document;
+    if (onlyIfEmpty && field.value.trim() && !isDefaultYear) return false;
+    field.value = String(value);
+    if (name === "title") setTitleText(String(value));
+    return true;
+  }
+
+  async function lookUpCatalog() {
+    setAutofillBusy("Đang tra kho số của Thư viện tỉnh...");
+    setAutofillNote(null);
+    setCatalogMatches(null);
+    try {
+      const response = await fetch(`/admin/catalog-lookup?q=${encodeURIComponent(titleText.trim())}`);
+      const payload = (await response.json()) as { matches?: CatalogMatch[]; error?: string };
+      if (!response.ok) throw new Error(payload.error || "Không tra được kho số.");
+      setCatalogMatches(payload.matches || []);
+    } catch (error) {
+      setAutofillNote(error instanceof Error ? error.message : "Không tra được kho số.");
+    } finally {
+      setAutofillBusy(null);
+    }
+  }
+
+  function applyCatalogMatch(match: CatalogMatch) {
+    const filled = [
+      setField("author", match.author) && "tác giả",
+      setField("publisher", match.publisher) && "nhà xuất bản",
+      setField("year", match.year) && "năm",
+      setField("page_count", match.pageCount) && "số trang",
+      setField("keywords", match.subjects.join(", ")) && "từ khóa",
+      setField("description", match.description, true) && "mô tả"
+    ].filter(Boolean);
+    setCatalogMatches(null);
+    setAutofillNote(filled.length ? `Đã điền ${filled.join(", ")} từ kho số. Bạn kiểm tra lại trước khi lưu.` : "Bản ghi trong kho số không có thêm thông tin để điền.");
+  }
+
+  async function readPdfDetails() {
+    const file = previewInputRef.current?.files?.[0];
+    if (!file) return;
+    setAutofillNote(null);
+    setAutofillBusy("Đang đọc chữ ở các trang đầu...");
+    try {
+      const text = await readFirstPagesText(file, 3, setAutofillBusy);
+      setPdfText(text);
+      const guess = guessBookDetails(text);
+      const filled = [
+        setField("year", guess.year, true) && `năm ${guess.year}`,
+        setField("publisher", guess.publisher, true) && "nhà xuất bản",
+        setField("author", guess.author, true) && "tác giả"
+      ].filter(Boolean);
+      setAutofillNote(
+        filled.length
+          ? `Đã gợi ý ${filled.join(", ")} từ trang đầu PDF. Chữ nhận dạng có thể sai, bạn kiểm tra lại.`
+          : "Không tìm thấy năm, nhà xuất bản hay tác giả trong trang đầu. Xem chữ đã đọc được bên dưới để tự điền."
+      );
+    } catch (error) {
+      setAutofillNote(error instanceof Error ? `Không đọc được chữ: ${error.message}` : "Không đọc được chữ trong PDF.");
+    } finally {
+      setAutofillBusy(null);
+    }
+  }
 
   async function handlePdfSelected(file: File | undefined) {
     generatedCoverRef.current = null;
@@ -281,6 +353,66 @@ export function DocumentForm({ communes, document }: { communes: Commune[]; docu
             placeholder="dia-chi-xa-tan-bien"
           />
         </label>
+      </div>
+
+      <div className="rounded-lg border border-palm/20 bg-palm/5 p-4">
+        <p className="text-sm font-semibold text-ink">Tự điền thông tin sách</p>
+        <p className="mt-1 text-xs leading-5 text-ink/60">
+          Gõ tên sách rồi tra kho số của Thư viện tỉnh, hoặc chọn file PDF bên dưới rồi để máy đọc trang bìa lót. Thông tin chỉ được điền vào ô, chưa lưu.
+        </p>
+        <div className="mt-3 flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={lookUpCatalog}
+            disabled={Boolean(autofillBusy) || titleText.trim().length < 3}
+            className="inline-flex min-h-10 items-center gap-2 rounded-full bg-palm px-4 text-sm font-semibold text-white transition hover:bg-palm/90 disabled:cursor-not-allowed disabled:bg-palm/40"
+          >
+            <LibraryBig className="h-4 w-4" aria-hidden="true" />
+            Tra kho số Thư viện
+          </button>
+          <button
+            type="button"
+            onClick={readPdfDetails}
+            disabled={Boolean(autofillBusy) || !pdfInfo}
+            className="inline-flex min-h-10 items-center gap-2 rounded-full border border-palm/30 bg-white px-4 text-sm font-semibold text-palm transition hover:bg-palm/10 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            <FileText className="h-4 w-4" aria-hidden="true" />
+            Đọc trang đầu PDF
+          </button>
+        </div>
+        {autofillBusy ? <p className="mt-3 text-sm text-palm">{autofillBusy}</p> : null}
+        {autofillNote ? <p className="mt-3 text-sm text-ink/70">{autofillNote}</p> : null}
+        {catalogMatches ? (
+          catalogMatches.length ? (
+            <ul className="mt-3 divide-y divide-ink/10 rounded border border-ink/10 bg-white">
+              {catalogMatches.map((match) => (
+                <li key={match.fileId} className="flex flex-wrap items-center justify-between gap-3 p-3 text-sm">
+                  <span>
+                    <span className="block font-semibold text-ink">{match.title}</span>
+                    <span className="block text-xs text-ink/60">
+                      {[match.author, match.publisher, match.year, match.pageCount ? `${match.pageCount} trang` : ""].filter(Boolean).join(", ") || "Ít thông tin"}
+                    </span>
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => applyCatalogMatch(match)}
+                    className="rounded-full border border-palm/30 px-3 py-1.5 text-xs font-semibold text-palm transition hover:bg-palm/10"
+                  >
+                    Dùng thông tin này
+                  </button>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="mt-3 text-sm text-ink/70">Kho số chưa có sách này. Bạn có thể chọn file PDF rồi bấm “Đọc trang đầu PDF”.</p>
+          )
+        ) : null}
+        {pdfText ? (
+          <details className="mt-3 text-xs text-ink/70">
+            <summary className="cursor-pointer font-semibold text-ink">Chữ đọc được từ trang đầu</summary>
+            <pre className="mt-2 max-h-48 overflow-auto whitespace-pre-wrap rounded bg-white p-3 font-sans">{pdfText}</pre>
+          </details>
+        ) : null}
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">
