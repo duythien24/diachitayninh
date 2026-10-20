@@ -22,6 +22,7 @@ export function DocumentCoverImage({ src, alt = "", fill, sizes, className, prio
       sizes={sizes}
       className={className}
       priority={priority}
+      quality={85}
       unoptimized={isTayNinhLibraryUrl(src)}
     />
   );
