@@ -31,7 +31,9 @@ export const metadata: Metadata = {
     type: "website",
     images: [{ url: "/images/nui-ba-den-may-phu.jpg", alt: "Núi Bà Đen mây phủ" }]
   },
-  twitter: { card: "summary_large_image" }
+  twitter: { card: "summary_large_image" },
+  // Google Search Console ownership (property https://diachitayninh.vercel.app/).
+  verification: { google: "8GNC34dL2qyH5cvoPn6vllRXuyfVRbycVbDQOoPwv04" }
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
