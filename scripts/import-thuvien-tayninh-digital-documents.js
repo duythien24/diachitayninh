@@ -86,13 +86,11 @@ function parsePageCount(value) {
   return match ? Number(match[0]) : null;
 }
 
+// Only the catalogue's publication date is trusted. Years in the title are usually the period covered
+// ("1945-1975") and CREATED is the upload date, both of which put books on the wrong year.
 function parseYear(document) {
-  const fields = [document.DATEPUBLISHER, document.TITLE, document.SUBJECT, document.DESCRIPTION, document.CREATED];
-  for (const field of fields) {
-    const match = String(field || "").match(/\b(18|19|20)\d{2}\b/);
-    if (match) return Number(match[0]);
-  }
-  return document.CREATED ? new Date(document.CREATED).getFullYear() : new Date().getFullYear();
+  const match = String(document.DATEPUBLISHER || "").match(/\b(18|19|20)\d{2}\b/);
+  return match ? Number(match[0]) : null;
 }
 
 function keywords(document) {

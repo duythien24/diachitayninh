@@ -101,7 +101,7 @@ export default async function DocumentDetailPage({ params }: { params: Promise<{
           </div>
           <div className="mt-6 flex flex-wrap gap-2 text-xs font-semibold">
             <span className="rounded bg-paper px-2.5 py-1 text-ink/70">{documentTypeLabel(document.documentType)}</span>
-            <span className="rounded bg-paper px-2.5 py-1 text-ink/70">{document.year}</span>
+            {document.year ? <span className="rounded bg-paper px-2.5 py-1 text-ink/70">{document.year}</span> : null}
             {communes.length ? (
               communes.map((item) => (
                 <span key={item.id} className="rounded bg-paper px-2.5 py-1 text-ink/70">

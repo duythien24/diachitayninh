@@ -113,7 +113,7 @@ export default async function PdfReaderPage({ params }: { params: Promise<{ slug
                 <CalendarDays className="mt-0.5 h-4 w-4 shrink-0 text-palm" aria-hidden="true" />
                 <div>
                   <dt className="font-semibold text-ink">Năm xuất bản</dt>
-                  <dd className="mt-1 text-ink/68">{document.year}</dd>
+                  <dd className="mt-1 text-ink/68">{document.year || "Chưa rõ"}</dd>
                 </div>
               </div>
               <div className="flex gap-3">

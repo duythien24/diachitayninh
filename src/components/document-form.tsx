@@ -439,7 +439,8 @@ export function DocumentForm({ communes, document }: { communes: Commune[]; docu
           Năm xuất bản
           <input
             name="year"
-            defaultValue={document?.year || new Date().getFullYear()}
+            defaultValue={document?.year || ""}
+            placeholder="Ví dụ 2006"
             type="number"
             className="rounded border border-ink/12 px-3 py-2.5 font-normal outline-none transition focus:border-palm"
           />

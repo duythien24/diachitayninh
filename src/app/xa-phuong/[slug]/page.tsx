@@ -353,7 +353,7 @@ export default async function CommuneDetailPage({ params }: { params: Promise<{ 
                   >
                     <span className="flex items-center justify-between gap-3 text-xs font-semibold text-brass">
                       <span>Gợi ý {index + 1}</span>
-                      <span>{document.year}</span>
+                      <span>{document.year || ""}</span>
                     </span>
                     <span className="mt-4 line-clamp-2 text-lg font-semibold leading-7 text-white group-hover:text-brass">{document.title}</span>
                     <span className="mt-3 line-clamp-2 text-sm leading-6 text-white/60">{document.description}</span>
@@ -447,7 +447,7 @@ export default async function CommuneDetailPage({ params }: { params: Promise<{ 
                         className="block rounded border border-ink/8 bg-paper/60 px-3 py-2 text-sm font-semibold text-ink transition hover:border-palm/25 hover:bg-paper"
                       >
                         <span className="line-clamp-1">{document.title}</span>
-                        <span className="mt-1 block text-xs font-medium text-ink/50">{document.year}</span>
+                        <span className="mt-1 block text-xs font-medium text-ink/50">{document.year || ""}</span>
                       </Link>
                     ))}
                   </div>

@@ -224,7 +224,8 @@ function mapDocument(row: DocumentRow): Document {
     documentType: row.document_type,
     communeId: commune?.id || row.commune_id || undefined,
     communeIds: communes.map((item) => item.id),
-    year: row.year || new Date(row.created_at).getFullYear(),
+    // 0 = publication year unknown; never substitute the upload date, which put books on the wrong year.
+    year: row.year || 0,
     pageCount: row.page_count || undefined,
     previewPageCount: row.preview_page_count || undefined,
     keywords: row.keywords || [],
