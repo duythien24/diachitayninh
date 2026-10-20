@@ -43,11 +43,13 @@ function request(url, options = {}, body) {
         }
       },
       (res) => {
-        let responseBody = "";
+        // Join raw bytes before decoding: adding Buffer chunks to a string split multi-byte Vietnamese
+        // letters at chunk edges and stored "t���nh" instead of "tỉnh".
+        const chunks = [];
         res.on("data", (chunk) => {
-          responseBody += chunk;
+          chunks.push(chunk);
         });
-        res.on("end", () => resolve({ status: res.statusCode, headers: res.headers, body: responseBody }));
+        res.on("end", () => resolve({ status: res.statusCode, headers: res.headers, body: Buffer.concat(chunks).toString("utf8") }));
       }
     );
 

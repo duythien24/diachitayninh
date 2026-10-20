@@ -10,7 +10,6 @@ import {
   FileText,
   HardDrive,
   KeyRound,
-  LogIn,
   LogOut,
   ServerCog,
   UserCircle
@@ -54,16 +53,9 @@ export function AccountMenu({ account }: { account: AccountSession | null }) {
     };
   }, [isOpen]);
 
+  // Readers never sign in; the admin entry lives as a small "Quản trị" link in the footer.
   if (!account) {
-    return (
-      <Link
-        href="/admin/login"
-        className="inline-flex items-center gap-2 rounded px-3 py-2 text-sm font-medium text-ink/70 transition hover:bg-sand/70 hover:text-ink"
-      >
-        <LogIn className="h-4 w-4" aria-hidden="true" />
-        Đăng nhập
-      </Link>
-    );
+    return null;
   }
 
   const links = [

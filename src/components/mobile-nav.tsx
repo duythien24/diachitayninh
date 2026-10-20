@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { BookMarked, Building2, CalendarDays, CircleHelp, FileText, HardDrive, Info, KeyRound, LogIn, LogOut, Menu, ShieldCheck, X } from "lucide-react";
+import { BookMarked, Building2, CalendarDays, CircleHelp, FileText, HardDrive, Info, KeyRound, LogOut, Menu, ShieldCheck, X } from "lucide-react";
 
 import type { AccountSession } from "@/components/account-menu";
 import { ReadingShelfLink } from "@/components/reading-shelf-link";
@@ -97,16 +97,7 @@ export function MobileNav({ account }: { account: AccountSession | null }) {
                   </button>
                 </form>
               </div>
-            ) : (
-              <Link
-                href="/admin/login"
-                onClick={() => setIsOpen(false)}
-                className="flex min-h-12 items-center gap-3 px-4 py-3 text-sm font-semibold text-ink transition hover:bg-paper"
-              >
-                <LogIn className="h-4 w-4 text-ink/55" aria-hidden="true" />
-                Đăng nhập
-              </Link>
-            )}
+            ) : null}
           </nav>
         </div>
       ) : null}
