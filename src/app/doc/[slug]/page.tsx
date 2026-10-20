@@ -51,56 +51,53 @@ export default async function PdfReaderPage({ params }: { params: Promise<{ slug
     <PageShell>
       <DocumentEventTracker documentId={document.id} eventType="pdf_open" />
       <ReadingHistoryTracker documentId={document.id} />
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-        <div>
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div className="min-w-0">
           <Link href={`/tai-lieu/${document.slug}`} className="inline-flex items-center gap-2 text-sm font-semibold text-palm">
             <ArrowLeft className="h-4 w-4" aria-hidden="true" />
             Chi tiết tài liệu
           </Link>
-          <h1 className="mt-3 text-3xl font-semibold leading-tight text-ink">{document.title}</h1>
+          <h1 className="mt-2 text-2xl font-semibold leading-tight text-ink sm:text-3xl">{document.title}</h1>
         </div>
-        <a
-          href={document.previewFileUrl}
-          target="_blank"
-          rel="noreferrer"
-          className="inline-flex min-h-11 items-center gap-2 rounded border border-ink/12 bg-white px-4 py-3 text-sm font-semibold text-ink transition hover:bg-paper"
-        >
-          <ExternalLink className="h-4 w-4" aria-hidden="true" />
-          Mở tab mới
-        </a>
+        <span className="inline-flex items-center gap-2 rounded border border-lacquer/25 bg-paper px-3 py-1.5 text-sm font-semibold text-lacquer">
+          <LockKeyhole className="h-4 w-4" aria-hidden="true" />
+          {isPreview ? `Bản đọc thử${document.previewPageCount ? ` · ${document.previewPageCount} trang đầu` : ""}` : "Bản đầy đủ"}
+        </span>
       </div>
 
-      <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
-        <section className="overflow-hidden rounded border border-ink/10 bg-white shadow-soft">
-          <div className="flex items-center gap-2 border-b border-ink/10 bg-paper px-4 py-3 text-sm font-semibold text-lacquer">
-            <LockKeyhole className="h-4 w-4" aria-hidden="true" />
-            {isPreview ? "Bản đọc thử - Thư viện tỉnh Tây Ninh" : "Bản đầy đủ - Thư viện tỉnh Tây Ninh"}
-          </div>
-          {usesLibraryViewer ? (
-            <div className="flex min-h-[62vh] items-center justify-center bg-paper px-6 py-12">
-              <div className="max-w-xl rounded border border-ink/10 bg-white p-6 text-center shadow-sm">
-                <p className="text-sm font-semibold text-lacquer">Trình đọc của Thư viện tỉnh Tây Ninh</p>
-                <h2 className="mt-3 text-2xl font-semibold text-ink">Mở tài liệu tại kho thư viện</h2>
-                <p className="mt-3 text-sm leading-6 text-ink/68">
-                  Tài liệu này được phục vụ bằng trình đọc riêng của Thư viện tỉnh Tây Ninh. Để tránh lỗi trắng trang khi nhúng chéo website,
-                  hãy mở bằng tab mới.
-                </p>
-                <a
-                  href={document.previewFileUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="mt-5 inline-flex min-h-11 items-center justify-center gap-2 rounded bg-palm px-4 py-3 text-sm font-semibold text-white transition hover:bg-palm/90"
-                >
-                  <ExternalLink className="h-4 w-4" aria-hidden="true" />
-                  Mở bản đọc tại Thư viện
-                </a>
-              </div>
+      <section className="mt-5 overflow-hidden rounded border border-ink/15 shadow-soft">
+        {usesLibraryViewer ? (
+          <div className="flex min-h-[62vh] items-center justify-center bg-paper px-6 py-12">
+            <div className="max-w-xl rounded border border-ink/10 bg-white p-6 text-center shadow-sm">
+              <p className="text-sm font-semibold text-lacquer">Trình đọc của Thư viện tỉnh Tây Ninh</p>
+              <h2 className="mt-3 text-2xl font-semibold text-ink">Mở tài liệu tại kho thư viện</h2>
+              <p className="mt-3 text-sm leading-6 text-ink/68">
+                Tài liệu này được phục vụ bằng trình đọc riêng của Thư viện tỉnh Tây Ninh. Để tránh lỗi trắng trang khi nhúng chéo website,
+                hãy mở bằng tab mới.
+              </p>
+              <a
+                href={document.previewFileUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="mt-5 inline-flex min-h-11 items-center justify-center gap-2 rounded bg-palm px-4 py-3 text-sm font-semibold text-white transition hover:bg-palm/90"
+              >
+                <ExternalLink className="h-4 w-4" aria-hidden="true" />
+                Mở bản đọc tại Thư viện
+              </a>
             </div>
-          ) : (
-            <PdfViewer url={document.previewFileUrl} title={document.title} />
-          )}
-        </section>
-        <aside className="space-y-4">
+          </div>
+        ) : (
+          <PdfViewer
+            url={document.previewFileUrl}
+            title={document.title}
+            badge={isPreview ? "Bản đọc thử" : "Bản đầy đủ"}
+            downloadable={!isPreview}
+          />
+        )}
+      </section>
+
+      <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_380px]">
+        <div>
           <section className="rounded border border-ink/10 bg-white p-5 shadow-soft">
             <p className="text-sm font-semibold text-lacquer">Thông tin tài liệu</p>
             <dl className="mt-4 space-y-4 text-sm">
@@ -188,7 +185,9 @@ export default async function PdfReaderPage({ params }: { params: Promise<{ slug
               </Link>
             </div>
           </section>
+        </div>
 
+        <div>
           {isPreview ? (
             <ContactPanel />
           ) : (
@@ -200,7 +199,7 @@ export default async function PdfReaderPage({ params }: { params: Promise<{ slug
               </p>
             </section>
           )}
-        </aside>
+        </div>
       </div>
     </PageShell>
   );
