@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
 import { CommuneList } from "@/components/commune-list";
+import { CommuneMap } from "@/components/commune-map";
+import { HeritageHeading } from "@/components/ornaments";
+import communePositions from "@/lib/commune-positions.json";
 import { PageShell, SectionHeader } from "@/components/page-shell";
 import { getCommunes, getDocuments } from "@/lib/repository";
 
@@ -38,6 +41,18 @@ export default async function CommunesPage() {
         title="96 xã, phường Tây Ninh"
         description="Danh sách đơn vị hành chính cấp xã sau sắp xếp năm 2025, dùng làm trục chính để gắn tài liệu địa chí và tư liệu báo chí."
       />
+      <section className="mt-12">
+        <HeritageHeading title="Bản đồ xã, phường" description="Bấm vào một điểm trên bản đồ để mở trang tư liệu của xã, phường đó." />
+        <CommuneMap
+          points={sortedCommunes.flatMap((commune) => {
+            const position = (communePositions as Record<string, { lat: number; lon: number }>)[commune.slug];
+            return position
+              ? [{ slug: commune.slug, name: commune.name, typeLabel: commune.type === "phuong" ? "Phường" : "Xã", documentCount: commune.documentCount, ...position }]
+              : [];
+          })}
+        />
+      </section>
+
       <CommuneList communes={sortedCommunes} />
     </PageShell>
   );
