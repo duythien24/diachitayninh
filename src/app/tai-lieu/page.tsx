@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { DocumentList } from "@/components/document-list";
+import { FullTextResults } from "@/components/fulltext-results";
 import { PageShell, SectionHeader } from "@/components/page-shell";
-import { getCommunes, getDocumentFilterOptions, searchDocuments } from "@/lib/repository";
+import { searchFullText } from "@/lib/fulltext";
+import { getCommunes, getDocumentFilterOptions, getDocuments, searchDocuments } from "@/lib/repository";
 import type { DocumentType } from "@/lib/types";
 
 const pageSize = 24;
@@ -80,6 +82,8 @@ export default async function DocumentsPage({
     getDocumentFilterOptions()
   ]);
   const copy = pageCopy(initialFilter);
+  const fullTextHits = initialQuery ? searchFullText(initialQuery) : [];
+  const allDocuments = fullTextHits.length ? await getDocuments() : [];
 
   return (
     <PageShell>
@@ -97,6 +101,7 @@ export default async function DocumentsPage({
         initialAuthor={selectedAuthor}
         initialPublisher={selectedPublisher}
       />
+      {initialQuery ? <FullTextResults query={initialQuery} hits={fullTextHits} documents={allDocuments} /> : null}
     </PageShell>
   );
 }

@@ -28,3 +28,7 @@ Thumbs.db
 
 # vercel
 .vercel/
+.tess-cache
+vie.traineddata
+tsconfig.tsbuildinfo
+.geocode-cache.json

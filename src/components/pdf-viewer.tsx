@@ -154,12 +154,14 @@ export function PdfViewer({
   url,
   title,
   badge,
-  downloadable = false
+  downloadable = false,
+  initialPage = 1
 }: {
   url: string;
   title: string;
   badge?: string;
   downloadable?: boolean;
+  initialPage?: number;
 }) {
   const shellRef = useRef<HTMLDivElement>(null);
   const [scroller, setScroller] = useState<HTMLDivElement | null>(null);
@@ -173,7 +175,7 @@ export function PdfViewer({
   const [customScale, setCustomScale] = useState(1);
   const [spread, setSpread] = useState(false);
   const [showThumbs, setShowThumbs] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(initialPage);
   const [pageInput, setPageInput] = useState("1");
   const [fullscreen, setFullscreen] = useState(false);
   // iPhone Safari has no element full screen; there the reader covers the window instead.
@@ -305,6 +307,19 @@ export function PdfViewer({
     });
     return () => cancelAnimationFrame(frame);
   }, [useSpread, pageWidth, scroller]);
+
+  // Opened from a search result (?trang=N): jump there once the pages are laid out.
+  const jumped = useRef(initialPage <= 1);
+  useEffect(() => {
+    if (jumped.current || !pdf || !area.width || !scroller) return;
+    const frame = requestAnimationFrame(() => {
+      const element = pageElements.current.get(Math.min(initialPage, pdf.numPages));
+      if (!element) return;
+      scroller.scrollTop = element.offsetTop - 16;
+      jumped.current = true;
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [pdf, area.width, scroller, initialPage]);
 
   // Keep the active thumbnail in view.
   useEffect(() => {

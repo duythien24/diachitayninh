@@ -35,8 +35,15 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   };
 }
 
-export default async function PdfReaderPage({ params }: { params: Promise<{ slug: string }> }) {
+export default async function PdfReaderPage({
+  params,
+  searchParams
+}: {
+  params: Promise<{ slug: string }>;
+  searchParams: Promise<{ trang?: string }>;
+}) {
   const { slug } = await params;
+  const initialPage = Math.max(1, Number((await searchParams).trang) || 1);
   const document = await getDocumentBySlug(slug);
 
   if (!document) {
@@ -92,6 +99,7 @@ export default async function PdfReaderPage({ params }: { params: Promise<{ slug
             title={document.title}
             badge={isPreview ? "Bản đọc thử" : "Bản đầy đủ"}
             downloadable={!isPreview}
+            initialPage={initialPage}
           />
         )}
       </section>
