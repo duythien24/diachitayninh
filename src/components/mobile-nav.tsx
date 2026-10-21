@@ -1,10 +1,12 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { BookMarked, Building2, CalendarDays, CircleHelp, FileText, HardDrive, Info, KeyRound, LogOut, Menu, ShieldCheck, X } from "lucide-react";
 
 import type { AccountSession } from "@/components/account-menu";
+import { isActivePath } from "@/components/nav-links";
 import { ReadingShelfLink } from "@/components/reading-shelf-link";
 
 const navLinks = [
@@ -17,6 +19,7 @@ const navLinks = [
 
 export function MobileNav({ account }: { account: AccountSession | null }) {
   const [isOpen, setIsOpen] = useState(false);
+  const pathname = usePathname() || "/";
 
   return (
     <div className="xl:hidden">
@@ -35,14 +38,18 @@ export function MobileNav({ account }: { account: AccountSession | null }) {
           <nav className="divide-y divide-ink/8">
             {navLinks.map((item) => {
               const Icon = item.icon;
+              const active = isActivePath(pathname, item.href);
               return (
                 <Link
                   key={item.href}
                   href={item.href}
                   onClick={() => setIsOpen(false)}
-                  className="flex min-h-12 items-center gap-3 px-4 py-3 text-sm font-semibold text-ink transition hover:bg-paper"
+                  aria-current={active ? "page" : undefined}
+                  className={`flex min-h-12 items-center gap-3 border-l-4 px-4 py-3 text-sm font-semibold transition ${
+                    active ? "border-palm bg-palm/10 text-palm" : "border-transparent text-ink hover:bg-paper"
+                  }`}
                 >
-                  <Icon className="h-4 w-4 text-ink/55" aria-hidden="true" />
+                  <Icon className={`h-4 w-4 ${active ? "text-palm" : "text-ink/55"}`} aria-hidden="true" />
                   {item.label}
                 </Link>
               );

@@ -3,16 +3,9 @@ import Link from "next/link";
 
 import { AccountMenu } from "@/components/account-menu";
 import { MobileNav } from "@/components/mobile-nav";
+import { NavLinks } from "@/components/nav-links";
 import { ReadingShelfLink } from "@/components/reading-shelf-link";
 import { adminRoleLabel, getCurrentAdmin } from "@/lib/admin-users";
-
-const nav = [
-  { href: "/gioi-thieu", label: "Giới thiệu" },
-  { href: "/bo-suu-tap", label: "Bộ sưu tập" },
-  { href: "/dong-thoi-gian", label: "Dòng thời gian" },
-  { href: "/xa-phuong", label: "Xã/phường" },
-  { href: "/tai-lieu", label: "Tài liệu" }
-];
 
 export async function SiteHeader() {
   const currentAdmin = await getCurrentAdmin();
@@ -54,15 +47,7 @@ export async function SiteHeader() {
           </span>
         </Link>
         <nav className="hidden items-center gap-1 xl:flex">
-          {nav.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="rounded px-3 py-2 text-sm font-semibold text-ink/75 transition hover:bg-sand/70 hover:text-palm"
-            >
-              {item.label}
-            </Link>
-          ))}
+          <NavLinks />
           <span className="mx-2 h-5 w-px bg-ink/12" aria-hidden="true" />
           <ReadingShelfLink />
           <AccountMenu account={account} />
