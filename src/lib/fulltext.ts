@@ -25,15 +25,15 @@ function fold(text: string) {
   return out;
 }
 
-let prepared: { slug: string; pages: { text: string; folded: string }[] }[] | null = null;
+let prepared: { slug: string; pages: { text: string; folded: string; lower: string }[] }[] | null = null;
 function documents() {
   if (!prepared) {
     prepared = (index as IndexedDocument[]).map((doc) => ({
       slug: doc.slug,
       // Characters outside the BMP would break the one-to-one mapping; OCR text has none worth keeping.
       pages: doc.pages.map((text) => {
-        const clean = text.replace(/[\uD800-\uDFFF]/g, " ");
-        return { text: clean, folded: fold(clean) };
+        const clean = text.normalize("NFC").replace(/[\uD800-\uDFFF]/g, " ");
+        return { text: clean, folded: fold(clean), lower: clean.toLowerCase() };
       })
     }));
   }
@@ -44,42 +44,65 @@ export function hasFullText(slug: string) {
   return documents().some((doc) => doc.slug === slug);
 }
 
-export function searchFullText(query: string, limit = 12): FullTextHit[] {
-  const words = fold(query)
-    .split(/[^a-z0-9]+/)
-    .filter((word) => word.length >= 2);
-  if (!words.length) return [];
-  const phrase = fold(query).replace(/[^a-z0-9]+/g, " ").trim();
+const escape = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+// Whole words only, so "vo" does not match inside "voi".
+const wordPattern = (word: string) => new RegExp(`(?<![\\p{L}\\p{N}])${escape(word)}(?![\\p{L}\\p{N}])`, "gu");
 
-  const hits: FullTextHit[] = [];
+// Typed with accents: accents must match (Võ is not Vợ). Typed without: any accents match.
+export function searchFullText(query: string, limit = 12): FullTextHit[] {
+  const raw = query.normalize("NFC").toLowerCase().trim();
+  const accented = fold(raw) !== raw;
+  const source = (page: { folded: string; lower: string }) => (accented ? page.lower : page.folded);
+  const base = accented ? raw : fold(raw);
+  const words = base.split(/[^\p{L}\p{N}]+/u).filter((word) => word.length >= 2 || /\p{N}/u.test(word));
+  if (!words.length) return [];
+  const phrase = words.length > 1 ? new RegExp(words.map(escape).join("[^\\p{L}\\p{N}]+"), "gu") : null;
+  const wordRes = words.map(wordPattern);
+
+  type PageHit = { page: number; text: string; haystack: string; phraseAt: number };
+  const found: { slug: string; pages: PageHit[] }[] = [];
+  let anyPhrase = false;
   for (const doc of documents()) {
-    const pages: FullTextHit["pages"] = [];
-    let matchCount = 0;
-    doc.pages.forEach(({ text, folded }, index) => {
-      if (!words.every((word) => folded.includes(word))) return;
-      // Prefer the whole phrase for the snippet; otherwise the first word.
-      const flat = folded.replace(/\s+/g, " ");
-      const phraseHere = phrase.includes(" ") && flat.includes(phrase);
-      matchCount += phraseHere ? 3 : 1;
-      const anchorWord = phraseHere ? phrase.split(" ")[0] : words[0];
-      const at = folded.indexOf(anchorWord);
-      const start = Math.max(0, at - 90);
-      const end = Math.min(text.length, at + 160);
-      const body = text.slice(start, end).replace(/\s+/g, " ").trim();
-      const shown = `${start > 0 ? "…" : ""}${body}${end < text.length ? "…" : ""}`;
-      const foldedShown = fold(shown);
-      const highlights: Array<[number, number]> = [];
-      for (const word of words) {
-        let found = foldedShown.indexOf(word);
-        while (found !== -1) {
-          highlights.push([found, found + word.length]);
-          found = foldedShown.indexOf(word, found + word.length);
-        }
+    const pages: PageHit[] = [];
+    doc.pages.forEach((page, index) => {
+      const haystack = source(page);
+      if (!wordRes.every((re) => { re.lastIndex = 0; return re.test(haystack); })) return;
+      let phraseAt = -1;
+      if (phrase) {
+        phrase.lastIndex = 0;
+        const match = phrase.exec(haystack);
+        if (match) { phraseAt = match.index; anyPhrase = true; }
       }
-      highlights.sort((x, y) => x[0] - y[0]);
-      pages.push({ page: index + 1, snippet: shown, highlights });
+      pages.push({ page: index + 1, text: page.text, haystack, phraseAt });
     });
-    if (pages.length) hits.push({ slug: doc.slug, matchCount: matchCount + pages.length, pages });
+    if (pages.length) found.push({ slug: doc.slug, pages });
+  }
+
+  // When the exact phrase occurs somewhere, show only those pages.
+  const hits: FullTextHit[] = [];
+  for (const doc of found) {
+    const pages = anyPhrase ? doc.pages.filter((page) => page.phraseAt >= 0) : doc.pages;
+    if (!pages.length) continue;
+    hits.push({
+      slug: doc.slug,
+      matchCount: pages.length,
+      pages: pages.map(({ page, text, haystack, phraseAt }) => {
+        wordRes[0].lastIndex = 0;
+        const at = phraseAt >= 0 ? phraseAt : (wordRes[0].exec(haystack)?.index ?? 0);
+        const start = Math.max(0, at - 90);
+        const end = Math.min(text.length, at + 160);
+        const body = text.slice(start, end).replace(/\s+/g, " ").trim();
+        const shown = `${start > 0 ? "…" : ""}${body}${end < text.length ? "…" : ""}`;
+        const shownHay = accented ? shown.toLowerCase() : fold(shown);
+        const highlights: Array<[number, number]> = [];
+        for (const re of wordRes) {
+          re.lastIndex = 0;
+          for (const match of shownHay.matchAll(re)) highlights.push([match.index ?? 0, (match.index ?? 0) + match[0].length]);
+        }
+        highlights.sort((x, y) => x[0] - y[0]);
+        return { page, snippet: shown, highlights };
+      })
+    });
   }
   return hits.sort((a, b) => b.matchCount - a.matchCount).slice(0, limit);
 }
